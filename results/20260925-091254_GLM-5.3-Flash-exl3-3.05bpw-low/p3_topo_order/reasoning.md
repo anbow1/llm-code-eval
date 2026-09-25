@@ -1,0 +1,1 @@
+Lexicographically smallest => heap-based Kahn.

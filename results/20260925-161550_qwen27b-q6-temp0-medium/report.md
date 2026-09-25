@@ -1,0 +1,164 @@
+# qwen27b-q6-temp0-medium
+
+- Date: 2026-09-25 16:19
+- Model: local
+- Endpoint: http://localhost:8080/v1 (preset qwen-think, temperature 1.0, top_p 0.95, top_k 20, min_p 0.0, presence_penalty 0.0, repetition_penalty 1.0, max_tokens 65536, think default, effort medium)
+- Total time: 3.9 min (generation 3.5 min)
+- Tokens: 22245 total, 14138 of them thinking
+- Speed: 120.0 tok/s decode, first token after 2.4 s on average
+- Peak VRAM: 29.8 GB | Peak RAM: 39.7 GB (at start 39.6 GB) | Disk read: 0.0 GB
+- Tasks: 10/10 answered, 0 hit max_tokens, 0 timed out, 0 not run
+
+| Part | Score |
+|---|---|
+| Python | 97.2% |
+| TypeScript + Three.js | 100.0% |
+| **Overall** | **98.6%** |
+| Only tasks it finished | 98.9% |
+
+| Task | Score | Status | Time s | Tokens | Thinking | tok/s |
+|---|---|---|---|---|---|---|
+| t1_cube | 100% | ok | 8.5 | 798 | 256 | 131.7 |
+| p1_parse_duration | 89% | ok | 27.2 | 2823 | 2591 | 113.6 |
+| t2_solar | 100% | ok | 17.8 | 1791 | 328 | 116.6 |
+| p2_sliding_median | 100% | ok | 29.2 | 3111 | 2628 | 115.8 |
+| t3_instanced_wave | 100% | ok | 22.5 | 2482 | 1365 | 123.6 |
+| p3_topo_order | 100% | ok | 15.9 | 1558 | 1349 | 114.7 |
+| t4_shader_water | 100% | ok | 19.1 | 2059 | 1055 | 123.0 |
+| p4_gather_limited | 100% | ok | 27.2 | 2853 | 2479 | 115.1 |
+| t5_raycast_click | 100% | ok | 14.5 | 1522 | 664 | 125.5 |
+| t6_terrain | 100% | ok | 29.3 | 3248 | 1423 | 120.4 |
+
+## t1_cube — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS box_geometry
+- PASS standard_material
+- PASS ambient_light
+- PASS directional_light
+- PASS cube_rotates
+- PASS picture_animates
+- PASS resize
+- PASS no_console_errors
+
+## p1_parse_duration — 89%
+- FAIL valid '1h30m'
+- PASS valid '2d'
+- PASS valid '45s'
+- PASS valid '1d 2h 3m 4s'
+- PASS valid '0s'
+- PASS valid '90m'
+- PASS valid '  1h  '
+- FAIL valid '1d4s'
+- PASS valid '1h   30m'
+- FAIL valid '10d23h59m59s'
+- PASS invalid ''
+- PASS invalid '   '
+- PASS invalid '1x'
+- PASS invalid '30m1h'
+- PASS invalid '1h1h'
+- PASS invalid 'h'
+- PASS invalid '1.5h'
+- PASS invalid '-1h'
+- PASS invalid '+1h'
+- PASS invalid '1H'
+- PASS invalid '1h30'
+- PASS invalid '1 h'
+- PASS invalid '1h,30m'
+- PASS invalid 'abc'
+- PASS invalid '1d2d'
+- PASS invalid '5'
+- PASS invalid '1s2m'
+  - note: valid '1h30m': ValueError: Invalid duration string: '1h30m'
+  - note: valid '1d4s': ValueError: Invalid duration string: '1d4s'
+  - note: valid '10d23h59m59s': ValueError: Invalid duration string: '10d23h59m59s'
+
+## t2_solar — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS at_least_5_meshes
+- PASS sun_basic_or_emissive
+- PASS point_light
+- PASS 4_bodies_move
+- PASS moon_child_of_planet
+- PASS 3_different_speeds
+- PASS resize
+- PASS no_console_errors
+
+## p2_sliding_median — 100%
+- PASS example odd k
+- PASS even k
+- PASS k=1 and k=n
+- PASS duplicates
+- PASS random vs brute force
+- PASS invalid k
+- PASS performance 200k/1000
+
+## t3_instanced_wave — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS instanced_mesh
+- PASS count_10000
+- PASS instance_colors
+- PASS few_plain_meshes
+- PASS wave_animates
+- PASS picture_animates
+- PASS resize
+- PASS no_console_errors
+
+## p3_topo_order — 100%
+- PASS empty / no edges
+- PASS lexicographic
+- PASS duplicate edges
+- PASS cycles
+- PASS random vs brute force
+- PASS performance 200k/400k
+
+## t4_shader_water — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS shader_material
+- PASS uTime_uniform
+- PASS uTime_advances
+- PASS plane_128_segments
+- PASS picture_animates
+- PASS resize
+- PASS no_console_errors
+
+## p4_gather_limited — 100%
+- PASS results in order
+- PASS respects limit
+- PASS sliding window, not batches
+- PASS error: cancel + stop
+- PASS edge cases
+
+## t5_raycast_click — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS 25_cubes
+- PASS own_materials
+- PASS start_color_4488ff
+- PASS click_selects
+- PASS single_selection
+- PASS background_clears
+- PASS resize
+- PASS no_console_errors
+
+## t6_terrain — 100%
+- PASS compiles_strict
+- PASS loads
+- PASS renders
+- PASS custom_buffer_geometry
+- PASS indexed
+- PASS normals_point_up
+- PASS vertex_colors
+- PASS has_height
+- PASS orbit_controls
+- PASS lights
+- PASS resize
+- PASS no_console_errors

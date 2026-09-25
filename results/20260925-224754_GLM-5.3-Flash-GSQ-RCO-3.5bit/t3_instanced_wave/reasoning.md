@@ -1,0 +1,1 @@
+Write the code. Grid 100x100, spacing ~1.2. Update Y via matrix composition. Use dummy Object3D. Colors gradient by grid position set once at init. Need instanceColor usage flag maybe. Keep reusing dummy.

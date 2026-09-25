@@ -1,0 +1,3 @@
+Kahn's algorithm with a heap gives lexicographically smallest order. Use heapq. Handle self-loops: (a,a) means cycle — detect via indegree of a incremented by self-loop, which will never be removed... Actually in Kahn, self-loop adds indegree to itself; when popped, that node never reaches indegree 0, so it will remain and total popped < n → cycle detected. Fine. But heap pop of that node never happens if indegree > 0. Correct.
+
+Edge cases: duplicates fine. If result length < n, raise ValueError.

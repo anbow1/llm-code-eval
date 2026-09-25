@@ -1,0 +1,1 @@
+Simple straightforward scene. Cube color different from background.

@@ -1,0 +1,1 @@
+Simple, strict TypeScript, Three.js. Write the code.

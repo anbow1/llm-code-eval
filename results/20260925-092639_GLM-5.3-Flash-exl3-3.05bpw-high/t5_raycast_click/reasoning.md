@@ -1,0 +1,1 @@
+Simple grid of cubes, raycaster click. Grid occupies 5x5 positions with size, gaps. Compute bounding rect from canvas. Ensure __ready after first frame. Use clock for delta even though no animation — required setAnimationLoop with delta.
