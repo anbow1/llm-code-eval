@@ -4,13 +4,15 @@
 
 **Zwycięzca: Qwen3.8-27B UD-Q6_K_M na poziomie `low` (llama.cpp): 100% w 4,7 min, 40 GB RAM.** Najlepszy duży model to GLM-5.3-Flash EXL3 3.05 bpw na `high` (99,5% w 20,5 min, 118 GB RAM). Poziom myślenia liczy się bardziej niż wybór modelu: dla Qwen najlepsze są `low`/`medium` (`xhigh` przy kodzie myśli 8× dłużej), a dla GLM `high`.
 
-| Model | Kwantyzacja | Poziom | Wynik | Czas |
-|---|---|---|---|---|
-| Qwen3.8-27B | UD-Q6_K_M | low | 100.0% | 4.7 min |
-| Qwen3.8-27B | UD-Q6_K_M | medium | 98.6% | 3.9 min |
-| GLM-5.3-Flash | EXL3 3.05 bpw | high | 99.5% | 20.5 min |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL | medium | 99.2% | 29.5 min |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | medium | 100.0% | 54.6 min |
+| Model | Kwantyzacja | Poziom | Wynik | Czas | Tokeny razem | Śr. tok/s (z czasu) |
+|---|---|---|---|---|---|---|
+| Qwen3.8-27B | UD-Q6_K_M | low | 100.0% | 4.7 min | 28.7k | 108.9 |
+| Qwen3.8-27B | UD-Q6_K_M | medium | 98.6% | 3.9 min | 22.2k | 105.3 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | high | 99.5% | 20.5 min | 15.0k | 12.4 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | medium | 99.2% | 29.5 min | 55.4k | 31.7 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
+
+Śr. tok/s (z czasu) = wszystkie wygenerowane tokeny ÷ łączny czas generowania.
 
 Pełne podsumowanie: [SUMMARY.md](SUMMARY.md). Wszystkie 12 przebiegów i wyniki każdego zadania: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 

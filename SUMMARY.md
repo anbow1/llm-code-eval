@@ -19,20 +19,25 @@ Pełna tabela i wyniki każdego zadania są w [RESULTS_TABLE.md](RESULTS_TABLE.m
 
 ## Tabela wyników
 
-| # | Model | Kwantyzacja | Backend | Poziom | Wynik | Czas (min) | Tokeny myślenia | tok/s | RAM GB |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | low | **100.0%** | **4.7** | 21.9k | 121 | 39.8 |
-| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | **100.0%** | 54.6 | 64.4k | 23 | 67.3 |
-| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | **99.5%** | 20.5 | 7.8k | 14 | 117.7 |
-| 4 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | medium | **99.2%** | 29.5 | 47.7k | 39 | 101.3 |
-| 5 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | medium | **98.6%** | **3.9** | 14.1k | 120 | 39.7 |
-| 6 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | 93.9% | 18.8 | 6.4k | 14 | 127.1 |
-| 7 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | xhigh | 92.9% | 37.5 | 184.8k | 94 | 39.7 |
-| 8 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | medium | 90.6% | 12.8 | 18.0k | 36 | 86.1 |
-| 9 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | low | 87.5% | 68.2 | 80.3k | 23 | 63.6 |
-| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | 87.5% | 205.8 | 62.2k | 9 | 120.5 |
-| 11 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | low | 82.9% | 13.7 | 1.0k | 14 | 119.7 |
-| 12 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | xhigh | 79.2% | 84.7 | 51.4k | 18 | 83.3 |
+| # | Model | Kwantyzacja | Backend | Poziom | Wynik | Czas (min) | Tokeny razem | w tym myślenie | Śr. tok/s (z czasu) | RAM GB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | low | **100.0%** | **4.7** | 28.7k | 21.9k | 108.9 | 39.8 |
+| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | **100.0%** | 54.6 | 72.1k | 64.4k | 22.2 | 67.3 |
+| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | **99.5%** | 20.5 | 15.0k | 7.8k | 12.4 | 117.7 |
+| 4 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | medium | **99.2%** | 29.5 | 55.4k | 47.7k | 31.7 | 101.3 |
+| 5 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | medium | **98.6%** | **3.9** | 22.2k | 14.1k | 105.3 | 39.7 |
+| 6 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | 93.9% | 18.8 | 13.5k | 6.4k | 12.4 | 127.1 |
+| 7 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | xhigh | 92.9% | 37.5 | 194.0k | 184.8k | 87.1 | 39.7 |
+| 8 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | medium | 90.6% | 12.8 | 25.0k | 18.0k | 33.6 | 86.1 |
+| 9 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | low | 87.5% | 68.2 | 87.6k | 80.3k | 21.5 | 63.6 |
+| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | 87.5% | 205.8 | ~65.8k | ~62.2k | 5.3 | 120.5 |
+| 11 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | low | 82.9% | 13.7 | 9.6k | 1.0k | 11.9 | 119.7 |
+| 12 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | xhigh | 79.2% | 84.7 | ~53.6k | ~51.4k | 10.6 | 83.3 |
+
+- **Tokeny razem** = wszystko, co model wygenerował w 10 zadaniach (myślenie + odpowiedź).
+- **Śr. tok/s (z czasu)** = tokeny razem ÷ łączny czas generowania, razem z czytaniem promptu i czekaniem na pierwszy token. To realna szybkość pracy, a nie sama szybkość pisania.
+- `~` = liczba tokenów częściowo szacowana, bo serwer nie podał jej dla części zadań.
+- Sama odpowiedź (kod i opis) to prawie zawsze ok. 7–9 tys. tokenów. Wyjątkiem są dwa przebiegi z awariami, gdzie część zadań została bez odpowiedzi. Cała reszta różnicy w liczbie tokenów to myślenie.
 
 VRAM we wszystkich przebiegach: 24,6–30,8 GB.
 
@@ -61,24 +66,26 @@ Błędy, które nie były złym kodem, tylko awarią generowania:
 
 ## Jakość a czas
 
-| Ustawienie | Wynik | Czas | Uwagi |
-|---|---|---|---|
-| Qwen3.8-27B `medium` | 98.6% | 3.9 min | najszybszy |
-| Qwen3.8-27B `low` | 100.0% | 4.7 min | najlepszy stosunek jakości do czasu |
-| Qwen3.8-Flash-Next EXL3 `medium` | 90.6% | 12.8 min | |
-| GLM-5.3-Flash EXL3 `low` | 82.9% | 13.7 min | za mało myślenia |
-| GLM GSQ-RCO 3.5-bit `high` | 93.9% | 18.8 min | |
-| GLM-5.3-Flash EXL3 `high` | 99.5% | 20.5 min | najlepszy duży model |
-| Qwen3.8-Flash-Next UD-Q4_K_XL `medium` | 99.2% | 29.5 min | |
-| Qwen3.8-27B `xhigh` | 92.9% | 37.5 min | przemyśla kod |
-| Qwen3.8-Flash-Next IQ3_XXS `medium` | 100.0% | 54.6 min | |
-| Qwen3.8-Flash-Next IQ3_XXS `low` | 87.5% | 68.2 min | |
-| Qwen3.8-Flash-Next EXL3 `xhigh` | 79.2% | 84.7 min | awarie generowania |
-| GLM-5.3-Flash EXL3 `max` | 87.5% | 205.8 min | przekroczony limit czasu |
+| Ustawienie | Wynik | Czas | Tokeny razem | Śr. tok/s (z czasu) | Uwagi |
+|---|---|---|---|---|---|
+| Qwen3.8-27B `medium` | 98.6% | 3.9 min | 22.2k | 105.3 | najszybszy |
+| Qwen3.8-27B `low` | 100.0% | 4.7 min | 28.7k | 108.9 | najlepszy stosunek jakości do czasu |
+| Qwen3.8-Flash-Next EXL3 `medium` | 90.6% | 12.8 min | 25.0k | 33.6 | |
+| GLM-5.3-Flash EXL3 `low` | 82.9% | 13.7 min | 9.6k | 11.9 | za mało myślenia |
+| GLM GSQ-RCO 3.5-bit `high` | 93.9% | 18.8 min | 13.5k | 12.4 | |
+| GLM-5.3-Flash EXL3 `high` | 99.5% | 20.5 min | 15.0k | 12.4 | najlepszy duży model |
+| Qwen3.8-Flash-Next UD-Q4_K_XL `medium` | 99.2% | 29.5 min | 55.4k | 31.7 | |
+| Qwen3.8-27B `xhigh` | 92.9% | 37.5 min | 194.0k | 87.1 | przemyśla kod |
+| Qwen3.8-Flash-Next IQ3_XXS `medium` | 100.0% | 54.6 min | 72.1k | 22.2 | |
+| Qwen3.8-Flash-Next IQ3_XXS `low` | 87.5% | 68.2 min | 87.6k | 21.5 | |
+| Qwen3.8-Flash-Next EXL3 `xhigh` | 79.2% | 84.7 min | ~53.6k | 10.6 | awarie generowania |
+| GLM-5.3-Flash EXL3 `max` | 87.5% | 205.8 min | ~65.8k | 5.3 | przekroczony limit czasu |
 
-- **Qwen3.8-27B wygrywa zdecydowanie.** 100% w 4,7 minuty. Szybszy jest tylko ten sam model na `medium` (3,9 min, 98,6%), a wszystkie inne ustawienia są wolniejsze i nie lepsze. Generuje 120 tok/s, bo cały mieści się w VRAM.
-- **Duże modele MoE są wolne na tym sprzęcie.** Generują 9–39 tok/s, bo większość ekspertów leży w RAM. Myślą też dłużej, więc zadanie trwa kilka razy dłużej.
-- Najszybszy duży model to Qwen Flash-Next UD-Q4_K_XL (39 tok/s). GLM generuje 14 tok/s, ale myśli krótko (7 800 tokenów przy `high`), więc kończy test w 20 minut.
+Czas testu = tokeny ÷ szybkość. Model wygrywa czasem albo dlatego, że pisze szybko (Qwen 27B: ok. 105 tok/s), albo dlatego, że myśli krótko (GLM `high`: 15 tys. tokenów przy 12 tok/s).
+
+- **Qwen3.8-27B wygrywa zdecydowanie.** 100% w 4,7 minuty. Szybszy jest tylko ten sam model na `medium` (3,9 min, 98,6%), a wszystkie inne ustawienia są wolniejsze i nie lepsze. Realnie daje ok. 109 tok/s, bo cały mieści się w VRAM.
+- **Duże modele MoE są wolne na tym sprzęcie.** Realnie dają 5–34 tok/s (liczone z czasu), bo większość ekspertów leży w RAM. Qwen 27B mieści się cały w VRAM i daje 87–109 tok/s.
+- Najszybszy duży model to Qwen Flash-Next (EXL3 33,6 i UD-Q4_K_XL 31,7 tok/s liczone z czasu). GLM daje tylko 12,4 tok/s, ale myśli krótko (15 tys. tokenów przy `high`), więc kończy test w 20 minut. Qwen Flash-Next myśli 2–8 razy dłużej niż GLM `high`.
 - Wolniejsza szybkość w części zadań GLM `max` (spadki do 2,7 tok/s) zbiegła się z użyciem RAM ok. 120 GB ze 128 GB. Możliwe, że Windows zaczął przenosić pamięć na dysk.
 
 ## Poziomy myślenia

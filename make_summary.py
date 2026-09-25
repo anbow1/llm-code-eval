@@ -44,6 +44,7 @@ def main():
         d = json.loads(f.read_text(encoding="utf-8"))
         s, S, R = d.get("settings", {}), d.get("summary", {}), d.get("resources", {})
         name, quant, backend = describe(d["name"], d.get("model", ""))
+        gen_s = sum(r.get("gen_seconds") or 0 for r in d["results"])
         effort = s.get("reasoning_effort") or "domyślny (xhigh)"
         runs.append({
             "run": f.parent.name, "model": name, "quant": quant, "backend": backend, "effort": effort,
@@ -52,6 +53,11 @@ def main():
             "finished_only": round(S["answered_score"], 1) if S.get("answered_score") is not None else None,
             "answered": f"{S.get('tasks_answered')}/{S.get('tasks_total')}",
             "minutes": d["minutes"], "tokens": S.get("tokens_total"), "thinking": S.get("reasoning_tokens_total"),
+            "answer_tokens": (S.get("tokens_total") or 0) - (S.get("reasoning_tokens_total") or 0),
+            "gen_minutes": round(gen_s / 60, 1),
+            # average speed from time: all generated tokens / total generation time (incl. prompt + first token)
+            "tok_s_time": round(S["tokens_total"] / gen_s, 1) if gen_s and S.get("tokens_total") else None,
+            "tokens_approx": any(r.get("tokens_approx") for r in d["results"]),
             "tok_s": S.get("tok_per_s"), "vram_gb": R.get("vram_peak_gb"), "ram_gb": R.get("ram_peak_gb"),
             "disk_read_gb": R.get("disk_read_gb"),
             "tasks": {r["id"]: (round(r["score"] * 100), r["status"]) for r in d["results"]},
@@ -59,7 +65,8 @@ def main():
     runs.sort(key=lambda r: (-r["overall"], r["minutes"]))
 
     cols = ["run", "model", "quant", "backend", "effort", "temperature", "overall", "python", "three",
-            "finished_only", "answered", "minutes", "tokens", "thinking", "tok_s", "vram_gb", "ram_gb", "disk_read_gb"]
+            "finished_only", "answered", "minutes", "gen_minutes", "tokens", "thinking", "answer_tokens",
+            "tokens_approx", "tok_s_time", "tok_s", "vram_gb", "ram_gb", "disk_read_gb"]
     task_ids = sorted({t for r in runs for t in r["tasks"]}, key=lambda t: (t[0] != "t", t))
     with open(HERE / "results" / "results_table.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
@@ -73,12 +80,20 @@ def main():
              "Wszystkie przebiegi: temperatura 1.0, limit 65 536 tokenów i 60 min na zadanie, 10 zadań "
              "(6 × TypeScript + Three.js, 4 × Python). Jeden przebieg na ustawienie.", "",
              "| # | Model | Kwantyzacja | Backend | Poziom myślenia | Wynik | Python | Three.js | Czas (min) "
-             "| Tokeny | Myślenie | tok/s | VRAM GB | RAM GB |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+             "| Tokeny razem | w tym myślenie | Odpowiedź | Śr. tok/s (z czasu) | tok/s (generowanie) "
+             "| VRAM GB | RAM GB |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(runs, 1):
+        ap = "~" if r["tokens_approx"] else ""
         lines.append(f"| {i} | {r['model']} | {r['quant']} | {r['backend']} | {r['effort']} | **{n(r['overall'])}%** "
-                     f"| {n(r['python'])} | {n(r['three'])} | {n(r['minutes'])} | {k(r['tokens'])} | "
-                     f"{k(r['thinking'])} | {n(r['tok_s'], 0)} | {n(r['vram_gb'])} | {n(r['ram_gb'])} |")
+                     f"| {n(r['python'])} | {n(r['three'])} | {n(r['minutes'])} | {ap}{k(r['tokens'])} | "
+                     f"{ap}{k(r['thinking'])} | {ap}{k(r['answer_tokens'])} | **{n(r['tok_s_time'])}** | "
+                     f"{n(r['tok_s'], 0)} | {n(r['vram_gb'])} | {n(r['ram_gb'])} |")
+    lines += ["", "- **Śr. tok/s (z czasu)** = wszystkie wygenerowane tokeny ÷ łączny czas generowania wszystkich "
+                  "zadań (razem z czytaniem promptu i czekaniem na pierwszy token). To realna szybkość pracy.",
+              "- **tok/s (generowanie)** = średnia z zadań, liczona od pierwszego tokena do końca (sama szybkość "
+                  "pisania).",
+              "- `~` = liczba tokenów częściowo szacowana (serwer nie podał jej dla części zadań, np. przerwanych albo zapętlonych)."]
     lines += ["", "## Wynik na zadanie (%)", "",
               "| Model / poziom | " + " | ".join(task_ids) + " |",
               "|---|" + "---|" * len(task_ids)]
