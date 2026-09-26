@@ -26,6 +26,7 @@ import urllib.request
 from pathlib import Path
 
 import tasks as T
+import tasks_hard as TH
 
 HERE = Path(__file__).resolve().parent
 TS_ENV = HERE / "ts_env"
@@ -472,6 +473,7 @@ def run_three_task(task, code, workdir, browser):
         shot1 = page.screenshot()
         (workdir / "screenshot.png").write_bytes(shot1)
         ctx.img_changed = img_diff(shot0, shot1)
+        ctx.shot = shot1
 
         res["loads"] = ready and bool(ctx.s0)
         res["renders"] = distinct_colors(shot1) > 4
@@ -647,6 +649,8 @@ def main():
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")
     ap.add_argument("--probe-question", choices=["easy", "hard"], default="easy",
                     help="easy = count the 7s from 1 to 1000; hard = digit sums (needs real thinking)")
+    ap.add_argument("--suite", choices=["base", "hard"], default="base",
+                    help="base = 10 original tasks, hard = 6 harder tasks")
     ap.add_argument("--only", choices=["python", "three"], default=None)
     ap.add_argument("--tasks", default="", help="comma list of task ids, e.g. t5_raycast_click,p1_parse_duration")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
@@ -667,13 +671,16 @@ def main():
     start = time.perf_counter()
     deadline = start + args.budget_min * 60 if args.budget_min > 0 else float("inf")
     name = args.label or Path(args.model).stem
+    if args.suite == "hard" and not name.endswith("-HARD"):
+        name += "-HARD"
     safe = re.sub(r"[^\w.-]+", "_", name)[:80]
     run_dir = HERE / "results" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
     run_dir.mkdir(parents=True)
 
     # interleave Python and Three.js so a stop does not wipe out one whole part
-    py = [("python", t) for t in T.PY_TASKS] if args.only != "three" else []
-    th = [("three", t) for t in T.THREE_TASKS] if args.only != "python" else []
+    S_ = TH if args.suite == "hard" else T
+    py = [("python", t) for t in S_.PY_TASKS] if args.only != "three" else []
+    th = [("three", t) for t in S_.THREE_TASKS] if args.only != "python" else []
     jobs = []
     for i in range(max(len(py), len(th))):
         jobs += th[i:i + 1] + py[i:i + 1]
@@ -862,7 +869,8 @@ def write_report(run_dir, name, args, results, total, res):
          "settings": {"preset": args.preset, "max_tokens": args.max_tokens, "temperature": args.temperature,
                       **{k: getattr(args, k) for k in SAMPLING_KEYS},
                       "think": args.think, "reasoning_effort": args.reasoning_effort,
-                      "task_timeout_min": args.task_timeout_min, "budget_min": args.budget_min},
+                      "task_timeout_min": args.task_timeout_min, "budget_min": args.budget_min,
+                      "suite": args.suite},
          "minutes": round(total / 60, 1), "results": results}, indent=2), encoding="utf-8")
 
     print("\n" + "=" * 60)

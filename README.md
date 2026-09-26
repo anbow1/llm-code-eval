@@ -100,6 +100,26 @@ Python — ukryte testy (poprawność + wydajność):
 | p3_topo_order | graf, najmniejsza leksykograficznie kolejność, cykle |
 | p4_gather_limited | asyncio: limit, kolejność, anulowanie po błędzie |
 
+## Zestaw trudny (`--suite hard`)
+
+6 dodatkowych, trudniejszych zadań, żeby rozróżnić najlepsze modele. Uruchamiasz je tak samo, tylko z `--suite hard`; nazwa przebiegu dostaje końcówkę `-HARD`.
+
+| Zadanie | Co testuje |
+|---|---|
+| h_t1_physics | 20 kul w pudełku: zderzenia sprężyste z masami, zachowanie energii, brak nakładania; test sam wywołuje `step()` 600 razy |
+| h_t2_instanced_pick | 900 instancji w jednym InstancedMesh, klik przełącza kolor, sprawdzane też na ekranie (czy kolor dotarł do GPU) |
+| h_t3_postfx_invert | EffectComposer + własny shader odwracający kolory; wynik na ekranie musi być poprawny w sRGB (kolejność przejść) |
+| h_p1_interval_set | zbiór przedziałów: łączenie, dzielenie, przypadki brzegowe, wydajność O(log n) |
+| h_p2_expr_eval | dokładny kalkulator: priorytety, `^` prawostronne, unarny minus, funkcje, błędy; 400 losowych wyrażeń |
+| h_p3_line_diff | minimalny diff (LCS) z powtórzeniami linii; wydajność wymaga algorytmu Myersa |
+
+Przykład:
+
+```
+python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort high,max
+python run_eval.py --suite hard --label qwen27b-q6 --preset qwen-think --reasoning-effort medium,xhigh
+```
+
 ## Wyniki
 
 Każdy przebieg trafia do `results/<data>_<model>/`:
