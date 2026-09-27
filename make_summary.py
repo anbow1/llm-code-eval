@@ -44,6 +44,12 @@ def describe(label, model):
     return label, "?", backend
 
 
+def task_order(t):
+    """Base tasks before hard ones, Three.js (t*) before Python (p*) within each suite."""
+    base = t[2:] if t.startswith("h_") else t
+    return t.startswith("h_"), base[0] != "t", base
+
+
 def main():
     runs = []
     for f in sorted(HERE.glob("results/*/summary.json")):
@@ -75,7 +81,7 @@ def main():
     cols = ["run", "suite", "model", "quant", "backend", "effort", "temperature", "overall", "python", "three",
             "finished_only", "answered", "minutes", "gen_minutes", "tokens", "thinking", "answer_tokens",
             "tokens_approx", "tok_s_time", "tok_s", "vram_gb", "ram_gb", "disk_read_gb"]
-    all_ids = sorted({t for r in runs for t in r["tasks"]}, key=lambda t: (t.startswith("h_"), t[0] != "t", t))
+    all_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
     with open(HERE / "results" / "results_table.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(cols + all_ids)
@@ -121,7 +127,7 @@ def section(runs, title, note):
                      f"| {n(r['python'])} | {n(r['three'])} | {n(r['minutes'])} | {ap}{k(r['tokens'])} | "
                      f"{ap}{k(r['thinking'])} | {ap}{k(r['answer_tokens'])} | **{n(r['tok_s_time'])}** | "
                      f"{n(r['tok_s'], 0)} | {n(r['vram_gb'])} | {n(r['ram_gb'])} |")
-    task_ids = sorted({t for r in runs for t in r["tasks"]}, key=lambda t: (t.split("_")[1][0] != "t", t))
+    task_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
     lines += ["", "Score per task (%):", "",
               "| Model / effort | " + " | ".join(task_ids) + " |",
               "|---|" + "---|" * len(task_ids)]

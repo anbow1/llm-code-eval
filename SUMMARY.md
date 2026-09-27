@@ -115,6 +115,8 @@ Test time = tokens ÷ speed. A model finishes fast either because it writes fast
 
 ## Interrupted runs (no score, not in the table)
 
+Their raw data has been removed from `results/`; only these notes remain.
+
 - Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS `xhigh` (4 tasks): in `p2` and `t2` it thought for 240–250k characters and gave no answer.
 - Qwen3.8-Flash-Next EXL3 5.05, second run (4 tasks): no answer in `p1` after about 100k characters of thinking.
 - GLM-5.3-Flash GSQ-RCO 3.0-bit: three attempts, each stopped after 3 tasks.
