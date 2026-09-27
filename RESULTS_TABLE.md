@@ -1,46 +1,10 @@
-# Results table
+# Results table: base suite
 
-Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token and 60-minute limit per task. Settings that were run more than once are averaged in the first table of each suite; every single run is listed in the second.
+10 tasks (6 × TypeScript + Three.js, 4 × Python). Hard-suite results are in [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
-## Hard suite (--suite hard)
+Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token and 60-minute limit per task. Settings that were run more than once are averaged in the first table; every single run is listed in the second.
 
-6 tasks (3 × TypeScript + Three.js, 3 × Python).
-
-Mean per setting:
-
-| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 82.9 | 15.6 |
-| 2 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 3 | **87.8%** | 83–94 | 17.8 | 67.4k | 63.9 | 15.4 |
-| 3 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | **66.7%** | – | 10.9 | ~53.9k | 83.2 | 15.5 |
-
-Every run:
-
-| # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) | Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) | VRAM GB | RAM GB |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 27.09 10:05 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **94.1%** | 88.1 | 100.0 | 11.4 | ~52.4k | ~45.4k | ~7.0k | **77.9** | 81 | 15.6 | 14.2 |
-| 2 | 27.09 10:54 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **94.1%** | 88.1 | 100.0 | 13.7 | 59.5k | 52.2k | 7.3k | **73.1** | 78 | 15.3 | 26.3 |
-| 3 | 27.09 10:30 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **92.1%** | 84.2 | 100.0 | 10.6 | ~55.5k | ~47.0k | ~8.5k | **88.5** | 91 | 15.6 | 15.4 |
-| 4 | 27.09 10:42 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **86.1%** | 72.2 | 100.0 | 10.2 | 44.9k | 38.0k | 6.8k | **74.7** | 78 | 15.2 | 22.2 |
-| 5 | 27.09 09:14 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **83.3%** | 66.7 | 100.0 | 29.4 | 97.9k | 91.1k | 6.9k | **55.8** | 73 | 15.4 | 21.2 |
-| 6 | 27.09 10:18 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | **66.7%** | 33.3 | 100.0 | 10.9 | ~53.9k | ~49.6k | ~4.3k | **83.4** | 88 | 15.5 | 14.7 |
-
-Score per task (%):
-
-| Run | Model / effort | h_t1_physics | h_t2_instanced_pick | h_t3_postfx_invert | h_p1_interval_set | h_p2_expr_eval | h_p3_line_diff |
-|---|---|---|---|---|---|---|---|
-| 27.09 10:05 | Qwen3.8-27B EXL3 3.0 bpw / medium | 100 | 100 | 100 | 100 | 98 | 67 |
-| 27.09 10:54 | Qwen3.8-27B AP IQ3_S / medium | 100 | 100 | 100 | 100 | 98 | 67 |
-| 27.09 10:30 | Qwen3.8-27B EXL3 3.0 bpw / medium | 100 | 100 | 100 | 57 | 95 | 100 |
-| 27.09 10:42 | Qwen3.8-27B AP IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 17 |
-| 27.09 09:14 | Qwen3.8-27B AP IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 0 (limit) |
-| 27.09 10:18 | Qwen3.8-27B EXL3 3.0 bpw qv44 / medium | 100 | 100 | 100 | 100 | 0 (none) | 0 (none) |
-
-## Base suite
-
-10 tasks (6 × TypeScript + Three.js, 4 × Python).
-
-Mean per setting:
+## Mean per setting
 
 | # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -71,7 +35,7 @@ Mean per setting:
 | 25 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **82.9%** | – | 13.7 | 9.6k | 11.9 | 27.0 |
 | 26 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | RTX 5090 32 GB | default (xhigh) | 1 | **79.2%** | – | 84.7 | ~176.0k | 34.8 | 29.4 |
 
-Every run:
+## Every run
 
 | # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) | Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) | VRAM GB | RAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -112,7 +76,7 @@ Every run:
 | 35 | 25.09 13:50 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | RTX 5090 32 GB | default (xhigh) | **79.2%** | 75.0 | 83.3 | 84.7 | ~176.0k | ~170.8k | ~5.2k | **34.8** | 34 | 29.4 | 83.3 |
 | 36 | 27.09 07:09 | Qwen3.8-27B | EXL3 2.2 bpw | ExLlamaV3 | RTX 4080 16 GB | low | **78.5%** | 75.0 | 81.9 | 10.3 | ~38.9k | ~33.1k | ~5.8k | **76.9** | 85 | 14.1 | 14.3 |
 
-Score per task (%):
+## Score per task (%)
 
 | Run | Model / effort | t1_cube | t2_solar | t3_instanced_wave | t4_shader_water | t5_raycast_click | t6_terrain | p1_parse_duration | p2_sliding_median | p3_topo_order | p4_gather_limited |
 |---|---|---|---|---|---|---|---|---|---|---|---|

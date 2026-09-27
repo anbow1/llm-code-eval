@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Build results tables from results/*/summary.json.
+"""Build results tables from results/*/summary.json (base suite) and results_hard/*/summary.json (hard suite).
 
     python make_summary.py
 
 Writes:
-  RESULTS_TABLE.md        - main table + per-task table
-  results/results_table.csv
+  RESULTS_TABLE.md, results/results_table.csv                - base suite
+  RESULTS_TABLE_HARD.md, results_hard/results_table.csv      - hard suite
 """
 import csv
 import json
@@ -74,9 +74,19 @@ def task_order(t):
     return t.startswith("h_"), base[0] != "t", base
 
 
-def main():
+SUITES = {
+    "base": ("results", "RESULTS_TABLE.md", "# Results table: base suite",
+             "10 tasks (6 × TypeScript + Three.js, 4 × Python). Hard-suite results are in "
+             "[RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md)."),
+    "hard": ("results_hard", "RESULTS_TABLE_HARD.md", "# Results table: hard suite (--suite hard)",
+             "6 tasks (3 × TypeScript + Three.js, 3 × Python). Base-suite results are in "
+             "[RESULTS_TABLE.md](RESULTS_TABLE.md)."),
+}
+
+
+def load_runs(folder):
     runs = []
-    for f in sorted(HERE.glob("results/*/summary.json")):
+    for f in sorted((HERE / folder).glob("*/summary.json")):
         d = json.loads(f.read_text(encoding="utf-8"))
         s, S, R = d.get("settings", {}), d.get("summary", {}), d.get("resources", {})
         # the folder name, not d["name"]: folders are sometimes renamed afterwards to fix a label
@@ -105,41 +115,41 @@ def main():
             "tasks": {r["id"]: (round(r["score"] * 100), r["status"]) for r in d["results"]},
         })
     runs.sort(key=lambda r: (-r["overall"], r["minutes"]))
+    return runs
 
+
+def main():
     cols = ["run", "suite", "model", "quant", "backend", "gpu", "effort", "temperature", "overall", "python", "three",
             "finished_only", "answered", "minutes", "gen_minutes", "tokens", "thinking", "answer_tokens",
             "tokens_approx", "tok_s_time", "tok_s", "vram_gb", "ram_gb", "disk_read_gb"]
-    all_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
-    with open(HERE / "results" / "results_table.csv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        w.writerow(cols + all_ids)
-        for r in runs:
-            w.writerow([r[c] for c in cols] + [r["tasks"].get(t, ("", ""))[0] for t in all_ids])
+    for folder, table, title, note in SUITES.values():
+        runs = load_runs(folder)
+        if not runs:
+            continue
+        all_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
+        with open(HERE / folder / "results_table.csv", "w", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            w.writerow(cols + all_ids)
+            for r in runs:
+                w.writerow([r[c] for c in cols] + [r["tasks"].get(t, ("", ""))[0] for t in all_ids])
 
-    lines = ["# Results table", "",
-             "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). "
-             "All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token and "
-             "60-minute limit per task. Settings that were run more than once are averaged in the first table "
-             "of each suite; every single run is listed in the second.", ""]
-    titles = {
-        "hard": ("## Hard suite (--suite hard)", "6 tasks (3 × TypeScript + Three.js, 3 × Python)."),
-        "base": ("## Base suite", "10 tasks (6 × TypeScript + Three.js, 4 × Python)."),
-    }
-    for suite in ("hard", "base"):
-        rs = [r for r in runs if r["suite"] == suite]
-        if rs:
-            lines += section(rs, *titles[suite])
-    lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "
-              "(including prompt processing and waiting for the first token). This is the real working speed.",
-              "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
-              "speed).",
-              "- `~` = token count partly estimated: the server did not report it for some tasks, or under-reported "
-              "it (ExLlamaV3 / TabbyAPI on long answers), so it was estimated from the text length "
-              "(see `fix_token_counts.py`).",
-              "- (limit) = ran out of tokens, (time) = hit the 60-minute limit, "
-              "(none) = stopped while still thinking, no answer.", ""]
-    (HERE / "RESULTS_TABLE.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines))
+        lines = [title, "", note, "",
+                 "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says "
+                 "which). All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token "
+                 "and 60-minute limit per task. Settings that were run more than once are averaged in the first "
+                 "table; every single run is listed in the second.", ""]
+        lines += section(runs)
+        lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "
+                  "(including prompt processing and waiting for the first token). This is the real working speed.",
+                  "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
+                  "speed).",
+                  "- `~` = token count partly estimated: the server did not report it for some tasks, or "
+                  "under-reported it (ExLlamaV3 / TabbyAPI on long answers), so it was estimated from the text "
+                  "length (see `fix_token_counts.py`).",
+                  "- (limit) = ran out of tokens, (time) = hit the 60-minute limit, "
+                  "(none) = stopped while still thinking, no answer.", ""]
+        (HERE / table).write_text("\n".join(lines), encoding="utf-8")
+        print("\n".join(lines))
 
 
 def when(run):
@@ -147,7 +157,7 @@ def when(run):
     return f"{run[6:8]}.{run[4:6]} {run[9:11]}:{run[11:13]}"
 
 
-def section(runs, title, note):
+def section(runs):
     k = lambda x: f"{x / 1000:.1f}k" if isinstance(x, (int, float)) else "n/a"
     n = lambda x, p=1: f"{x:.{p}f}" if isinstance(x, (int, float)) else "n/a"
     mean = lambda xs: sum(xs) / len(xs) if xs else None
@@ -163,7 +173,7 @@ def section(runs, title, note):
                     sum(tok) / (gen * 60) if gen and len(tok) == len(rs) else None,
                     max((r["vram_gb"] for r in rs if r["vram_gb"] is not None), default=None)))
     agg.sort(key=lambda a: (-a[2], a[3]))
-    lines = [title, "", note, "", "Mean per setting:", "",
+    lines = ["## Mean per setting", "",
              "| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) "
              "| Mean tokens | Avg tok/s (from time) | VRAM GB |",
              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
@@ -176,7 +186,7 @@ def section(runs, title, note):
                      f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | 1 | **{n(sc)}%** "
                      f"| – | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |")
 
-    lines += ["", "Every run:", "",
+    lines += ["", "## Every run", "",
               "| # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) "
               "| Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) "
               "| VRAM GB | RAM GB |",
@@ -189,7 +199,7 @@ def section(runs, title, note):
                      f"{ap}{k(r['thinking'])} | {ap}{k(r['answer_tokens'])} | **{n(r['tok_s_time'])}** | "
                      f"{n(r['tok_s'], 0)} | {n(r['vram_gb'])} | {n(r['ram_gb'])} |")
     task_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
-    lines += ["", "Score per task (%):", "",
+    lines += ["", "## Score per task (%)", "",
               "| Run | Model / effort | " + " | ".join(task_ids) + " |",
               "|---|---|" + "---|" * len(task_ids)]
     mark = {"max_tokens": " (limit)", "task_timeout": " (time)", "no_answer": " (none)"}

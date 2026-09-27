@@ -21,7 +21,7 @@
 - Every run: temperature 1.0, sampling as recommended by the model makers (`--preset glm` / `qwen-think`), 65,536-token and 60-minute limit per task.
 - On the 5090 each setting was run once. On the 4080 several settings were run 2–3 times; the tables show the mean.
 
-The full tables, including every single run and the score per task, are in [RESULTS_TABLE.md](RESULTS_TABLE.md). Raw data (model code, thinking, screenshots) is in `results/`.
+The full tables, including every single run and the score per task, are in [RESULTS_TABLE.md](RESULTS_TABLE.md) (base suite) and [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) (hard suite). Raw data (model code, thinking, screenshots) is in `results/` and `results_hard/`.
 
 # Part 1: RTX 5090 (25 Sep)
 
@@ -170,6 +170,8 @@ What the 3-bit files got wrong on the base suite, and Q6 did not:
 
 ## Hard suite
 
+All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_hard/`.
+
 No model has been run on the hard suite on the 5090 yet, so there is no Q6 reference.
 
 | Quant | Backend | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Decode tok/s |
@@ -203,7 +205,7 @@ No model has been run on the hard suite on the 5090 yet, so there is no Q6 refer
 
 ## Interrupted runs (no score, not in the table)
 
-Their raw data has been removed from `results/`; only these notes remain.
+Their raw data has been removed from `results/` and `results_hard/`; only these notes remain.
 
 - Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS `xhigh` (4 tasks): in `p2` and `t2` it thought for 240–250k characters and gave no answer.
 - Qwen3.8-Flash-Next EXL3 5.05, second run (4 tasks): no answer in `p1` after about 100k characters of thinking.

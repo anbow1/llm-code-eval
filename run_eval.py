@@ -695,7 +695,8 @@ def main():
     if args.suite == "hard" and not name.endswith("-HARD"):
         name += "-HARD"
     safe = re.sub(r"[^\w.-]+", "_", name)[:80]
-    run_dir = HERE / "results" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
+    results_dir = "results_hard" if args.suite == "hard" else "results"
+    run_dir = HERE / results_dir / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
     run_dir.mkdir(parents=True)
 
     # interleave Python and Three.js so a stop does not wipe out one whole part
