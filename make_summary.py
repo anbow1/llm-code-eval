@@ -20,21 +20,23 @@ def describe(label, model):
     m = f"{label} {model}".replace("\\", "/").lower()
     backend = "ExLlamaV3" if "exl3" in m else "llama.cpp"
     bit = re.search(r"(\d\.\d+)\s*-?bit", m)
-    bpw = re.search(r"(\d\.\d+)\s*-?bpw|exl3-(\d)(\d{2})", m)
-    if "27b" in m:
+    bpw = re.search(r"(\d\.\d+)\s*-?bpw|(\d\.\d+)_exl3|exl3-(\d)(\d{2})", m)
+    if re.search(r"27b|3\.8-27[_-]", m):
+        name = "Qwen3.8-27B abliterated" if "abliterated" in m else "Qwen3.8-27B"
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
-        whole_bit = re.search(r"(\d)\s*-?bit", m)
         if "exl3" in m and bpw:
-            quant = f"EXL3 {bpw.group(1) or bpw.group(2) + '.' + bpw.group(3)} bpw"
+            quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
         elif gguf:
             quant = gguf.group(0).upper()
         elif "q6" in m:
             quant = "UD-Q6_K_M"  # the 25 Sep runs, labelled only "q6"
-        elif bit or whole_bit:
-            quant = f"{(bit or whole_bit).group(1)}-bit"
+        elif bit:
+            quant = f"{bit.group(1)}-bit"
         else:
             quant = "?"
-        return "Qwen3.8-27B", quant, backend
+        prefix = "GSQ-RCO " if "gsq-rco" in m else "AP " if "-ap-" in m else ""
+        suffix = "".join(f" {x}" for x in ("MTP", "qv44") if re.search(rf"[_-]{x.lower()}([_-]|$)", m))
+        return name, prefix + quant + suffix, backend
     if "glm" in m:
         if "exl3" in m:
             quant = "EXL3 3.05 bpw"
@@ -57,11 +59,11 @@ def describe(label, model):
 
 
 def gpu_of(resources, model, quant):
-    """GPU the run was made on. Newer runs record it; of the older ones, the 3-bit Qwen3.8-27B
-    runs were made on a second PC (RTX 4080 16 GB), everything else on the RTX 5090 32 GB."""
+    """GPU the run was made on. Newer runs record it. Of the older ones, the 2-3-bit Qwen3.8-27B
+    runs were made on a second PC (RTX 4080 16 GB + 32 GB RAM), everything else on the RTX 5090 32 GB."""
     if resources.get("gpu"):
         return resources["gpu"]
-    if model == "Qwen3.8-27B" and re.search(r"(^|[^\d.])3(\.\d+)?[ -]?(bit|bpw)|i?q3_", quant.lower()):
+    if model.startswith("Qwen3.8-27B") and "Q6" not in quant:
         return "RTX 4080 16 GB"
     return "RTX 5090 32 GB"
 
@@ -77,7 +79,9 @@ def main():
     for f in sorted(HERE.glob("results/*/summary.json")):
         d = json.loads(f.read_text(encoding="utf-8"))
         s, S, R = d.get("settings", {}), d.get("summary", {}), d.get("resources", {})
-        name, quant, backend = describe(d["name"], d.get("model", ""))
+        # the folder name, not d["name"]: folders are sometimes renamed afterwards to fix a label
+        label = re.sub(r"^\d{8}-\d{6}_", "", f.parent.name)
+        name, quant, backend = describe(label, d.get("model", ""))
         gen_s = sum(r.get("gen_seconds") or 0 for r in d["results"])
         effort = s.get("reasoning_effort") or "default (xhigh)"
         runs.append({
@@ -112,14 +116,14 @@ def main():
         for r in runs:
             w.writerow([r[c] for c in cols] + [r["tasks"].get(t, ("", ""))[0] for t in all_ids])
 
-    lines = ["# Results table", ""]
+    lines = ["# Results table", "",
+             "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). "
+             "All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token and "
+             "60-minute limit per task. Settings that were run more than once are averaged in the first table "
+             "of each suite; every single run is listed in the second.", ""]
     titles = {
-        "hard": ("## Hard suite (--suite hard)",
-                 "6 tasks (3 × TypeScript + Three.js, 3 × Python), temperature 1.0, 65,536-token and 60-minute limit "
-                 "per task. One run per setting."),
-        "base": ("## Base suite",
-                 "10 tasks (6 × TypeScript + Three.js, 4 × Python), temperature 1.0, 65,536-token and 60-minute limit "
-                 "per task. One run per setting."),
+        "hard": ("## Hard suite (--suite hard)", "6 tasks (3 × TypeScript + Three.js, 3 × Python)."),
+        "base": ("## Base suite", "10 tasks (6 × TypeScript + Three.js, 4 × Python)."),
     }
     for suite in ("hard", "base"):
         rs = [r for r in runs if r["suite"] == suite]
@@ -137,28 +141,60 @@ def main():
     print("\n".join(lines))
 
 
+def when(run):
+    """'26.09 19:42' from the run folder name."""
+    return f"{run[6:8]}.{run[4:6]} {run[9:11]}:{run[11:13]}"
+
+
 def section(runs, title, note):
     k = lambda x: f"{x / 1000:.1f}k" if isinstance(x, (int, float)) else "n/a"
     n = lambda x, p=1: f"{x:.{p}f}" if isinstance(x, (int, float)) else "n/a"
-    lines = [title, "", note, "",
-             "| # | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) "
-             "| Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) "
-             "| VRAM GB | RAM GB |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    mean = lambda xs: sum(xs) / len(xs) if xs else None
+
+    groups = {}
+    for r in runs:
+        groups.setdefault((r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]), []).append(r)
+    agg = []
+    for key, rs in groups.items():
+        tok = [r["tokens"] for r in rs if r["tokens"]]
+        gen = sum(r["gen_minutes"] for r in rs)
+        agg.append((key, rs, mean([r["overall"] for r in rs]), mean([r["minutes"] for r in rs]), mean(tok),
+                    sum(tok) / (gen * 60) if gen and len(tok) == len(rs) else None,
+                    max((r["vram_gb"] for r in rs if r["vram_gb"] is not None), default=None)))
+    agg.sort(key=lambda a: (-a[2], a[3]))
+    lines = [title, "", note, "", "Mean per setting:", "",
+             "| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) "
+             "| Mean tokens | Avg tok/s (from time) | VRAM GB |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for i, ((model, quant, backend, gpu, effort), rs, sc, mins, tok, tps, vram) in enumerate(agg, 1):
+        lo, hi = min(r["overall"] for r in rs), max(r["overall"] for r in rs)
+        ap = "~" if any(r["tokens_approx"] for r in rs) else ""
+        lines.append(f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | {len(rs)} | **{n(sc)}%** "
+                     f"| {n(lo, 0)}–{n(hi, 0)} | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |"
+                     if len(rs) > 1 else
+                     f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | 1 | **{n(sc)}%** "
+                     f"| – | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |")
+
+    lines += ["", "Every run:", "",
+              "| # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) "
+              "| Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) "
+              "| VRAM GB | RAM GB |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(runs, 1):
         ap = "~" if r["tokens_approx"] else ""
-        lines.append(f"| {i} | {r['model']} | {r['quant']} | {r['backend']} | {r['gpu']} | {r['effort']} | **{n(r['overall'])}%** "
+        lines.append(f"| {i} | {when(r['run'])} | {r['model']} | {r['quant']} | {r['backend']} | {r['gpu']} "
+                     f"| {r['effort']} | **{n(r['overall'])}%** "
                      f"| {n(r['python'])} | {n(r['three'])} | {n(r['minutes'])} | {ap}{k(r['tokens'])} | "
                      f"{ap}{k(r['thinking'])} | {ap}{k(r['answer_tokens'])} | **{n(r['tok_s_time'])}** | "
                      f"{n(r['tok_s'], 0)} | {n(r['vram_gb'])} | {n(r['ram_gb'])} |")
     task_ids = sorted({t for r in runs for t in r["tasks"]}, key=task_order)
     lines += ["", "Score per task (%):", "",
-              "| Model / effort | " + " | ".join(task_ids) + " |",
-              "|---|" + "---|" * len(task_ids)]
+              "| Run | Model / effort | " + " | ".join(task_ids) + " |",
+              "|---|---|" + "---|" * len(task_ids)]
     mark = {"max_tokens": " (limit)", "task_timeout": " (time)", "no_answer": " (none)"}
     for r in runs:
         cells = [f"{r['tasks'].get(t, ('', ''))[0]}{mark.get(r['tasks'].get(t, ('', ''))[1], '')}" for t in task_ids]
-        lines.append(f"| {r['model']} {r['quant']} / {r['effort']} | " + " | ".join(cells) + " |")
+        lines.append(f"| {when(r['run'])} | {r['model']} {r['quant']} / {r['effort']} | " + " | ".join(cells) + " |")
     return lines + [""]
 
 

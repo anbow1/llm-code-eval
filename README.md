@@ -1,8 +1,8 @@
 # llm-code-eval — a quick coding test for local LLMs
 
-## Results (25 Sep 2026, RTX 5090 32 GB + 128 GB RAM)
+## Results (25–27 Sep 2026)
 
-**Winner: Qwen3.8-27B UD-Q6_K_M at reasoning effort `low` (llama.cpp): 100% in 4.7 min, 40 GB RAM.** The best large model is GLM-5.3-Flash EXL3 3.05 bpw at `high` (99.5% in 20.5 min, 118 GB RAM). The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
+**RTX 5090 32 GB + 128 GB RAM. Winner: Qwen3.8-27B UD-Q6_K_M at reasoning effort `low` (llama.cpp): 100% in 4.7 min, 40 GB RAM.** The best large model is GLM-5.3-Flash EXL3 3.05 bpw at `high` (99.5% in 20.5 min, 118 GB RAM). The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
 
 | Model | Quant | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|
@@ -12,9 +12,19 @@
 | Qwen3.8-Flash-Next | UD-Q4_K_XL | medium | 99.2% | 29.5 min | 55.4k | 31.7 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
 
+**RTX 4080 16 GB + 32 GB RAM: Qwen3.8-27B at 3 bits almost matches Q6 on the base suite, at about half the speed.** The best are EXL3 3.0 bpw at `low` and AP IQ3_S at `medium`. EXL3 3.0 bpw is also the best on the hard suite. Below 3 bits (EXL3 2.2 bpw) the score drops by about 10 points. Scores are means over 2–3 runs.
+
+| Model | Quant | Suite | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
+|---|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B | AP IQ3_S | base | medium | 2 | 100.0% | 8.2 min | 34.6k | 73.0 |
+| Qwen3.8-27B | EXL3 3.0 bpw | base | low | 3 | 98.5% | 7.3 min | 24.1k | 58.2 |
+| Qwen3.8-27B | EXL3 2.2 bpw | base | low | 3 | 87.8% | 9.6 min | 26.5k | 50.9 |
+| Qwen3.8-27B | EXL3 3.0 bpw | hard | medium | 2 | 93.1% | 11.0 min | 18.4k | 28.3 |
+| Qwen3.8-27B | AP IQ3_S | hard | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
+
 Avg tok/s (from time) = all generated tokens ÷ total generation time.
 
-Full write-up: [SUMMARY.md](SUMMARY.md). All 12 runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+Full write-up: [SUMMARY.md](SUMMARY.md). Every run (42 in total) and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
 The base suite has 10 tasks: 6 × TypeScript + Three.js and 4 × Python, all checked automatically. A harder 6-task suite is described below.
 
@@ -36,7 +46,7 @@ python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 ```
 
 Main options:
-- `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the label. The GPU is recorded automatically (`nvidia-smi`).
+- `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--max-tokens 65536`: token limit per task, thinking included (default 65536)
