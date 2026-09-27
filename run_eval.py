@@ -264,6 +264,20 @@ class ResourceMonitor:
         except Exception:
             return None
 
+    def _gpu_name(self):
+        if not self.has_smi:
+            return None
+        try:
+            out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+                                 capture_output=True, text=True, timeout=5).stdout
+            gpus = []
+            for line in out.strip().splitlines():
+                name, _, mib = line.rpartition(",")
+                gpus.append(f"{name.strip().replace('NVIDIA GeForce ', '')} {round(int(mib) / 1024)} GB")
+            return " + ".join(gpus) or None
+        except Exception:
+            return None
+
     def _ram_gib(self):
         if not self.psutil:
             return None
@@ -298,6 +312,7 @@ class ResourceMonitor:
         self.disk1 = self._disk_read()
         gb = lambda mib: round(mib / 1024, 1) if mib is not None else None
         return {
+            "gpu": self._gpu_name(),
             "vram_peak_gb": gb(self.peak_vram),
             "ram_peak_gb": round(self.peak_ram, 1) if self.peak_ram is not None else None,
             "ram_at_start_gb": round(self.base_ram, 1) if self.base_ram is not None else None,
