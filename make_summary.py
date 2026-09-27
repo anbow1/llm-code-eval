@@ -133,8 +133,9 @@ def main():
               "(including prompt processing and waiting for the first token). This is the real working speed.",
               "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
               "speed).",
-              "- `~` = token count partly estimated (the server did not report it for some tasks, e.g. interrupted "
-              "or looping ones).",
+              "- `~` = token count partly estimated: the server did not report it for some tasks, or under-reported "
+              "it (ExLlamaV3 / TabbyAPI on long answers), so it was estimated from the text length "
+              "(see `fix_token_counts.py`).",
               "- (limit) = ran out of tokens, (time) = hit the 60-minute limit, "
               "(none) = stopped while still thinking, no answer.", ""]
     (HERE / "RESULTS_TABLE.md").write_text("\n".join(lines), encoding="utf-8")

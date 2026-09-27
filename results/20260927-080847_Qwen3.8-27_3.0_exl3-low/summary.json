@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 0,
     "not_run": 0,
-    "tokens_total": 23692,
-    "reasoning_tokens_total": 18238,
-    "tok_per_s": 85.3,
+    "tokens_total": 31886,
+    "reasoning_tokens_total": 26143,
+    "tok_per_s": 96.1,
     "ttft_avg_s": 2.6,
     "gen_minutes": 6.1
   },
@@ -173,11 +173,13 @@
       "ttft_s": 2.7,
       "think_seconds": 74.6,
       "prompt_tokens": 208,
-      "tokens": 2667,
-      "reasoning_tokens": 2602,
-      "answer_tokens": 65,
-      "tokens_approx": false,
-      "tok_per_s": 35.0
+      "tokens": 6808,
+      "reasoning_tokens": 6609,
+      "answer_tokens": 199,
+      "tokens_approx": true,
+      "tok_per_s": 89.2,
+      "tokens_reported": 2667,
+      "reasoning_tokens_reported": 2602
     },
     {
       "id": "t3_instanced_wave",
@@ -281,11 +283,13 @@
       "ttft_s": 2.6,
       "think_seconds": 73.4,
       "prompt_tokens": 230,
-      "tokens": 2629,
-      "reasoning_tokens": 2555,
-      "answer_tokens": 74,
-      "tokens_approx": false,
-      "tok_per_s": 34.9
+      "tokens": 6682,
+      "reasoning_tokens": 6453,
+      "answer_tokens": 229,
+      "tokens_approx": true,
+      "tok_per_s": 88.6,
+      "tokens_reported": 2629,
+      "reasoning_tokens_reported": 2555
     },
     {
       "id": "t5_raycast_click",

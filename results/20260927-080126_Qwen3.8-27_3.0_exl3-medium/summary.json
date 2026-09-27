@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 0,
     "not_run": 0,
-    "tokens_total": 25409,
-    "reasoning_tokens_total": 19724,
-    "tok_per_s": 86.2,
+    "tokens_total": 30884,
+    "reasoning_tokens_total": 24723,
+    "tok_per_s": 91.5,
     "ttft_avg_s": 2.9,
     "gen_minutes": 6.4
   },
@@ -176,11 +176,13 @@
       "ttft_s": 2.6,
       "think_seconds": 98.4,
       "prompt_tokens": 182,
-      "tokens": 3328,
-      "reasoning_tokens": 3126,
-      "answer_tokens": 202,
-      "tokens_approx": false,
-      "tok_per_s": 31.9
+      "tokens": 8803,
+      "reasoning_tokens": 8125,
+      "answer_tokens": 678,
+      "tokens_approx": true,
+      "tok_per_s": 84.3,
+      "tokens_reported": 3328,
+      "reasoning_tokens_reported": 3126
     },
     {
       "id": "t3_instanced_wave",

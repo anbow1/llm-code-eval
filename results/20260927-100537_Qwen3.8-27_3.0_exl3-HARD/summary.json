@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 0,
     "not_run": 0,
-    "tokens_total": 18297,
-    "reasoning_tokens_total": 15769,
-    "tok_per_s": 40.7,
+    "tokens_total": 52392,
+    "reasoning_tokens_total": 45357,
+    "tok_per_s": 80.8,
     "ttft_avg_s": 3.8,
     "gen_minutes": 11.2
   },
@@ -70,11 +70,13 @@
       "ttft_s": 6.4,
       "think_seconds": 69.2,
       "prompt_tokens": 570,
-      "tokens": 2554,
-      "reasoning_tokens": 1849,
-      "answer_tokens": 705,
-      "tokens_approx": false,
-      "tok_per_s": 26.6
+      "tokens": 7817,
+      "reasoning_tokens": 5320,
+      "answer_tokens": 2497,
+      "tokens_approx": true,
+      "tok_per_s": 81.5,
+      "tokens_reported": 2554,
+      "reasoning_tokens_reported": 1849
     },
     {
       "id": "h_p1_interval_set",
@@ -96,11 +98,13 @@
       "ttft_s": 5.1,
       "think_seconds": 98.1,
       "prompt_tokens": 289,
-      "tokens": 2791,
-      "reasoning_tokens": 2638,
-      "answer_tokens": 153,
-      "tokens_approx": false,
-      "tok_per_s": 27.0
+      "tokens": 8401,
+      "reasoning_tokens": 7771,
+      "answer_tokens": 630,
+      "tokens_approx": true,
+      "tok_per_s": 81.2,
+      "tokens_reported": 2791,
+      "reasoning_tokens_reported": 2638
     },
     {
       "id": "h_t2_instanced_pick",
@@ -192,11 +196,13 @@
       "ttft_s": 2.9,
       "think_seconds": 107.8,
       "prompt_tokens": 406,
-      "tokens": 2649,
-      "reasoning_tokens": 2375,
-      "answer_tokens": 274,
-      "tokens_approx": false,
-      "tok_per_s": 21.8
+      "tokens": 10643,
+      "reasoning_tokens": 9136,
+      "answer_tokens": 1507,
+      "tokens_approx": true,
+      "tok_per_s": 87.6,
+      "tokens_reported": 2649,
+      "reasoning_tokens_reported": 2375
     },
     {
       "id": "h_t3_postfx_invert",
@@ -248,11 +254,13 @@
       "ttft_s": 2.7,
       "think_seconds": 218.1,
       "prompt_tokens": 285,
-      "tokens": 3087,
-      "reasoning_tokens": 2943,
-      "answer_tokens": 144,
-      "tokens_approx": false,
-      "tok_per_s": 13.4
+      "tokens": 18315,
+      "reasoning_tokens": 17166,
+      "answer_tokens": 1149,
+      "tokens_approx": true,
+      "tok_per_s": 79.4,
+      "tokens_reported": 3087,
+      "reasoning_tokens_reported": 2943
     }
   ]
 }

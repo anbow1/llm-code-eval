@@ -17,12 +17,12 @@
 | Model | Quant | Suite | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|
 | Qwen3.8-27B | AP IQ3_S | base | medium | 2 | 100.0% | 8.2 min | 34.6k | 73.0 |
-| Qwen3.8-27B | EXL3 3.0 bpw | base | low | 3 | 98.5% | 7.3 min | 24.1k | 58.2 |
-| Qwen3.8-27B | EXL3 2.2 bpw | base | low | 3 | 87.8% | 9.6 min | 26.5k | 50.9 |
-| Qwen3.8-27B | EXL3 3.0 bpw | hard | medium | 2 | 93.1% | 11.0 min | 18.4k | 28.3 |
+| Qwen3.8-27B | EXL3 3.0 bpw | base | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
+| Qwen3.8-27B | EXL3 2.2 bpw | base | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
+| Qwen3.8-27B | EXL3 3.0 bpw | hard | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
 | Qwen3.8-27B | AP IQ3_S | hard | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
 
-Avg tok/s (from time) = all generated tokens ÷ total generation time.
+Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
 
 Full write-up: [SUMMARY.md](SUMMARY.md). Every run (42 in total) and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
@@ -80,6 +80,8 @@ Rebuild the result tables from the data:
 ```
 python make_summary.py
 ```
+
+Runs made with an older `run_eval.py` against ExLlamaV3 (TabbyAPI) may have token counts that are far too low. Run `python fix_token_counts.py` once to re-estimate them from the saved text; it keeps the server's numbers and is safe to run again.
 
 ## What is measured
 

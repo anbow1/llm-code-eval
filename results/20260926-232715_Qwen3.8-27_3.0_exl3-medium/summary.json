@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 0,
     "not_run": 0,
-    "tokens_total": 35443,
-    "reasoning_tokens_total": 29214,
-    "tok_per_s": 86.8,
+    "tokens_total": 60750,
+    "reasoning_tokens_total": 54358,
+    "tok_per_s": 95.5,
     "ttft_avg_s": 3.1,
     "gen_minutes": 13.4
   },
@@ -183,11 +183,13 @@
       "ttft_s": 2.7,
       "think_seconds": 498.7,
       "prompt_tokens": null,
-      "tokens": 13047,
-      "reasoning_tokens": 13047,
+      "tokens": 34455,
+      "reasoning_tokens": 34455,
       "answer_tokens": 0,
       "tokens_approx": true,
-      "tok_per_s": 26.2
+      "tok_per_s": 69.1,
+      "tokens_reported": 13047,
+      "reasoning_tokens_reported": 13047
     },
     {
       "id": "t3_instanced_wave",
@@ -293,11 +295,13 @@
       "ttft_s": 2.8,
       "think_seconds": 86.5,
       "prompt_tokens": 204,
-      "tokens": 3709,
-      "reasoning_tokens": 3607,
-      "answer_tokens": 102,
-      "tokens_approx": false,
-      "tok_per_s": 41.8
+      "tokens": 7608,
+      "reasoning_tokens": 7343,
+      "answer_tokens": 265,
+      "tokens_approx": true,
+      "tok_per_s": 85.8,
+      "tokens_reported": 3709,
+      "reasoning_tokens_reported": 3607
     },
     {
       "id": "t5_raycast_click",

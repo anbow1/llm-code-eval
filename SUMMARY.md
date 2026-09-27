@@ -6,9 +6,10 @@
 - **Qwen3.8-27B also works on a 16 GB card.** On the RTX 4080, the best 3-bit files score almost the same as Q6 on the 5090 on the base suite, at about half the speed:
   - AP IQ3_S (llama.cpp) at `medium`: 100% in both runs, 8.2 min on average.
   - EXL3 3.0 bpw (ExLlamaV3) at `low`: 98.5% over 3 runs, 7.3 min.
-- **On the hard suite, EXL3 3.0 bpw is the best 3-bit file**: 93.1% (2 runs) in 11 min with 18k tokens. AP IQ3_S scores 87.8% (3 runs), generates 3.7× more tokens and takes 18 min. With the `qv44` variant, EXL3 3.0 bpw stopped mid-thought twice and scored 66.7%.
+- **On the hard suite, EXL3 3.0 bpw is the best 3-bit file**: 93.1% (2 runs) in 11 min. AP IQ3_S scores 87.8% (3 runs) and takes 18 min, because it generates more tokens (67k against 54k) and writes more slowly (64 against 83 tok/s from time). With the `qv44` variant, EXL3 3.0 bpw stopped mid-thought twice and scored 66.7%.
 - **Below 3 bits quality drops.** EXL3 2.2 bpw scores 86–88% and varies a lot between runs (78–94%). The abliterated GSQ-RCO files score lower than the plain AP files (91% against 96% on average).
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium` and `xhigh` overthinks code. GLM does best at `high`. Which of `low`/`medium` is better depends on the file: GGUF did better at `medium`, EXL3 at `low`.
+- **ExLlamaV3 (TabbyAPI) under-reports tokens on long answers**, e.g. 2,222 tokens for 181,000 characters. The counts for its runs were re-estimated from the saved text (`fix_token_counts.py`, marked `~`). With the corrected counts, EXL3 generates at a steady 76–84 tok/s on the 4080, faster than llama.cpp (65–75). The earlier "slowdowns" were an artefact of the wrong counts.
 - **At temperature 1.0, one run is not enough.** The same file and setting ranged from 84 to 100% (EXL3 3.0 bpw `medium`) and from 78 to 94% (EXL3 2.2 bpw `low`).
 
 ## Hardware and settings
@@ -37,9 +38,9 @@ The full tables, including every single run and the score per task, are in [RESU
 | 7 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | xhigh | 92.9% | 37.5 | 194.0k | 184.8k | 87.1 | 39.7 |
 | 8 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | medium | 90.6% | 12.8 | 25.0k | 18.0k | 33.6 | 86.1 |
 | 9 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | low | 87.5% | 68.2 | 87.6k | 80.3k | 21.5 | 63.6 |
-| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | 87.5% | 205.8 | ~65.8k | ~62.2k | 5.3 | 120.5 |
+| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | 87.5% | 205.8 | ~159.1k | ~149.5k | 12.9 | 120.5 |
 | 11 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | low | 82.9% | 13.7 | 9.6k | 1.0k | 11.9 | 119.7 |
-| 12 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | xhigh | 79.2% | 84.7 | ~53.6k | ~51.4k | 10.6 | 83.3 |
+| 12 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | xhigh | 79.2% | 84.7 | ~176.0k | ~170.8k | 34.8 | 83.3 |
 
 - **Total tokens** = everything the model generated across the 10 tasks (thinking + answer).
 - **Avg tok/s (from time)** = total tokens ÷ total generation time, including prompt processing and waiting for the first token. This is the real working speed, not just the writing speed.
@@ -85,15 +86,15 @@ Failures that were not bad code but broken generation:
 | Qwen3.8-27B `xhigh` | 92.9% | 37.5 min | 194.0k | 87.1 | overthinks code |
 | Qwen3.8-Flash-Next IQ3_XXS `medium` | 100.0% | 54.6 min | 72.1k | 22.2 | |
 | Qwen3.8-Flash-Next IQ3_XXS `low` | 87.5% | 68.2 min | 87.6k | 21.5 | |
-| Qwen3.8-Flash-Next EXL3 `xhigh` | 79.2% | 84.7 min | ~53.6k | 10.6 | generation failures |
-| GLM-5.3-Flash EXL3 `max` | 87.5% | 205.8 min | ~65.8k | 5.3 | hit the time limit |
+| Qwen3.8-Flash-Next EXL3 `xhigh` | 79.2% | 84.7 min | ~176.0k | 34.8 | generation failures |
+| GLM-5.3-Flash EXL3 `max` | 87.5% | 205.8 min | ~159.1k | 12.9 | hit the time limit |
 
 Test time = tokens ÷ speed. A model finishes fast either because it writes fast (Qwen 27B: about 105 tok/s) or because it thinks briefly (GLM `high`: 15k tokens at 12 tok/s).
 
 - **Qwen3.8-27B wins clearly.** 100% in 4.7 minutes. Only the same model at `medium` is faster (3.9 min, 98.6%); every other setting is slower and no better. It runs at about 109 tok/s because it fits entirely in VRAM.
-- **The large MoE models are slow on this hardware.** They manage 5–34 tok/s (from time) because most experts sit in system RAM. Qwen 27B fits entirely in VRAM and does 87–109 tok/s.
+- **The large MoE models are slow on this hardware.** They manage 12–35 tok/s (from time) because most experts sit in system RAM. Qwen 27B fits entirely in VRAM and does 87–109 tok/s.
 - The fastest large model is Qwen Flash-Next (EXL3 33.6 and UD-Q4_K_XL 31.7 tok/s from time). GLM manages only 12.4 tok/s but thinks briefly (15k tokens at `high`), so it finishes in 20 minutes. Qwen Flash-Next thinks 2–8 times longer than GLM `high`.
-- The slowdowns in some GLM `max` tasks (down to 2.7 tok/s) coincided with RAM use of about 120 of 128 GB. Windows may have started paging memory to disk.
+- An earlier version of this summary reported slowdowns in GLM `max` (down to 2.7 tok/s). They came from ExLlamaV3 under-reporting tokens (see Part 2); the real speed was a steady 12–15 tok/s. GLM `max` simply thinks a lot: about 150k thinking tokens.
 
 ## Reasoning levels
 
@@ -109,7 +110,7 @@ Test time = tokens ÷ speed. A model finishes fast either because it writes fast
 
 - `low` barely thinks (1,000 tokens for the whole test), so it makes real mistakes (82.9%).
 - `high` is the best trade-off: 99.5% in 20.5 min.
-- `max` thinks 8× longer than `high`, takes 206 min and hit the time limit on one task.
+- `max` thinks about 19× longer than `high` (~150k against 7.8k thinking tokens), takes 206 min and hit the time limit on one task.
 - **For code: `high`.**
 
 # Part 2: Qwen3.8-27B at 2–3 bits on the RTX 4080 16 GB (26–27 Sep)
@@ -130,31 +131,31 @@ All of them used 14.1–15.6 GB of VRAM (out of 16), and system RAM stayed at 13
 
 ## Base suite
 
-Mean over runs. The Q6 rows from the 5090 are shown for comparison.
+Mean over runs. The Q6 rows from the 5090 are shown for comparison. `~` = token count re-estimated from the text (ExLlamaV3, see [Speed on the 4080](#speed-on-the-4080)).
 
 | # | Model | Quant | GPU | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|---|---|
 | – | Qwen3.8-27B | UD-Q6_K_M | 5090 | low | 1 | 100.0% | – | 4.7 | 28.7k | 108.6 |
 | – | Qwen3.8-27B | UD-Q6_K_M | 5090 | medium | 1 | 98.6% | – | 3.9 | 22.2k | 105.9 |
 | 1 | Qwen3.8-27B | AP IQ3_S | 4080 | medium | 2 | **100.0%** | 100–100 | 8.2 | 34.6k | 73.0 |
-| 2 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | low | 3 | **98.5%** | 96–100 | 7.3 | 24.1k | 58.2 |
+| 2 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | low | 3 | **98.5%** | 96–100 | 7.3 | ~34.7k | 83.8 |
 | 3 | Qwen3.8-27B | AP IQ3_XS | 4080 | medium | 1 | 98.2% | – | 8.8 | 37.2k | 73.9 |
 | 4 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_S | 4080 | medium | 1 | 98.2% | – | 9.5 | 37.7k | 68.3 |
 | 5 | Qwen3.8-27B | AP IQ3_XS | 4080 | low | 1 | 97.5% | – | 12.3 | 46.8k | 65.1 |
 | 6 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_S MTP | 4080 | medium | 1 | 95.7% | – | 7.9 | 29.8k | 66.2 |
 | 7 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_S MTP | 4080 | low | 1 | 92.9% | – | 10.5 | 40.2k | 65.7 |
 | 8 | Qwen3.8-27B | AP IQ3_S | 4080 | low | 2 | 90.9% | 89–93 | 8.2 | 34.0k | 71.7 |
-| 9 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 3 | 90.7% | 84–100 | 12.9 | ~29.2k | 38.8 |
+| 9 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 3 | 90.7% | 84–100 | 12.9 | ~57.7k | 76.6 |
 | 10 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_XXS | 4080 | medium | 1 | 88.3% | – | 9.2 | 38.3k | 74.3 |
-| 11 | Qwen3.8-27B | EXL3 2.2 bpw | 4080 | low | 3 | 87.8% | 78–94 | 9.6 | 26.5k | 50.9 |
+| 11 | Qwen3.8-27B | EXL3 2.2 bpw | 4080 | low | 3 | 87.8% | 78–94 | 9.6 | ~39.6k | 76.2 |
 | 12 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_XXS | 4080 | low | 1 | 86.3% | – | 10.6 | 45.0k | 75.0 |
-| 13 | Qwen3.8-27B | EXL3 2.2 bpw | 4080 | medium | 3 | 86.3% | 81–93 | 8.3 | 28.2k | 60.6 |
+| 13 | Qwen3.8-27B | EXL3 2.2 bpw | 4080 | medium | 3 | 86.3% | 81–93 | 8.3 | ~37.7k | 80.9 |
 | 14 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_S | 4080 | low | 1 | 83.8% | – | 12.1 | 47.2k | 68.4 |
 
 - **Best on 16 GB:** AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). That is the quality of Q6 on the 5090, at 1.5–2× the time.
 - **3 bits are the floor.** EXL3 2.2 bpw loses about 10 points against 3.0 bpw, at either level.
 - **Abliterated GSQ-RCO files are weaker.** They average 91% against 96% for the plain AP files. At `low` they also think about 20% longer. The MTP version was not faster: 73 tok/s decode against 77 for the version without MTP.
-- **`low` vs `medium` depends on the file.** GGUF files did better at `medium` in 5 of 5 pairs. EXL3 3.0 bpw did better at `low` (98.5% against 90.7%) and thought less there (18k against 23k thinking tokens).
+- **`low` vs `medium` depends on the file.** GGUF files did better at `medium` in 5 of 5 pairs. EXL3 3.0 bpw did better at `low` (98.5% against 90.7%) and thought about half as much there (28k against 51k thinking tokens).
 
 What the 3-bit files got wrong on the base suite, and Q6 did not:
 
@@ -173,21 +174,20 @@ No model has been run on the hard suite on the 5090 yet, so there is no Q6 refer
 
 | Quant | Backend | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Decode tok/s |
 |---|---|---|---|---|---|---|---|---|
-| EXL3 3.0 bpw | ExLlamaV3 | medium | 2 | **93.1%** | 92–94 | 11.0 | 18.4k | 41–45 |
+| EXL3 3.0 bpw | ExLlamaV3 | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 81–91 |
 | AP IQ3_S | llama.cpp | medium | 3 | 87.8% | 83–94 | 17.8 | 67.4k | 73–78 |
-| EXL3 3.0 bpw qv44 | ExLlamaV3 | medium | 1 | 66.7% | – | 10.9 | 18.2k | 41 |
+| EXL3 3.0 bpw qv44 | ExLlamaV3 | medium | 1 | 66.7% | – | 10.9 | ~53.9k | 88 |
 
 - **Three.js tasks: 100% in every run.** Physics, instanced picking and post-processing all passed.
 - **Python tasks separate the runs.** `h_p3_line_diff` (Myers diff) is the hardest. AP IQ3_S hit the 65,536-token limit on it once, while still thinking, and failed the correctness tests once (17%). `h_p2_expr_eval` mostly passes; one repeated mistake is raising `NameError` instead of `ValueError` for an unknown function.
-- **AP IQ3_S thinks 2.5–6× longer than EXL3** (38–91k thinking tokens against 15–16k) and does not score higher.
-- **`qv44` broke generation.** In `h_p2` and `h_p3` the model stopped inside its thinking after 2.4k–3.5k tokens (once after a loop) and never wrote code. The other four tasks were fine.
+- **AP IQ3_S is slower and does not score higher.** It thinks somewhat longer (38–91k thinking tokens against 45–47k for EXL3) and writes more slowly.
+- **`qv44` broke generation.** In `h_p2` and `h_p3` the model stopped inside its thinking after about 9k and 17k tokens (once after a loop) and never wrote code. The other four tasks were fine.
 
 ## Speed on the 4080
 
 - **llama.cpp (GGUF): steady 73–81 tok/s decode**, 65–75 tok/s from time. That is about 65% of Q6 on the 5090.
-- **ExLlamaV3 (EXL3) writes faster (80–92 tok/s) but sometimes slows down sharply.** In 10 of 12 base runs one Python task, usually `p2_sliding_median`, dropped to 3–35 tok/s. The worst was 2.9 tok/s, 12.7 min for 2.2k tokens. On the hard suite decode was only 41–45 tok/s (28 tok/s from time).
-  - So EXL3 averages 39–61 tok/s from time. It still finishes quickly because it thinks less.
-  - The slowdowns happened at 15.5–15.6 GB VRAM out of 16. A possible cause is the Windows NVIDIA driver moving memory to system RAM when VRAM is almost full (CUDA "sysmem fallback"). This has not been checked.
+- **ExLlamaV3 (EXL3): steady 81–97 tok/s decode**, 76–84 tok/s from time, so about 15% faster than llama.cpp.
+- **ExLlamaV3 counts tokens wrong.** TabbyAPI reports far too few completion tokens on long answers. Example: `p2_sliding_median` in run `20260927-081515` was reported as 2,222 tokens, but its text is 181,000 characters. That is about 55,000 tokens at the 3.3 characters per token measured on the llama.cpp runs. The wrong counts made EXL3 look as if it slowed down to 3–35 tok/s and thought less than llama.cpp; neither was true. `fix_token_counts.py` re-estimated the counts from the saved text for 40 tasks in 16 EXL3 runs (both PCs), and `run_eval.py` now does this by itself. The tables mark these counts with `~`.
 
 ## Caveats
 
@@ -217,10 +217,9 @@ Earlier tests from 24 Sep (temperature 0, 12,000-token limit, older script) are 
 ## Next steps
 
 - **Everyday coding on a 32 GB card:** Qwen3.8-27B Q6 at `low` or `medium` (`--chat-template-kwargs "{\"reasoning_effort\":\"low\"}"`).
-- **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`. It is the fastest, the most stable over repeats and the best on the hard suite. AP IQ3_S at `medium` in llama.cpp is equally good on the base suite and has a steadier speed. Avoid the `qv44` variant and anything below 3 bits.
+- **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`. It is the fastest (~84 tok/s), the most stable over repeats and the best on the hard suite. AP IQ3_S at `medium` in llama.cpp is equally good on the base suite and has a steadier speed. Avoid the `qv44` variant and anything below 3 bits.
 - **If a larger model is needed:** GLM-5.3-Flash EXL3 3.05 bpw at `high`.
 - **Get a hard-suite reference:** run Qwen3.8-27B Q6 on the 5090 with `--suite hard` at `low` and `medium`.
 - **Fill the gaps on the 4080:** EXL3 3.0 bpw at `low` on the hard suite, and a second run of the settings run only once.
-- **Check the EXL3 slowdowns:** watch VRAM during a run, or turn off "CUDA – Sysmem Fallback Policy" in the NVIDIA control panel.
 
 Rebuild the tables from the data with `python make_summary.py`.

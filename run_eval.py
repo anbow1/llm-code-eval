@@ -215,9 +215,15 @@ def chat(args, system, prompt, timeout):
         text = text[m.end():]
     comp = usage.get("completion_tokens")
     rtok = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
-    approx = comp is None
+    chars = len(think) + len(text)
+    # Some servers (TabbyAPI / ExLlamaV3) report far too few completion tokens on long answers.
+    # Code and English run at ~3-4.7 characters per token, so more than 6 means the count is wrong.
+    approx = not comp or chars / comp > 6
     if approx:
-        comp = chunks  # one streamed chunk is ~one token
+        # one streamed chunk is ~one token; a server that sends several tokens per chunk is
+        # covered by the length estimate (~3.5 characters per token)
+        comp = max(chunks, round(chars / 3.5))
+        rtok = round(comp * len(think) / chars) if chars else 0
     if rtok is None and comp:
         if chunks:  # split by streamed chunks (about one token each)
             rtok = round(comp * think_chunks / chunks)
