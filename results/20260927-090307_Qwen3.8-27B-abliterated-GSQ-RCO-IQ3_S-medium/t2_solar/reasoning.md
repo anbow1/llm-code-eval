@@ -1,0 +1,1 @@
+Create a single TS file. Include a delta-based render loop, resizing, and exposure. A PointLight with decay 2 and sufficient intensity. Planets orbit via angle += speed * delta. Planets rotate around their own axis. The moon is a child object of planet2 and orbits around the planet.
