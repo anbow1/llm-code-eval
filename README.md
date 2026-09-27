@@ -1,10 +1,22 @@
-# llm-code-eval — szybki test lokalnych modeli
+# llm-code-eval — a quick coding test for local LLMs
 
-## Wyniki (25.09.2026, RTX 5090 32 GB + 128 GB RAM)
+The repository has two test suites, kept apart everywhere:
 
-**Zwycięzca: Qwen3.8-27B UD-Q6_K_M na poziomie `low` (llama.cpp): 100% w 4,7 min, 40 GB RAM.** Najlepszy duży model to GLM-5.3-Flash EXL3 3.05 bpw na `high` (99,5% w 20,5 min, 118 GB RAM). Poziom myślenia liczy się bardziej niż wybór modelu: dla Qwen najlepsze są `low`/`medium` (`xhigh` przy kodzie myśli 8× dłużej), a dla GLM `high`.
+| | Base suite | Hard suite |
+|---|---|---|
+| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × TypeScript + Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) |
+| Run with | `python run_eval.py ...` | `python run_eval.py --suite hard ...` |
+| Raw results | `results/` | `results_hard/` |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) |
+| Compare | `python compare.py` | `python compare.py --hard` |
 
-| Model | Kwantyzacja | Poziom | Wynik | Czas | Tokeny razem | Śr. tok/s (z czasu) |
+Full write-up for both: [SUMMARY.md](SUMMARY.md).
+
+## Base suite: results (25–27 Sep 2026)
+
+**RTX 5090 32 GB + 128 GB RAM. Winner: Qwen3.8-27B UD-Q6_K_M at reasoning effort `low` (llama.cpp): 100% in 4.7 min, 40 GB RAM.** The best large model is GLM-5.3-Flash EXL3 3.05 bpw at `high` (99.5% in 20.5 min, 118 GB RAM). The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
+
+| Model | Quant | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|
 | Qwen3.8-27B | UD-Q6_K_M | low | 100.0% | 4.7 min | 28.7k | 108.9 |
 | Qwen3.8-27B | UD-Q6_K_M | medium | 98.6% | 3.9 min | 22.2k | 105.3 |
@@ -12,123 +24,153 @@
 | Qwen3.8-Flash-Next | UD-Q4_K_XL | medium | 99.2% | 29.5 min | 55.4k | 31.7 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
 
-Śr. tok/s (z czasu) = wszystkie wygenerowane tokeny ÷ łączny czas generowania.
+**RTX 4080 16 GB + 32 GB RAM: Qwen3.8-27B at 3 bits almost matches Q6, at about half the speed.** The best are EXL3 3.0 bpw at `low` and AP IQ3_S at `medium`. Below 3 bits (EXL3 2.2 bpw) the score drops by about 10 points. Scores are means over 2–3 runs.
 
-Pełne podsumowanie: [SUMMARY.md](SUMMARY.md). Wszystkie 12 przebiegów i wyniki każdego zadania: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+| Model | Quant | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
+|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B | AP IQ3_S | medium | 2 | 100.0% | 8.2 min | 34.6k | 73.0 |
+| Qwen3.8-27B | EXL3 3.0 bpw | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
+| Qwen3.8-27B | EXL3 2.2 bpw | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
 
+All 36 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
-10 zadań: 6 × TypeScript + Three.js, 4 × Python. Wszystko sprawdzane automatycznie.
+## Hard suite: results (27 Sep 2026)
 
-## Instalacja (raz)
+So far only run on the RTX 4080 16 GB, at `medium`; there is no Q6 / RTX 5090 reference yet. **EXL3 3.0 bpw is the best 3-bit file**: it scores higher than AP IQ3_S and finishes faster. The `qv44` variant stopped mid-thought in two tasks.
+
+| Model | Quant | Effort | Runs | Mean score | Min–max | Mean time | Mean tokens | Avg tok/s (from time) |
+|---|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B | EXL3 3.0 bpw | medium | 2 | 93.1% | 92–94 | 11.0 min | ~54.0k | 82.9 |
+| Qwen3.8-27B | AP IQ3_S | medium | 3 | 87.8% | 83–94 | 17.8 min | 67.4k | 63.9 |
+| Qwen3.8-27B | EXL3 3.0 bpw qv44 | medium | 1 | 66.7% | – | 10.9 min | ~53.9k | 83.2 |
+
+All 6 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+
+Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
+
+## Setup (once)
 
 ```
-pip install playwright pillow
+pip install playwright pillow psutil
 python -m playwright install chromium
 ```
 
-Potrzebny też Node.js 20+ (`node -v`). Przy pierwszym starcie skrypt sam zainstaluje three, typescript i esbuild do `ts_env/`.
+You also need Node.js 20+ (`node -v`). On the first run the script installs three, typescript and esbuild into `ts_env/`.
 
-## Start
+## Running
 
-Uruchom model na serwerze zgodnym z OpenAI (llama.cpp, TabbyAPI, LM Studio, Ollama), potem:
+Serve the model with any OpenAI-compatible server (llama.cpp, TabbyAPI, LM Studio, Ollama), then:
 
 ```
 python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 ```
 
-Najważniejsze opcje:
-- `--label` — krótka nazwa w raporcie (zamiast długiej ścieżki do pliku)
-- `--preset qwen-think` / `qwen-instruct` / `glm` — ustawienia próbkowania zalecane przez twórców modelu
-- `--temperature 1.0` — domyślnie 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` nadpisują preset
-- `--max-tokens 65536` — limit tokenów na zadanie, razem z myśleniem (domyślnie 65536)
-- `--task-timeout-min 60` — limit czasu na jedno zadanie (domyślnie 60 min)
-- `--budget-min 0` — limit na cały przebieg, 0 = bez limitu (domyślnie)
-- `--think off` — wyłącza myślenie (enable_thinking=false w szablonie Qwen/GLM)
-- `--reasoning-effort low` — poziom myślenia (np. low / medium / high / xhigh), jeśli serwer to obsługuje
-- `--reasoning-effort off,low,xhigh` — pełny test po kolei na każdym poziomie, każdy z osobnym raportem
-- `--probe-effort` — szybka sonda (poziomy dobiera do presetu: GLM `off,low,high,max`, Qwen `off,low,medium,xhigh`; możesz podać własne, od najsłabszego): jedno krótkie pytanie na każdym poziomie; pokazuje, ile model myśli i czy serwer w ogóle zmienia poziom; domyślnie 3 próby na poziom (`--probe-repeats`); `--probe-question hard` daje trudniejsze pytanie, przy którym poziom myślenia ma większe znaczenie
-- `--only three` / `--only python`, `--tasks t5_raycast_click` — tylko wybrane zadania
+Main options:
+- `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
+- `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
+- `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
+- `--max-tokens 65536`: token limit per task, thinking included (default 65536)
+- `--task-timeout-min 60`: time limit per task (default 60 min)
+- `--budget-min 0`: time limit for the whole run, 0 = none (default)
+- `--think off`: turns thinking off (`enable_thinking=false` in the Qwen/GLM chat template)
+- `--reasoning-effort low`: reasoning level (e.g. low / medium / high / xhigh), if the chat template supports it
+- `--reasoning-effort off,low,xhigh`: runs the full test once per level, each with its own report
+- `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
+- `--suite hard`: run the hard suite instead of the base one (see [Hard suite: tasks](#hard-suite-tasks))
+- `--only three` / `--only python`, `--tasks t5_raycast_click`: run only some tasks
 
-| Preset | Ustawienia |
+| Preset | Settings |
 |---|---|
 | qwen-think | temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0, repetition_penalty 1.0 |
-| qwen-instruct | temperature 0.7, top_p 0.80, top_k 20, min_p 0, presence_penalty 1.5, repetition_penalty 1.0 (użyj z `--think off`) |
+| qwen-instruct | temperature 0.7, top_p 0.80, top_k 20, min_p 0, presence_penalty 1.5, repetition_penalty 1.0 (use with `--think off`) |
 | glm | temperature 1.0, top_p 1.0 |
 
-Przy temperaturze 1.0 wyniki różnią się między przebiegami. Do porównań warto puścić każdy model 2 razy.
+At temperature 1.0 results vary between runs. For comparisons, run each model twice.
 
-Pomiar pamięci wymaga: `pip install psutil` (VRAM czyta z `nvidia-smi`).
+Memory measurement needs `psutil`; VRAM is read from `nvidia-smi`.
 
-Porównanie przebiegów (najnowszy przebieg każdej nazwy; `--all` pokazuje wszystkie):
+Compare runs (latest run per name; `--all` shows every run):
 
 ```
-python compare.py
+python compare.py          # base suite
+python compare.py --hard   # hard suite
 ```
 
-## Co jest mierzone
+Rebuild the result tables of both suites from the data:
 
-- wynik każdego zadania i status: `ok`, `max_tokens` (skończył się limit tokenów), `task_timeout`, `server_crash`, `server_down`
-- „fin.” — średni wynik tylko z zadań, które model skończył (oddziela jakość od szybkości)
-- czas, tokeny (w tym tokeny myślenia), szybkość generowania (tok/s), czas do pierwszego tokena
-- szczytowe VRAM i RAM oraz ile GB przeczytano z dysku w czasie testu
-- tekst myślenia zapisuje się w `reasoning.md` obok odpowiedzi
+```
+python make_summary.py
+```
 
-## Co jest sprawdzane
+Runs made with an older `run_eval.py` against ExLlamaV3 (TabbyAPI) may have token counts that are far too low. Run `python fix_token_counts.py` once to re-estimate them from the saved text; it keeps the server's numbers and is safe to run again.
 
-Three.js — każde zadanie:
-- kompiluje się w `tsc --strict`
-- ładuje się w przeglądarce i nie ma błędów w konsoli
-- coś widać na ekranie (nie pusty kolor)
-- dobrze reaguje na zmianę rozmiaru okna
-- plus testy zadania (np. czy kostka się obraca, czy klik zaznacza właściwą kostkę, czy normalne patrzą w górę)
+## What is measured
 
-| Zadanie | Co testuje |
+- score and status of every task: `ok`, `max_tokens` (ran out of tokens), `task_timeout`, `no_answer` (stopped while still thinking), `server_crash`, `server_down`
+- "fin.": average score over the tasks the model finished (separates quality from speed)
+- time, tokens (including thinking tokens), generation speed (tok/s), time to first token
+- peak VRAM and RAM, and how many GB were read from disk during the run
+- the model's thinking is saved as `reasoning.md` next to its answer
+
+## Base suite: tasks
+
+Every Three.js task (in both suites) must:
+- compile with `tsc --strict`
+- load in the browser without console errors
+- actually draw something (not a blank colour)
+- handle window resizing
+- pass its own checks (e.g. the cube rotates, a click selects the right cube, terrain normals point up)
+
+| Task | What it tests |
 |---|---|
-| t1_cube | podstawy: scena, światło, animacja z delta time |
-| t2_solar | hierarchia obiektów, orbity, PointLight |
-| t3_instanced_wave | InstancedMesh 10 000 kostek, wydajność |
-| t4_shader_water | własny ShaderMaterial, GLSL, uniformy |
-| t5_raycast_click | Raycaster, klik myszką, stan zaznaczenia |
-| t6_terrain | własna BufferGeometry, indeksy, kolejność wierzchołków, OrbitControls z addons |
+| t1_cube | basics: scene, lights, delta-time animation |
+| t2_solar | object hierarchy, orbits, PointLight |
+| t3_instanced_wave | InstancedMesh with 10,000 cubes, performance |
+| t4_shader_water | custom ShaderMaterial, GLSL, uniforms |
+| t5_raycast_click | Raycaster, mouse clicks, selection state |
+| t6_terrain | hand-built BufferGeometry, indices, winding order, OrbitControls from addons |
 
-Python — ukryte testy (poprawność + wydajność):
+Python tasks have hidden tests (correctness + performance):
 
-| Zadanie | Co testuje |
+| Task | What it tests |
 |---|---|
-| p1_parse_duration | dokładne czytanie specyfikacji, przypadki brzegowe |
-| p2_sliding_median | algorytm + wydajność (200k elementów) |
-| p3_topo_order | graf, najmniejsza leksykograficznie kolejność, cykle |
-| p4_gather_limited | asyncio: limit, kolejność, anulowanie po błędzie |
+| p1_parse_duration | reading a spec carefully, edge cases |
+| p2_sliding_median | algorithm + performance (200k items) |
+| p3_topo_order | graphs, lexicographically smallest order, cycles |
+| p4_gather_limited | asyncio: concurrency limit, ordering, cancellation on error |
 
-## Zestaw trudny (`--suite hard`)
+## Hard suite: tasks
 
-6 dodatkowych, trudniejszych zadań, żeby rozróżnić najlepsze modele. Uruchamiasz je tak samo, tylko z `--suite hard`; nazwa przebiegu dostaje końcówkę `-HARD`.
+6 harder tasks to separate the models that score about 100% on the base suite. They live in `tasks_hard.py`, runs are saved to `results_hard/` and the run name gets a `-HARD` suffix. The Three.js tasks are checked the same way as in the base suite (plus their own checks below); the Python tasks have hidden tests.
 
-| Zadanie | Co testuje |
+| Task | What it tests |
 |---|---|
-| h_t1_physics | 20 kul w pudełku: zderzenia sprężyste z masami, zachowanie energii, brak nakładania; test sam wywołuje `step()` 600 razy |
-| h_t2_instanced_pick | 900 instancji w jednym InstancedMesh, klik przełącza kolor, sprawdzane też na ekranie (czy kolor dotarł do GPU) |
-| h_t3_postfx_invert | EffectComposer + własny shader odwracający kolory; wynik na ekranie musi być poprawny w sRGB (kolejność przejść) |
-| h_p1_interval_set | zbiór przedziałów: łączenie, dzielenie, przypadki brzegowe, wydajność O(log n) |
-| h_p2_expr_eval | dokładny kalkulator: priorytety, `^` prawostronne, unarny minus, funkcje, błędy; 400 losowych wyrażeń |
-| h_p3_line_diff | minimalny diff (LCS) z powtórzeniami linii; wydajność wymaga algorytmu Myersa |
+| h_t1_physics | 20 balls in a box: mass-aware elastic collisions, energy conservation, no overlap; the test calls `step()` 600 times itself |
+| h_t2_instanced_pick | 900 instances in one InstancedMesh, clicks toggle colour, also checked on screen (did the colour reach the GPU) |
+| h_t3_postfx_invert | EffectComposer + custom colour-inverting shader; the on-screen result must be correct in sRGB (pass order) |
+| h_p1_interval_set | interval set: merging, splitting, edge cases, O(log n) performance |
+| h_p2_expr_eval | exact calculator: precedence, right-associative `^`, unary minus, functions, errors; 400 random expressions |
+| h_p3_line_diff | minimal diff (LCS) with repeated lines; performance needs Myers' algorithm |
 
-Przykład:
+Examples:
 
 ```
-python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort high,max
-python run_eval.py --suite hard --label qwen27b-q6 --preset qwen-think --reasoning-effort medium,xhigh
+python run_eval.py --suite hard --label qwen27b-q6 --preset qwen-think --reasoning-effort low,medium
+python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort high
+python compare.py --hard
 ```
 
-## Wyniki
+## Output
 
-Każdy przebieg trafia do `results/<data>_<model>/`:
-- `report.md` — co przeszło, co nie i dlaczego
-- `summary.json` — liczby do porównań
-- w folderze zadania: pełna odpowiedź modelu, kod i `screenshot.png`
+Each run is saved to `results/<date>_<name>/` (base suite) or `results_hard/<date>_<name>-HARD/` (hard suite):
+- `report.md`: what passed, what failed and why
+- `summary.json`: numbers for comparisons
+- one folder per task with the model's full answer, its code, its thinking and `screenshot.png`
 
-## Wskazówki
+`make_summary.py` also writes `results_table.csv` into each of the two folders.
 
-- Używaj presetu zalecanego dla danego modelu.
-- Modele „myślące” mogą pisać bardzo długo. Jeśli czas się kończy, wyłącz myślenie albo zmniejsz `--max-tokens`.
-- Zadania i testy są w `tasks.py`. Łatwo dodać własne.
+## Tips
+
+- Use the preset recommended for the model.
+- Thinking models can write for a very long time. If time runs out, lower the reasoning level, turn thinking off or lower `--max-tokens`.
+- Tasks and tests live in `tasks.py` and `tasks_hard.py`; adding your own is easy.

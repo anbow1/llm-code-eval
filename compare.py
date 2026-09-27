@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Compare all runs in results/:  python compare.py   (add --all to show every run of a model)"""
+"""Compare runs:  python compare.py         base suite (results/)
+                python compare.py --hard  hard suite (results_hard/)
+Add --all to show every run of a model, not only the newest."""
 import json
 import sys
 from pathlib import Path
 
 rows = []
-for f in sorted(Path(__file__).resolve().parent.glob("results/*/summary.json")):
+folder = "results_hard" if "--hard" in sys.argv else "results"
+for f in sorted(Path(__file__).resolve().parent.glob(f"{folder}/*/summary.json")):
     d = json.loads(f.read_text(encoding="utf-8"))
     S = d.get("summary") or {}
     R = d.get("resources") or {}
     res = d["results"]
     tps = [r["tok_per_s"] for r in res if r.get("tok_per_s")]
     rows.append({
-        "name": d["name"].replace("\\", "/").split("/")[-1],
+        "name": f.parent.name[16:],  # folder name without the date; folders may be renamed to fix a label
         "py": d.get("python"), "th": d.get("three"), "ov": d["overall"],
         "fin": S.get("answered_score"),
         "done": f"{S.get('tasks_answered', sum(1 for r in res if r.get('gen_seconds')))}/{len(res)}",

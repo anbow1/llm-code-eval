@@ -215,9 +215,15 @@ def chat(args, system, prompt, timeout):
         text = text[m.end():]
     comp = usage.get("completion_tokens")
     rtok = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
-    approx = comp is None
+    chars = len(think) + len(text)
+    # Some servers (TabbyAPI / ExLlamaV3) report far too few completion tokens on long answers.
+    # Code and English run at ~3-4.7 characters per token, so more than 6 means the count is wrong.
+    approx = not comp or chars / comp > 6
     if approx:
-        comp = chunks  # one streamed chunk is ~one token
+        # one streamed chunk is ~one token; a server that sends several tokens per chunk is
+        # covered by the length estimate (~3.5 characters per token)
+        comp = max(chunks, round(chars / 3.5))
+        rtok = round(comp * len(think) / chars) if chars else 0
     if rtok is None and comp:
         if chunks:  # split by streamed chunks (about one token each)
             rtok = round(comp * think_chunks / chunks)
@@ -264,6 +270,20 @@ class ResourceMonitor:
         except Exception:
             return None
 
+    def _gpu_name(self):
+        if not self.has_smi:
+            return None
+        try:
+            out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+                                 capture_output=True, text=True, timeout=5).stdout
+            gpus = []
+            for line in out.strip().splitlines():
+                name, _, mib = line.rpartition(",")
+                gpus.append(f"{name.strip().replace('NVIDIA GeForce ', '')} {round(int(mib) / 1024)} GB")
+            return " + ".join(gpus) or None
+        except Exception:
+            return None
+
     def _ram_gib(self):
         if not self.psutil:
             return None
@@ -298,6 +318,7 @@ class ResourceMonitor:
         self.disk1 = self._disk_read()
         gb = lambda mib: round(mib / 1024, 1) if mib is not None else None
         return {
+            "gpu": self._gpu_name(),
             "vram_peak_gb": gb(self.peak_vram),
             "ram_peak_gb": round(self.peak_ram, 1) if self.peak_ram is not None else None,
             "ram_at_start_gb": round(self.base_ram, 1) if self.base_ram is not None else None,
@@ -674,7 +695,8 @@ def main():
     if args.suite == "hard" and not name.endswith("-HARD"):
         name += "-HARD"
     safe = re.sub(r"[^\w.-]+", "_", name)[:80]
-    run_dir = HERE / "results" / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
+    results_dir = "results_hard" if args.suite == "hard" else "results"
+    run_dir = HERE / results_dir / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
     run_dir.mkdir(parents=True)
 
     # interleave Python and Three.js so a stop does not wipe out one whole part

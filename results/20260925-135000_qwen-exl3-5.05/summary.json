@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 0,
     "not_run": 0,
-    "tokens_total": 53621,
-    "reasoning_tokens_total": 51401,
-    "tok_per_s": 18.5,
+    "tokens_total": 175980,
+    "reasoning_tokens_total": 170789,
+    "tok_per_s": 34.5,
     "ttft_avg_s": 4.2,
     "gen_minutes": 84.4
   },
@@ -171,11 +171,13 @@
       "ttft_s": 3.6,
       "think_seconds": 807.3,
       "prompt_tokens": 445,
-      "tokens": 6901,
-      "reasoning_tokens": 6705,
-      "answer_tokens": 196,
-      "tokens_approx": false,
-      "tok_per_s": 8.3
+      "tokens": 28648,
+      "reasoning_tokens": 27639,
+      "answer_tokens": 1009,
+      "tokens_approx": true,
+      "tok_per_s": 34.3,
+      "tokens_reported": 6901,
+      "reasoning_tokens_reported": 6705
     },
     {
       "id": "p2_sliding_median",
@@ -197,11 +199,13 @@
       "ttft_s": 3.9,
       "think_seconds": 1215.6,
       "prompt_tokens": 220,
-      "tokens": 8054,
-      "reasoning_tokens": 7945,
-      "answer_tokens": 109,
-      "tokens_approx": false,
-      "tok_per_s": 6.5
+      "tokens": 44833,
+      "reasoning_tokens": 43932,
+      "answer_tokens": 901,
+      "tokens_approx": true,
+      "tok_per_s": 36.2,
+      "tokens_reported": 8054,
+      "reasoning_tokens_reported": 7945
     },
     {
       "id": "t3_instanced_wave",
@@ -252,11 +256,13 @@
       "ttft_s": 3.8,
       "think_seconds": 319.0,
       "prompt_tokens": 215,
-      "tokens": 4506,
-      "reasoning_tokens": 4444,
-      "answer_tokens": 62,
-      "tokens_approx": false,
-      "tok_per_s": 13.9
+      "tokens": 10849,
+      "reasoning_tokens": 10650,
+      "answer_tokens": 199,
+      "tokens_approx": true,
+      "tok_per_s": 33.4,
+      "tokens_reported": 4506,
+      "reasoning_tokens_reported": 4444
     },
     {
       "id": "t4_shader_water",
@@ -305,11 +311,13 @@
       "ttft_s": 3.7,
       "think_seconds": 1470.9,
       "prompt_tokens": 242,
-      "tokens": 5936,
-      "reasoning_tokens": 5897,
-      "answer_tokens": 39,
-      "tokens_approx": false,
-      "tok_per_s": 4.0
+      "tokens": 52476,
+      "reasoning_tokens": 51878,
+      "answer_tokens": 598,
+      "tokens_approx": true,
+      "tok_per_s": 35.4,
+      "tokens_reported": 5936,
+      "reasoning_tokens_reported": 5897
     },
     {
       "id": "t5_raycast_click",
@@ -335,11 +343,13 @@
       "ttft_s": 5.4,
       "think_seconds": 287.2,
       "prompt_tokens": 456,
-      "tokens": 4340,
-      "reasoning_tokens": 4095,
-      "answer_tokens": 245,
-      "tokens_approx": false,
-      "tok_per_s": 13.9
+      "tokens": 11955,
+      "reasoning_tokens": 11040,
+      "answer_tokens": 915,
+      "tokens_approx": true,
+      "tok_per_s": 38.2,
+      "tokens_reported": 4340,
+      "reasoning_tokens_reported": 4095
     },
     {
       "id": "t6_terrain",
@@ -361,11 +371,13 @@
       "ttft_s": 3.7,
       "think_seconds": 111.6,
       "prompt_tokens": null,
-      "tokens": 1516,
-      "reasoning_tokens": 1516,
+      "tokens": 4851,
+      "reasoning_tokens": 4851,
       "answer_tokens": 0,
       "tokens_approx": true,
-      "tok_per_s": 13.6
+      "tok_per_s": 43.5,
+      "tokens_reported": 1516,
+      "reasoning_tokens_reported": 1516
     }
   ]
 }

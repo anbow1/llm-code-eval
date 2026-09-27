@@ -1,0 +1,7 @@
+run,suite,model,quant,backend,gpu,effort,temperature,overall,python,three,finished_only,answered,minutes,gen_minutes,tokens,thinking,answer_tokens,tokens_approx,tok_s_time,tok_s,vram_gb,ram_gb,disk_read_gb,h_t1_physics,h_t2_instanced_pick,h_t3_postfx_invert,h_p1_interval_set,h_p2_expr_eval,h_p3_line_diff
+20260927-100537_Qwen3.8-27_3.0_exl3-HARD,hard,Qwen3.8-27B,EXL3 3.0 bpw,ExLlamaV3,RTX 4080 16 GB,medium,1.0,94.1,88.1,100.0,94.1,6/6,11.4,11.2,52392,45357,7035,True,77.9,80.8,15.6,14.2,0.5,100,100,100,100,98,67
+20260927-105403_Qwen3.8-27B-AP-IQ3_S-HARD,hard,Qwen3.8-27B,AP IQ3_S,llama.cpp,RTX 4080 16 GB,medium,1.0,94.1,88.1,100.0,94.1,6/6,13.7,13.6,59503,52199,7304,False,73.1,77.8,15.3,26.3,0.2,100,100,100,100,98,67
+20260927-103037_Qwen3.8-27_3.0_exl3-HARD,hard,Qwen3.8-27B,EXL3 3.0 bpw,ExLlamaV3,RTX 4080 16 GB,medium,1.0,92.1,84.2,100.0,92.1,6/6,10.6,10.5,55549,47029,8520,True,88.5,91.3,15.6,15.4,4.1,100,100,100,57,95,100
+20260927-104205_Qwen3.8-27B-AP-IQ3_S-HARD,hard,Qwen3.8-27B,AP IQ3_S,llama.cpp,RTX 4080 16 GB,medium,1.0,86.1,72.2,100.0,86.1,6/6,10.2,10.0,44880,38040,6840,False,74.7,78.0,15.2,22.2,0.2,100,100,100,100,100,17
+20260927-091412_Qwen3.8-27B-AP-IQ3_S-HARD,hard,Qwen3.8-27B,AP IQ3_S,llama.cpp,RTX 4080 16 GB,medium,1.0,83.3,66.7,100.0,100.0,5/6,29.4,29.2,97930,91056,6874,False,55.8,73.1,15.4,21.2,0.3,100,100,100,100,100,0
+20260927-101826_Qwen3.8-27_3.0_exl3_qv44-HARD,hard,Qwen3.8-27B,EXL3 3.0 bpw qv44,ExLlamaV3,RTX 4080 16 GB,medium,1.0,66.7,33.3,100.0,100.0,4/6,10.9,10.8,53897,49562,4335,True,83.4,88.4,15.5,14.7,0.2,100,100,100,100,0,0

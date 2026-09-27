@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 ts_env/
 results/*/*/bundle.js
+results_hard/*/*/bundle.js

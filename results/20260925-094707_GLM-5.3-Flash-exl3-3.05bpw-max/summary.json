@@ -14,9 +14,9 @@
     "hit_max_tokens": 0,
     "timeouts": 1,
     "not_run": 0,
-    "tokens_total": 65806,
-    "reasoning_tokens_total": 62226,
-    "tok_per_s": 8.6,
+    "tokens_total": 159127,
+    "reasoning_tokens_total": 149457,
+    "tok_per_s": 13.6,
     "ttft_avg_s": 7.7,
     "gen_minutes": 205.4
   },
@@ -113,11 +113,13 @@
       "ttft_s": 6.2,
       "think_seconds": 2250.7,
       "prompt_tokens": 253,
-      "tokens": 6285,
-      "reasoning_tokens": 6174,
-      "answer_tokens": 111,
-      "tokens_approx": false,
-      "tok_per_s": 2.7
+      "tokens": 30390,
+      "reasoning_tokens": 29572,
+      "answer_tokens": 818,
+      "tokens_approx": true,
+      "tok_per_s": 13.3,
+      "tokens_reported": 6285,
+      "reasoning_tokens_reported": 6174
     },
     {
       "id": "t2_solar",
@@ -143,11 +145,13 @@
       "ttft_s": 9.0,
       "think_seconds": 1998.2,
       "prompt_tokens": 385,
-      "tokens": 5678,
-      "reasoning_tokens": 5376,
-      "answer_tokens": 302,
-      "tokens_approx": false,
-      "tok_per_s": 2.7
+      "tokens": 27082,
+      "reasoning_tokens": 24839,
+      "answer_tokens": 2243,
+      "tokens_approx": true,
+      "tok_per_s": 12.8,
+      "tokens_reported": 5678,
+      "reasoning_tokens_reported": 5376
     },
     {
       "id": "p2_sliding_median",
@@ -199,11 +203,13 @@
       "ttft_s": 8.9,
       "think_seconds": 817.0,
       "prompt_tokens": 360,
-      "tokens": 6334,
-      "reasoning_tokens": 5931,
-      "answer_tokens": 403,
-      "tokens_approx": false,
-      "tok_per_s": 7.2
+      "tokens": 11439,
+      "reasoning_tokens": 10353,
+      "answer_tokens": 1086,
+      "tokens_approx": true,
+      "tok_per_s": 13.1,
+      "tokens_reported": 6334,
+      "reasoning_tokens_reported": 5931
     },
     {
       "id": "p3_topo_order",
@@ -284,11 +290,13 @@
       "ttft_s": 6.0,
       "think_seconds": 3594.1,
       "prompt_tokens": null,
-      "tokens": 22099,
-      "reasoning_tokens": 22099,
+      "tokens": 41848,
+      "reasoning_tokens": 41848,
       "answer_tokens": 0,
       "tokens_approx": true,
-      "tok_per_s": 6.1
+      "tok_per_s": 11.6,
+      "tokens_reported": 22099,
+      "reasoning_tokens_reported": 22099
     },
     {
       "id": "t5_raycast_click",
@@ -314,11 +322,13 @@
       "ttft_s": 9.2,
       "think_seconds": 1164.9,
       "prompt_tokens": 391,
-      "tokens": 6143,
-      "reasoning_tokens": 5823,
-      "answer_tokens": 320,
-      "tokens_approx": false,
-      "tok_per_s": 5.0
+      "tokens": 16938,
+      "reasoning_tokens": 15518,
+      "answer_tokens": 1420,
+      "tokens_approx": true,
+      "tok_per_s": 13.8,
+      "tokens_reported": 6143,
+      "reasoning_tokens_reported": 5823
     },
     {
       "id": "t6_terrain",
@@ -345,11 +355,13 @@
       "ttft_s": 9.5,
       "think_seconds": 1130.8,
       "prompt_tokens": 416,
-      "tokens": 6753,
-      "reasoning_tokens": 6233,
-      "answer_tokens": 520,
-      "tokens_approx": false,
-      "tok_per_s": 5.5
+      "tokens": 18916,
+      "reasoning_tokens": 16737,
+      "answer_tokens": 2179,
+      "tokens_approx": true,
+      "tok_per_s": 15.4,
+      "tokens_reported": 6753,
+      "reasoning_tokens_reported": 6233
     }
   ]
 }
