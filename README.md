@@ -36,7 +36,7 @@ python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 ```
 
 Main options:
-- `--label`: short name used in the report (instead of the long model path)
+- `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--max-tokens 65536`: token limit per task, thinking included (default 65536)
