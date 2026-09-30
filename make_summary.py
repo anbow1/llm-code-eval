@@ -26,6 +26,8 @@ def describe(label, model):
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m and bpw:
             quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
+        elif "exl3" in m:
+            quant = "EXL3 (bpw not in label)"
         elif gguf:
             quant = gguf.group(0).upper()
         elif "q6" in m:
@@ -46,14 +48,15 @@ def describe(label, model):
             quant = "?"
         return "GLM-5.3-Flash", quant, backend
     if "flash-next" in m or "qwen" in m:
+        gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m:
             quant = "EXL3 5.05 bpw"
-        elif "iq3_xxs" in m:
-            quant = "GSQ-RCO IQ3_XXS"
-        elif "q4_k_xl" in m:
-            quant = "UD-Q4_K_XL"
+        elif gguf:
+            quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
         else:
             quant = "?"
+        if re.search(r"[_-]strata([_-]|$)", m):
+            quant += " strata"
         return "Qwen3.8-Flash-Next", quant, backend
     return label, "?", backend
 
@@ -135,8 +138,8 @@ def main():
 
         lines = [title, "", note, "",
                  "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says "
-                 "which). All runs: temperature 1.0, sampling preset recommended by the model maker, 65,536-token "
-                 "and 60-minute limit per task. Settings that were run more than once are averaged in the first "
+                 "which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and "
+                 "65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged in the first "
                  "table; every single run is listed in the second.", ""]
         lines += section(runs)
         lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "

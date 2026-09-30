@@ -1,31 +1,36 @@
-# Local model coding test: summary (25–27 Sep 2026)
+# Local model coding test: summary (25–30 Sep 2026)
 
 ## TL;DR
 
-- **Winner on the RTX 5090: Qwen3.8-27B UD-Q6_K_M at reasoning effort `low` (llama.cpp): 100% in 4.7 min.** No larger model scored higher, and every one was 4 to 40 times slower.
-- **Qwen3.8-27B also works on a 16 GB card.** On the RTX 4080, the best 3-bit files score almost the same as Q6 on the 5090 on the base suite, at about half the speed:
-  - AP IQ3_S (llama.cpp) at `medium`: 100% in both runs, 8.2 min on average.
-  - EXL3 3.0 bpw (ExLlamaV3) at `low`: 98.5% over 3 runs, 7.3 min.
-- **On the hard suite, EXL3 3.0 bpw is the best 3-bit file**: 93.1% (2 runs) in 11 min. AP IQ3_S scores 87.8% (3 runs) and takes 18 min, because it generates more tokens (67k against 54k) and writes more slowly (64 against 83 tok/s from time). With the `qv44` variant, EXL3 3.0 bpw stopped mid-thought twice and scored 66.7%.
-- **Below 3 bits quality drops.** EXL3 2.2 bpw scores 86–88% and varies a lot between runs (78–94%). The abliterated GSQ-RCO files score lower than the plain AP files (91% against 96% on average).
-- **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium` and `xhigh` overthinks code. GLM does best at `high`. Which of `low`/`medium` is better depends on the file: GGUF did better at `medium`, EXL3 at `low`.
-- **ExLlamaV3 (TabbyAPI) under-reports tokens on long answers**, e.g. 2,222 tokens for 181,000 characters. The counts for its runs were re-estimated from the saved text (`fix_token_counts.py`, marked `~`). With the corrected counts, EXL3 generates at a steady 76–84 tok/s on the 4080, faster than llama.cpp (65–75). The earlier "slowdowns" were an artefact of the wrong counts.
-- **At temperature 1.0, one run is not enough.** The same file and setting ranged from 84 to 100% (EXL3 3.0 bpw `medium`) and from 78 to 94% (EXL3 2.2 bpw `low`).
+- **Base suite (10 tasks) is saturated.** On the RTX 5090 seven settings score 100%. The fastest are:
+  - Qwen3.8-27B UD-Q6_K_M at `low` (llama.cpp): 4.7 min;
+  - Qwen3.8-Flash-Next GSQ-RCO IQ3_S "strata" at `medium`: 4.9 min;
+  - Qwen3.8-27B EXL3 at `low`: 5.0 min.
+- **Hard suite (6 tasks) now has results from both PCs, and it separates the models.**
+  - **Best: Qwen3.8-Flash-Next GSQ-RCO IQ3_S "strata"**, 100% at `medium` (20 min) and 97.8% at `low` (8.4 min), one run each.
+  - **Best quality per minute: Qwen3.8-27B EXL3 at `low` on the 5090**: 94.4% in 6.5 min.
+  - **Qwen3.8-Flash-Next UD-Q4_K_XL**: 95.8% over 2 runs, 20 min.
+  - **GLM-5.3-Flash is the weakest and slowest.** At `high` it scored 82% and hit the 60-minute limit on `h_p3_line_diff` in 3 of 3 runs, so a run takes 90–115 min. At `low` it scored 78%.
+- **"strata" makes Flash-Next about 3.7× faster**, with the same file and the same memory use: 125–141 tok/s from time against 35. What the "strata" setting is is not recorded in the run data.
+- **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
+- **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. GLM needs `high` on the base suite, but on the hard suite even `high` runs out of time.
+- **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
+- **At temperature 1.0, one run is not enough.** The same setting ranged over up to 16 points between runs.
 
 ## Hardware and settings
 
-- **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows. All runs from 25 Sep.
+- **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows. All runs from 25 Sep and 28–30 Sep.
 - **PC B:** RTX 4080 16 GB VRAM + 32 GB DDR5 RAM, Windows. All Qwen3.8-27B 2–3-bit runs from 26–27 Sep.
 - Backends: llama.cpp (`llama-server --jinja`) and ExLlamaV3 (TabbyAPI).
 - Base suite, 10 tasks: 6 × TypeScript + Three.js, checked in a real browser (`tsc --strict` compile, rendering, animation, clicking, window resize), and 4 × Python with hidden correctness and performance tests. Hard suite: 6 tasks (`--suite hard`, see the README).
-- Every run: temperature 1.0, sampling as recommended by the model makers (`--preset glm` / `qwen-think`), 65,536-token and 60-minute limit per task.
-- On the 5090 each setting was run once. On the 4080 several settings were run 2–3 times; the tables show the mean.
+- Every run: temperature 1.0, sampling as recommended by the model makers (`--preset glm` / `qwen-think`), 60-minute limit per task. Token limit per task: 65,536; the runs from 30 Sep used 98,304 (the new default in `run_eval.py`).
+- Many settings were run once; some 2–3 times. The tables show the mean.
 
 The full tables, including every single run and the score per task, are in [RESULTS_TABLE.md](RESULTS_TABLE.md) (base suite) and [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) (hard suite). Raw data (model code, thinking, screenshots) is in `results/` and `results_hard/`.
 
-# Part 1: RTX 5090 (25 Sep)
+# Part 1: RTX 5090, base suite (25 and 29–30 Sep)
 
-## Results
+## Results from 25 Sep
 
 | # | Model | Quant | Backend | Effort | Score | Time (min) | Total tokens | of which thinking | Avg tok/s (from time) | RAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -113,6 +118,21 @@ Test time = tokens ÷ speed. A model finishes fast either because it writes fast
 - `max` thinks about 19× longer than `high` (~150k against 7.8k thinking tokens), takes 206 min and hit the time limit on one task.
 - **For code: `high`.**
 
+## New runs from 29–30 Sep
+
+| Model | Quant | Backend | Effort | Score | Time (min) | Total tokens | Avg tok/s (from time) | Decode tok/s | VRAM / RAM GB |
+|---|---|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | low | **100.0%** | **5.0** | 30.5k | 108.1 | 134 | 26.9 / 17 |
+| Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | medium | **100.0%** | 6.5 | ~42.7k | 114.7 | 135 | 26.9 / 19 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | **100.0%** | 31.3 | 65.6k | 35.3 | 38 | 30.8 / 68 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | medium | **100.0%** | 35.3 | 73.3k | 35.0 | 38 | 30.8 / 73 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | low | 90.9% | 5.1 | 35.4k | 125.4 | 141 | 30.5 / 70 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | medium | **100.0%** | **4.9** | 34.8k | 129.0 | 145 | 30.5 / 68 |
+
+- **Qwen3.8-27B in EXL3 is as good as Q6 in llama.cpp and a little faster**: 134 tok/s decode against 121. The label does not say the bpw; it used 26.9 GB VRAM.
+- **Flash-Next GSQ-RCO IQ3_S scored 100% at both levels**, but at 35 tok/s it needs over 30 minutes, like the other Flash-Next files.
+- **The "strata" runs of the same file ran 3.7× faster** (125–141 tok/s from time), with the same VRAM and RAM use. With it, the Flash-Next MoE is as fast as the dense 27B. Its `low` run lost points on `p1` (accepted "1 h"), `p2` (an `IndexError`, as in many runs), a TypeScript type error in `t3` and one check in `t6`.
+
 # Part 2: Qwen3.8-27B at 2–3 bits on the RTX 4080 16 GB (26–27 Sep)
 
 Seven files of Qwen3.8-27B that fit in 16 GB VRAM:
@@ -168,40 +188,65 @@ What the 3-bit files got wrong on the base suite, and Q6 did not:
   This looks like quantisation damage: the model remembers the API less precisely.
 - **p1_parse_duration**: rejecting "1h30m" without a space, as on the 5090.
 
-## Hard suite
-
-All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_hard/`.
-
-No model has been run on the hard suite on the 5090 yet, so there is no Q6 reference.
-
-| Quant | Backend | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Decode tok/s |
-|---|---|---|---|---|---|---|---|---|
-| EXL3 3.0 bpw | ExLlamaV3 | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 81–91 |
-| AP IQ3_S | llama.cpp | medium | 3 | 87.8% | 83–94 | 17.8 | 67.4k | 73–78 |
-| EXL3 3.0 bpw qv44 | ExLlamaV3 | medium | 1 | 66.7% | – | 10.9 | ~53.9k | 88 |
-
-- **Three.js tasks: 100% in every run.** Physics, instanced picking and post-processing all passed.
-- **Python tasks separate the runs.** `h_p3_line_diff` (Myers diff) is the hardest. AP IQ3_S hit the 65,536-token limit on it once, while still thinking, and failed the correctness tests once (17%). `h_p2_expr_eval` mostly passes; one repeated mistake is raising `NameError` instead of `ValueError` for an unknown function.
-- **AP IQ3_S is slower and does not score higher.** It thinks somewhat longer (38–91k thinking tokens against 45–47k for EXL3) and writes more slowly.
-- **`qv44` broke generation.** In `h_p2` and `h_p3` the model stopped inside its thinking after about 9k and 17k tokens (once after a loop) and never wrote code. The other four tasks were fine.
-
 ## Speed on the 4080
 
 - **llama.cpp (GGUF): steady 73–81 tok/s decode**, 65–75 tok/s from time. That is about 65% of Q6 on the 5090.
 - **ExLlamaV3 (EXL3): steady 81–97 tok/s decode**, 76–84 tok/s from time, so about 15% faster than llama.cpp.
 - **ExLlamaV3 counts tokens wrong.** TabbyAPI reports far too few completion tokens on long answers. Example: `p2_sliding_median` in run `20260927-081515` was reported as 2,222 tokens, but its text is 181,000 characters. That is about 55,000 tokens at the 3.3 characters per token measured on the llama.cpp runs. The wrong counts made EXL3 look as if it slowed down to 3–35 tok/s and thought less than llama.cpp; neither was true. `fix_token_counts.py` re-estimated the counts from the saved text for 40 tasks in 16 EXL3 runs (both PCs), and `run_eval.py` now does this by itself. The tables mark these counts with `~`.
 
+# Part 3: Hard suite, both PCs (27–30 Sep)
+
+All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_hard/`. Mean over runs.
+
+| # | Model | Quant | GPU | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | medium | 1 | **100.0%** | – | 20.0 | 138.2k | 116.3 |
+| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | low | 1 | **97.8%** | – | 8.4 | 70.4k | 141.3 |
+| 3 | Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | **95.8%** | 93–98 | 19.9 | 44.1k | 37.3 |
+| 4 | Qwen3.8-27B | EXL3 (bpw not in label) | 5090 | low | 1 | **94.4%** | – | **6.5** | ~46.1k | 121.9 |
+| 5 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 82.9 |
+| 6 | Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 83–94 | 17.8 | 67.4k | 63.9 |
+| 7 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | 5090 | medium | 1 | 84.9% | – | 29.2 | 54.0k | 31.0 |
+| 8 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | 5090 | low | 1 | 82.9% | – | 57.3 | 120.1k | 35.1 |
+| 9 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | 5090 | high | 1 | 82.9% | – | 98.3 | ~80.2k | 13.6 |
+| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 2 | 81.9% | 82–82 | 102.6 | ~65.9k | 10.7 |
+| 11 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | 5090 | medium | 2 | 79.8% | 77–83 | 90.0 | 184.8k | 34.3 |
+| 12 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 71–84 | 19.4 | ~13.2k | 11.6 |
+| 13 | Qwen3.8-27B | EXL3 (bpw not in label) | 5090 | medium | 1 | 77.8% | – | 10.4 | ~67.6k | 110.4 |
+| 14 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | 4080 | medium | 1 | 66.7% | – | 10.9 | ~53.9k | 83.2 |
+
+Qwen3.8-27B UD-Q6_K_M, the base-suite winner, has not been run on the hard suite yet.
+
+**`h_p3_line_diff` (minimal diff, needs Myers' algorithm) decides most of the ranking.** Only 8 of 21 runs solved it fully.
+
+- **GLM-5.3-Flash at `high` hit the 60-minute limit on it in 3 of 3 runs**, both EXL3 and GSQ-RCO. At 11–14 tok/s it cannot think long enough within the hour, so each run took 90–115 minutes and scored about 82%.
+- **Flash-Next GSQ-RCO IQ3_S without "strata" ran out of tokens on it in 3 of 3 runs**: 65,536 twice and 98,304 once, at about 34 tok/s after 32–50 minutes. The two "strata" runs of the same file solved it: 28k tokens at `low` and 81k at `medium`. With one run each, this may be luck rather than a difference in the model.
+- **Flash-Next UD-Q4_K_XL, IQ3_XXS and 27B EXL3 at `low` solved it.**
+
+**Other findings:**
+
+- **Qwen3.8-27B EXL3 on the 5090, `low` against `medium`:**
+  - At `low`: 94.4% in 6.5 min, the fastest good result.
+  - At `medium`: 77.8%. Its `h_p3` run stopped inside its thinking after about 33k tokens.
+  - In both runs it failed `h_t3_postfx_invert` the same way: it named a GLSL variable `output`, which is a reserved word, so the shader did not compile.
+- **GLM `low` against `high`:** `low` is 5× faster (19 min) but scored 78%, with mistakes in physics, instanced picking, the interval set and the diff.
+- **ExLlamaV3 stopped mid-thought in 3 tasks:** twice with `qv44` on the 4080 and once on the 5090. Each time the stream ended with `finish_reason = stop` while the model was still thinking. On the 5090 this happened at about 33k tokens, which matches a 32,768-token context. It is worth checking TabbyAPI's `max_seq_len` / cache size: it should be at least prompt + `--max-tokens`.
+- **Three.js tasks are mostly solved.** Most misses are TypeScript compile errors from APIs that do not exist (`renderer.getDelta()`, `getAnimationLoop()`, `ShaderPass.name`, a wrong namespace), plus the `output` shader error above.
+
 ## Caveats
 
-- **Few runs, temperature 1.0.** On the 5090 each setting was run once; on the 4080 many settings were run only once or twice. The repeats show how big the noise is: the same setting ranged over 16 points (EXL3 3.0 bpw `medium`: 84–100%). Treat differences under about 5 points as noise. The differences in time and token count are much more stable.
+- **Few runs, temperature 1.0.** Most settings were run once, some 2–3 times. The repeats show how big the noise is: the same setting ranged over 16 points (EXL3 3.0 bpw `medium`: 84–100%). Treat differences under about 5 points as noise. The differences in time and token count are much more stable.
 - **The base suite is too easy for the best settings.** Ten tasks, and the best already score about 100%, so it does not separate them. It mainly measures one-shot code writing, not long agentic work (where, according to the model cards, GLM and DeepSeek have an edge).
-- **The hard suite has no reference yet.** It has only been run on the 4080, and only at `medium`.
+- **The hard suite still lacks Qwen3.8-27B Q6**, the base-suite winner, and most settings have one run.
+- **Token limits differ.** Runs from 30 Sep used 98,304 tokens per task, earlier ones 65,536. This matters only for runs that hit the limit (Flash-Next IQ3_S on `h_p3`, which hit it either way).
+- **Unknown settings.** "strata" (Flash-Next, 30 Sep) and the bpw of "Qwen3.8-27B-exl3" (29 Sep) are only known from the labels.
 - **The two PCs are not directly comparable on time.** GPU, RAM and file size all differ.
 - **Specific files, not models.** The quants differ in size, maker and backend, so this compares specific files on this hardware.
 - **Labels and folders:**
   - The labels `qwen27b-q6-temp0-*` are misleading: those runs used temperature 1.0, not 0.
   - Some 4080 folders were renamed after the run (e.g. `-low` dropped from the hard-suite labels, which ran at `medium`). The tables use the folder names.
   - For `20260927-103037` the folder says plain EXL3 3.0 bpw, but the name stored in the run says `qv44`. It is counted as plain EXL3 3.0 bpw.
+  - Some hard-suite labels do not say the level (e.g. `GLM-5.3-Flash-exl3-3.05bpw-HARD` at `high` and at `low`); the tables take the level from the run settings.
 
 ## Interrupted runs (no score, not in the table)
 
@@ -213,15 +258,22 @@ Their raw data has been removed from `results/` and `results_hard/`; only these 
 - Qwen3.8-Flash-Next UD-Q4_K_XL, first attempt (2 tasks).
 - Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS `xhigh` on the 4080 (1 task).
 - Qwen3.8-27B AP IQ3_S, hard suite on the 4080: three attempts stopped after the first task.
+- GLM-5.3-Flash EXL3, hard suite on the 5090:
+  - `high` on 26 Sep, stopped after 4 tasks;
+  - `max` on 26 Sep: the server stopped answering (timeouts) and no task was answered;
+  - `high` on 29 Sep, stopped after 5 tasks.
 
 Earlier tests from 24 Sep (temperature 0, 12,000-token limit, older script) are not comparable and are not included.
 
 ## Next steps
 
-- **Everyday coding on a 32 GB card:** Qwen3.8-27B Q6 at `low` or `medium` (`--chat-template-kwargs "{\"reasoning_effort\":\"low\"}"`).
-- **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`. It is the fastest (~84 tok/s), the most stable over repeats and the best on the hard suite. AP IQ3_S at `medium` in llama.cpp is equally good on the base suite and has a steadier speed. Avoid the `qv44` variant and anything below 3 bits.
-- **If a larger model is needed:** GLM-5.3-Flash EXL3 3.05 bpw at `high`.
-- **Get a hard-suite reference:** run Qwen3.8-27B Q6 on the 5090 with `--suite hard` at `low` and `medium`.
-- **Fill the gaps on the 4080:** EXL3 3.0 bpw at `low` on the hard suite, and a second run of the settings run only once.
+- **Everyday coding on a 32 GB card:** Qwen3.8-27B at `low`, Q6 in llama.cpp or EXL3 in ExLlamaV3. Both reach 100% on the base suite in about 5 minutes, and EXL3 scored 94.4% on the hard suite in 6.5 min.
+- **Hardest tasks, if time allows:** Qwen3.8-Flash-Next with "strata" at `medium` (100% on the hard suite in 20 min) or UD-Q4_K_XL at `medium` (95.8%). Worth a second run of each before trusting the ranking.
+- **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`, or AP IQ3_S at `medium` in llama.cpp. Avoid `qv44` and anything below 3 bits.
+- **GLM-5.3-Flash:** fine on the base suite at `high`, but too slow for the hard suite on this hardware.
+- **To fill the gaps:**
+  - run Qwen3.8-27B Q6 on the hard suite at `low` and `medium`;
+  - repeat the single-run hard-suite settings;
+  - check TabbyAPI's context length (the mid-thought stops).
 
 Rebuild the tables from the data with `python make_summary.py`.

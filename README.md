@@ -12,17 +12,21 @@ The repository has two test suites, kept apart everywhere:
 
 Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
-## Base suite: results (25–27 Sep 2026)
+## Base suite: results (25–30 Sep 2026)
 
-**RTX 5090 32 GB + 128 GB RAM. Winner: Qwen3.8-27B UD-Q6_K_M at reasoning effort `low` (llama.cpp): 100% in 4.7 min, 40 GB RAM.** The best large model is GLM-5.3-Flash EXL3 3.05 bpw at `high` (99.5% in 20.5 min, 118 GB RAM). The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
+**The base suite no longer separates the best models: on the RTX 5090 seven settings score 100%.** The fastest of them take about 5 minutes. The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
 
-| Model | Quant | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
-|---|---|---|---|---|---|---|
-| Qwen3.8-27B | UD-Q6_K_M | low | 100.0% | 4.7 min | 28.7k | 108.9 |
-| Qwen3.8-27B | UD-Q6_K_M | medium | 98.6% | 3.9 min | 22.2k | 105.3 |
-| GLM-5.3-Flash | EXL3 3.05 bpw | high | 99.5% | 20.5 min | 15.0k | 12.4 |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL | medium | 99.2% | 29.5 min | 55.4k | 31.7 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
+RTX 5090 32 GB + 128 GB RAM:
+
+| Model | Quant | Backend | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
+|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B | UD-Q6_K_M | llama.cpp | low | 100.0% | 4.7 min | 28.7k | 108.9 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | medium | 100.0% | 4.9 min | 34.8k | 129.0 |
+| Qwen3.8-27B | EXL3 | ExLlamaV3 | low | 100.0% | 5.0 min | 30.5k | 108.1 |
+| Qwen3.8-27B | EXL3 | ExLlamaV3 | medium | 100.0% | 6.5 min | ~42.7k | 114.7 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | 99.5% | 20.5 min | 15.0k | 12.4 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | 100.0% | 31.3 min | 65.6k | 35.3 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
 
 **RTX 4080 16 GB + 32 GB RAM: Qwen3.8-27B at 3 bits almost matches Q6, at about half the speed.** The best are EXL3 3.0 bpw at `low` and AP IQ3_S at `medium`. Below 3 bits (EXL3 2.2 bpw) the score drops by about 10 points. Scores are means over 2–3 runs.
 
@@ -32,21 +36,30 @@ Full write-up for both: [SUMMARY.md](SUMMARY.md).
 | Qwen3.8-27B | EXL3 3.0 bpw | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
 | Qwen3.8-27B | EXL3 2.2 bpw | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
 
-All 36 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+All 42 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
-## Hard suite: results (27 Sep 2026)
+## Hard suite: results (27–30 Sep 2026)
 
-So far only run on the RTX 4080 16 GB, at `medium`; there is no Q6 / RTX 5090 reference yet. **EXL3 3.0 bpw is the best 3-bit file**: it scores higher than AP IQ3_S and finishes faster. The `qv44` variant stopped mid-thought in two tasks.
+**The hard suite separates the models.** Scores are means where a setting was run more than once. Qwen3.8-27B Q6 has not been run on it yet.
 
-| Model | Quant | Effort | Runs | Mean score | Min–max | Mean time | Mean tokens | Avg tok/s (from time) |
+- **Best:** Qwen3.8-Flash-Next with "strata".
+- **Fastest good result:** Qwen3.8-27B EXL3 at `low`.
+- **GLM-5.3-Flash** hits the 60-minute limit on `h_p3_line_diff` at `high`.
+
+| Model | Quant | GPU | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|
-| Qwen3.8-27B | EXL3 3.0 bpw | medium | 2 | 93.1% | 92–94 | 11.0 min | ~54.0k | 82.9 |
-| Qwen3.8-27B | AP IQ3_S | medium | 3 | 87.8% | 83–94 | 17.8 min | 67.4k | 63.9 |
-| Qwen3.8-27B | EXL3 3.0 bpw qv44 | medium | 1 | 66.7% | – | 10.9 min | ~53.9k | 83.2 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | 95.8% | 19.9 min | 44.1k | 37.3 |
+| Qwen3.8-27B | EXL3 | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
+| Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
+| Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 2 | 81.9% | 102.6 min | ~65.9k | 10.7 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 19.4 min | ~13.2k | 11.6 |
 
-All 6 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+All 21 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
-Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
+Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`. "strata" and the bpw of the 5090 EXL3 run of Qwen3.8-27B are only known from the run labels.
 
 ## Setup (once)
 
@@ -69,7 +82,7 @@ Main options:
 - `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
-- `--max-tokens 65536`: token limit per task, thinking included (default 65536)
+- `--max-tokens 98304`: token limit per task, thinking included (default 98304; runs before 30 Sep used 65536)
 - `--task-timeout-min 60`: time limit per task (default 60 min)
 - `--budget-min 0`: time limit for the whole run, 0 = none (default)
 - `--think off`: turns thinking off (`enable_thinking=false` in the Qwen/GLM chat template)
