@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 def describe(label, model):
     """Readable model / quant / backend from the run label and model path (case-insensitive)."""
     m = f"{label} {model}".replace("\\", "/").lower()
-    backend = "ExLlamaV3" if "exl3" in m else "llama.cpp"
+    backend = "ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata([_-]|$)", m) else "llama.cpp"
     bit = re.search(r"(\d\.\d+)\s*-?bit", m)
     bpw = re.search(r"(\d\.\d+)\s*-?bpw|(\d\.\d+)_exl3|exl3-(\d)(\d{2})", m)
     if re.search(r"27b|3\.8-27[_-]", m):
@@ -26,8 +26,6 @@ def describe(label, model):
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m and bpw:
             quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
-        elif "exl3" in m:
-            quant = "EXL3 (bpw not in label)"
         elif gguf:
             quant = gguf.group(0).upper()
         elif "q6" in m:
@@ -55,8 +53,6 @@ def describe(label, model):
             quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
         else:
             quant = "?"
-        if re.search(r"[_-]strata([_-]|$)", m):
-            quant += " strata"
         return "Qwen3.8-Flash-Next", quant, backend
     return label, "?", backend
 
@@ -208,7 +204,8 @@ def section(runs):
     mark = {"max_tokens": " (limit)", "task_timeout": " (time)", "no_answer": " (none)"}
     for r in runs:
         cells = [f"{r['tasks'].get(t, ('', ''))[0]}{mark.get(r['tasks'].get(t, ('', ''))[1], '')}" for t in task_ids]
-        lines.append(f"| {when(r['run'])} | {r['model']} {r['quant']} / {r['effort']} | " + " | ".join(cells) + " |")
+        lines.append(f"| {when(r['run'])} | {r['model']} {r['quant']} ({r['backend']}) / {r['effort']} | "
+                     + " | ".join(cells) + " |")
     return lines + [""]
 
 

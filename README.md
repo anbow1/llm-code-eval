@@ -21,9 +21,9 @@ RTX 5090 32 GB + 128 GB RAM:
 | Model | Quant | Backend | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|
 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | low | 100.0% | 4.7 min | 28.7k | 108.9 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | medium | 100.0% | 4.9 min | 34.8k | 129.0 |
-| Qwen3.8-27B | EXL3 | ExLlamaV3 | low | 100.0% | 5.0 min | 30.5k | 108.1 |
-| Qwen3.8-27B | EXL3 | ExLlamaV3 | medium | 100.0% | 6.5 min | ~42.7k | 114.7 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | medium | 100.0% | 4.9 min | 34.8k | 129.0 |
+| Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | low | 100.0% | 5.0 min | 30.5k | 108.1 |
+| Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | medium | 100.0% | 6.5 min | ~42.7k | 114.7 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | 99.5% | 20.5 min | 15.0k | 12.4 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | 100.0% | 31.3 min | 65.6k | 35.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
@@ -42,16 +42,16 @@ All 42 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 
 **The hard suite separates the models.** Scores are means where a setting was run more than once. Qwen3.8-27B Q6 has not been run on it yet.
 
-- **Best:** Qwen3.8-Flash-Next with "strata".
-- **Fastest good result:** Qwen3.8-27B EXL3 at `low`.
+- **Best:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S run in [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models. It is 3.7× faster than the same file in llama.cpp.
+- **Fastest good result:** Qwen3.8-27B EXL3 6.0 bpw at `low`.
 - **GLM-5.3-Flash** hits the 60-minute limit on `h_p3_line_diff` at `high`.
 
 | Model | Quant | GPU | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
 | Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | 95.8% | 19.9 min | 44.1k | 37.3 |
-| Qwen3.8-27B | EXL3 | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
+| Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
 | Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 2 | 81.9% | 102.6 min | ~65.9k | 10.7 |
@@ -59,7 +59,7 @@ All 42 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 
 All 21 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
-Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`. "strata" and the bpw of the 5090 EXL3 run of Qwen3.8-27B are only known from the run labels.
+Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
 
 ## Setup (once)
 
@@ -72,14 +72,14 @@ You also need Node.js 20+ (`node -v`). On the first run the script installs thre
 
 ## Running
 
-Serve the model with any OpenAI-compatible server (llama.cpp, TabbyAPI, LM Studio, Ollama), then:
+Serve the model with any OpenAI-compatible server (llama.cpp, TabbyAPI, Strata, LM Studio, Ollama), then:
 
 ```
 python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 ```
 
 Main options:
-- `--label`: short name used in the report (instead of the long model path). Put the model and quant in it (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
+- `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, and `-strata` for runs in Strata (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--max-tokens 98304`: token limit per task, thinking included (default 98304; runs before 30 Sep used 65536)

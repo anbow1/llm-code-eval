@@ -9,9 +9,9 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | 1 | **100.0%** | – | 4.7 | 28.7k | 108.6 | 29.8 |
-| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 4.9 | 34.8k | 129.0 | 30.5 |
-| 3 | Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **100.0%** | – | 5.0 | 30.5k | 108.1 | 26.9 |
-| 4 | Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 6.5 | ~42.7k | 114.7 | 26.9 |
+| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 4.9 | 34.8k | 129.0 | 30.5 |
+| 3 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **100.0%** | – | 5.0 | 30.5k | 108.1 | 26.9 |
+| 4 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 6.5 | ~42.7k | 114.7 | 26.9 |
 | 5 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 2 | **100.0%** | 100–100 | 8.2 | 34.6k | 73.0 | 15.3 |
 | 6 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **100.0%** | – | 31.3 | 65.6k | 35.3 | 30.8 |
 | 7 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 35.3 | 73.3k | 35.0 | 30.8 |
@@ -28,7 +28,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 18 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_S MTP | llama.cpp | RTX 4080 16 GB | low | 1 | **92.9%** | – | 10.5 | 40.2k | 65.7 | 15.5 |
 | 19 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | default (xhigh) | 1 | **92.9%** | – | 37.5 | 194.0k | 87.1 | 30.0 |
 | 20 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | low | 2 | **90.9%** | 89–93 | 8.2 | 34.0k | 71.7 | 15.3 |
-| 21 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | RTX 5090 32 GB | low | 1 | **90.9%** | – | 5.1 | 35.4k | 125.4 | 30.5 |
+| 21 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | 1 | **90.9%** | – | 5.1 | 35.4k | 125.4 | 30.5 |
 | 22 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 3 | **90.7%** | 84–100 | 12.9 | ~57.7k | 76.6 | 15.6 |
 | 23 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **90.6%** | – | 12.8 | 25.0k | 33.7 | 29.3 |
 | 24 | Qwen3.8-27B abliterated | GSQ-RCO IQ3_XXS | llama.cpp | RTX 4080 16 GB | medium | 1 | **88.3%** | – | 9.2 | 38.3k | 74.3 | 15.1 |
@@ -46,9 +46,9 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) | Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) | VRAM GB | RAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 25.09 16:11 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | **100.0%** | 100.0 | 100.0 | 4.7 | 28.7k | 21.9k | 6.8k | **108.9** | 121 | 29.8 | 39.8 |
-| 2 | 30.09 19:15 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 4.9 | 34.8k | 26.5k | 8.3k | **129.4** | 145 | 30.5 | 68.3 |
-| 3 | 29.09 07:07 | Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | RTX 5090 32 GB | low | **100.0%** | 100.0 | 100.0 | 5.0 | 30.5k | 24.2k | 6.3k | **108.6** | 134 | 26.9 | 17.3 |
-| 4 | 29.09 07:12 | Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 6.5 | ~42.7k | ~36.0k | ~6.7k | **115.2** | 135 | 26.9 | 19.3 |
+| 2 | 30.09 19:15 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 4.9 | 34.8k | 26.5k | 8.3k | **129.4** | 145 | 30.5 | 68.3 |
+| 3 | 29.09 07:07 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | **100.0%** | 100.0 | 100.0 | 5.0 | 30.5k | 24.2k | 6.3k | **108.6** | 134 | 26.9 | 17.3 |
+| 4 | 29.09 07:12 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 6.5 | ~42.7k | ~36.0k | ~6.7k | **115.2** | 135 | 26.9 | 19.3 |
 | 5 | 27.09 08:41 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **100.0%** | 100.0 | 100.0 | 7.7 | 32.3k | 24.8k | 7.5k | **73.6** | 79 | 15.3 | 25.7 |
 | 6 | 27.09 07:52 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | low | **100.0%** | 100.0 | 100.0 | 8.6 | ~39.9k | ~33.8k | ~6.1k | **80.2** | 95 | 15.5 | 14.7 |
 | 7 | 26.09 21:05 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **100.0%** | 100.0 | 100.0 | 8.8 | 36.9k | 29.3k | 7.6k | **72.6** | 79 | 15.2 | 27.0 |
@@ -72,7 +72,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 25 | 25.09 15:26 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | default (xhigh) | **92.9%** | 85.7 | 100.0 | 37.5 | 194.0k | 184.8k | 9.2k | **87.1** | 94 | 30.0 | 39.7 |
 | 26 | 27.09 07:19 | Qwen3.8-27B | EXL3 2.2 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **92.6%** | 97.2 | 88.1 | 6.4 | ~27.8k | ~21.6k | ~6.2k | **79.4** | 87 | 14.2 | 15.5 |
 | 27 | 27.09 07:27 | Qwen3.8-27B | EXL3 2.2 bpw | ExLlamaV3 | RTX 4080 16 GB | low | **91.2%** | 89.3 | 93.1 | 12.4 | ~54.4k | ~48.2k | ~6.2k | **76.5** | 88 | 14.9 | 15.4 |
-| 28 | 30.09 19:10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | RTX 5090 32 GB | low | **90.9%** | 84.8 | 97.1 | 5.1 | 35.4k | 28.4k | 7.0k | **125.4** | 140 | 30.5 | 70.1 |
+| 28 | 30.09 19:10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | **90.9%** | 84.8 | 97.1 | 5.1 | 35.4k | 28.4k | 7.0k | **125.4** | 140 | 30.5 | 70.1 |
 | 29 | 25.09 20:59 | Qwen3.8-Flash-Next | EXL3 5.05 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | **90.6%** | 81.2 | 100.0 | 12.8 | 25.0k | 18.0k | 7.1k | **33.6** | 36 | 29.3 | 86.1 |
 | 30 | 27.09 08:01 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **88.6%** | 82.1 | 95.0 | 6.7 | ~30.9k | ~24.7k | ~6.2k | **80.6** | 92 | 15.5 | 14.9 |
 | 31 | 27.09 08:34 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | low | **88.6%** | 82.1 | 95.0 | 6.8 | 27.0k | 19.7k | 7.4k | **70.3** | 75 | 15.3 | 22.6 |
@@ -92,48 +92,48 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 
 | Run | Model / effort | t1_cube | t2_solar | t3_instanced_wave | t4_shader_water | t5_raycast_click | t6_terrain | p1_parse_duration | p2_sliding_median | p3_topo_order | p4_gather_limited |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 25.09 16:11 | Qwen3.8-27B UD-Q6_K_M / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 30.09 19:15 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S strata / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 29.09 07:07 | Qwen3.8-27B EXL3 (bpw not in label) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 29.09 07:12 | Qwen3.8-27B EXL3 (bpw not in label) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 27.09 08:41 | Qwen3.8-27B AP IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 27.09 07:52 | Qwen3.8-27B EXL3 3.0 bpw / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 26.09 21:05 | Qwen3.8-27B AP IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 27.09 08:15 | Qwen3.8-27B EXL3 3.0 bpw / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 29.09 20:15 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 29.09 20:46 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 25.09 17:37 | Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 25.09 09:26 | GLM-5.3-Flash EXL3 3.05 bpw / high | 100 | 100 | 100 | 100 | 100 | 100 | 96 | 100 | 100 | 100 |
-| 25.09 23:45 | Qwen3.8-Flash-Next UD-Q4_K_XL / medium | 100 | 91 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 27.09 08:08 | Qwen3.8-27B EXL3 3.0 bpw / low | 100 | 100 | 100 | 100 | 100 | 100 | 93 | 100 | 100 | 100 |
-| 25.09 16:15 | Qwen3.8-27B UD-Q6_K_M / medium | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 100 | 100 | 100 |
-| 26.09 20:45 | Qwen3.8-27B AP IQ3_XS / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 86 | 100 | 100 |
-| 27.09 09:03 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 86 | 100 | 100 |
-| 26.09 20:33 | Qwen3.8-27B AP IQ3_XS / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 80 |
-| 26.09 23:20 | Qwen3.8-27B EXL3 3.0 bpw / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 71 | 100 | 100 |
-| 26.09 20:22 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S MTP / medium | 100 | 100 | 100 | 100 | 100 | 92 | 100 | 71 | 100 | 100 |
-| 25.09 22:47 | GLM-5.3-Flash GSQ-RCO 3.5-bit / high | 45 | 82 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 26.09 23:01 | Qwen3.8-27B EXL3 2.2 bpw / low | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 100 | 100 | 60 |
-| 26.09 20:55 | Qwen3.8-27B AP IQ3_S / low | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 57 | 100 | 100 |
-| 26.09 20:12 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S MTP / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
-| 25.09 15:26 | Qwen3.8-27B UD-Q6_K_M / default (xhigh) | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
-| 27.09 07:19 | Qwen3.8-27B EXL3 2.2 bpw / medium | 100 | 100 | 100 | 70 | 100 | 58 | 89 | 100 | 100 | 100 |
-| 27.09 07:27 | Qwen3.8-27B EXL3 2.2 bpw / low | 100 | 100 | 100 | 100 | 100 | 58 | 100 | 57 | 100 | 100 |
-| 30.09 19:10 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S strata / low | 100 | 100 | 91 | 100 | 100 | 92 | 96 | 43 | 100 | 100 |
-| 25.09 20:59 | Qwen3.8-Flash-Next EXL3 5.05 bpw / medium | 100 | 100 | 100 | 100 | 100 | 100 | 96 | 29 | 100 | 100 |
-| 27.09 08:01 | Qwen3.8-27B EXL3 3.0 bpw / medium | 100 | 100 | 100 | 70 | 100 | 100 | 100 | 29 | 100 | 100 |
-| 27.09 08:34 | Qwen3.8-27B AP IQ3_S / low | 100 | 100 | 100 | 70 | 100 | 100 | 100 | 29 | 100 | 100 |
-| 26.09 19:52 | Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS / medium | 100 | 100 | 45 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
-| 25.09 16:29 | Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 0 (limit) | 100 | 100 |
-| 25.09 09:47 | GLM-5.3-Flash EXL3 3.05 bpw / max | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 0 (time) |
-| 26.09 19:42 | Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS / low | 100 | 100 | 100 | 100 | 100 | 0 | 100 | 57 | 100 | 100 |
-| 27.09 07:40 | Qwen3.8-27B EXL3 2.2 bpw / medium | 64 | 100 | 100 | 100 | 100 | 92 | 96 | 14 | 100 | 100 |
-| 27.09 08:50 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S / low | 100 | 100 | 100 | 0 | 100 | 100 | 100 | 57 | 100 | 80 |
-| 26.09 23:27 | Qwen3.8-27B EXL3 3.0 bpw / medium | 100 | 100 | 100 | 70 | 100 | 100 | 89 | 0 (none) | 100 | 100 |
-| 25.09 09:12 | GLM-5.3-Flash EXL3 3.05 bpw / low | 100 | 100 | 100 | 100 | 100 | 100 | 63 | 100 | 100 | 0 |
-| 26.09 23:07 | Qwen3.8-27B EXL3 2.2 bpw / medium | 100 | 100 | 100 | 60 | 100 | 58 | 89 | 14 | 100 | 100 |
-| 25.09 13:50 | Qwen3.8-Flash-Next EXL3 5.05 bpw / default (xhigh) | 100 | 100 | 100 | 100 | 100 | 0 | 0 | 100 | 100 | 100 |
-| 27.09 07:09 | Qwen3.8-27B EXL3 2.2 bpw / low | 100 | 0 | 100 | 100 | 100 | 92 | 100 | 0 | 100 | 100 |
+| 25.09 16:11 | Qwen3.8-27B UD-Q6_K_M (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 30.09 19:15 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 29.09 07:07 | Qwen3.8-27B EXL3 6.0 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 29.09 07:12 | Qwen3.8-27B EXL3 6.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 27.09 08:41 | Qwen3.8-27B AP IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 27.09 07:52 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 26.09 21:05 | Qwen3.8-27B AP IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 27.09 08:15 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 29.09 20:15 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 29.09 20:46 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 25.09 17:37 | Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 25.09 09:26 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / high | 100 | 100 | 100 | 100 | 100 | 100 | 96 | 100 | 100 | 100 |
+| 25.09 23:45 | Qwen3.8-Flash-Next UD-Q4_K_XL (llama.cpp) / medium | 100 | 91 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 27.09 08:08 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 93 | 100 | 100 | 100 |
+| 25.09 16:15 | Qwen3.8-27B UD-Q6_K_M (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 100 | 100 | 100 |
+| 26.09 20:45 | Qwen3.8-27B AP IQ3_XS (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 86 | 100 | 100 |
+| 27.09 09:03 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 86 | 100 | 100 |
+| 26.09 20:33 | Qwen3.8-27B AP IQ3_XS (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 80 |
+| 26.09 23:20 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 71 | 100 | 100 |
+| 26.09 20:22 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S MTP (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 92 | 100 | 71 | 100 | 100 |
+| 25.09 22:47 | GLM-5.3-Flash GSQ-RCO 3.5-bit (llama.cpp) / high | 45 | 82 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 26.09 23:01 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 100 | 100 | 60 |
+| 26.09 20:55 | Qwen3.8-27B AP IQ3_S (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 89 | 57 | 100 | 100 |
+| 26.09 20:12 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S MTP (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
+| 25.09 15:26 | Qwen3.8-27B UD-Q6_K_M (llama.cpp) / default (xhigh) | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
+| 27.09 07:19 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 70 | 100 | 58 | 89 | 100 | 100 | 100 |
+| 27.09 07:27 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 58 | 100 | 57 | 100 | 100 |
+| 30.09 19:10 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (Strata) / low | 100 | 100 | 91 | 100 | 100 | 92 | 96 | 43 | 100 | 100 |
+| 25.09 20:59 | Qwen3.8-Flash-Next EXL3 5.05 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 96 | 29 | 100 | 100 |
+| 27.09 08:01 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 70 | 100 | 100 | 100 | 29 | 100 | 100 |
+| 27.09 08:34 | Qwen3.8-27B AP IQ3_S (llama.cpp) / low | 100 | 100 | 100 | 70 | 100 | 100 | 100 | 29 | 100 | 100 |
+| 26.09 19:52 | Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS (llama.cpp) / medium | 100 | 100 | 45 | 100 | 100 | 100 | 100 | 43 | 100 | 100 |
+| 25.09 16:29 | Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 0 (limit) | 100 | 100 |
+| 25.09 09:47 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / max | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 0 (time) |
+| 26.09 19:42 | Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 0 | 100 | 57 | 100 | 100 |
+| 27.09 07:40 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / medium | 64 | 100 | 100 | 100 | 100 | 92 | 96 | 14 | 100 | 100 |
+| 27.09 08:50 | Qwen3.8-27B abliterated GSQ-RCO IQ3_S (llama.cpp) / low | 100 | 100 | 100 | 0 | 100 | 100 | 100 | 57 | 100 | 80 |
+| 26.09 23:27 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 70 | 100 | 100 | 89 | 0 (none) | 100 | 100 |
+| 25.09 09:12 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / low | 100 | 100 | 100 | 100 | 100 | 100 | 63 | 100 | 100 | 0 |
+| 26.09 23:07 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 60 | 100 | 58 | 89 | 14 | 100 | 100 |
+| 25.09 13:50 | Qwen3.8-Flash-Next EXL3 5.05 bpw (ExLlamaV3) / default (xhigh) | 100 | 100 | 100 | 100 | 100 | 0 | 0 | 100 | 100 | 100 |
+| 27.09 07:09 | Qwen3.8-27B EXL3 2.2 bpw (ExLlamaV3) / low | 100 | 0 | 100 | 100 | 100 | 92 | 100 | 0 | 100 | 100 |
 
 - **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks (including prompt processing and waiting for the first token). This is the real working speed.
 - **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing speed).

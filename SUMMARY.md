@@ -4,14 +4,14 @@
 
 - **Base suite (10 tasks) is saturated.** On the RTX 5090 seven settings score 100%. The fastest are:
   - Qwen3.8-27B UD-Q6_K_M at `low` (llama.cpp): 4.7 min;
-  - Qwen3.8-Flash-Next GSQ-RCO IQ3_S "strata" at `medium`: 4.9 min;
-  - Qwen3.8-27B EXL3 at `low`: 5.0 min.
+  - Qwen3.8-Flash-Next GSQ-RCO IQ3_S in the Strata engine at `medium`: 4.9 min;
+  - Qwen3.8-27B EXL3 6.0 bpw at `low`: 5.0 min.
 - **Hard suite (6 tasks) now has results from both PCs, and it separates the models.**
-  - **Best: Qwen3.8-Flash-Next GSQ-RCO IQ3_S "strata"**, 100% at `medium` (20 min) and 97.8% at `low` (8.4 min), one run each.
-  - **Best quality per minute: Qwen3.8-27B EXL3 at `low` on the 5090**: 94.4% in 6.5 min.
+  - **Best: Qwen3.8-Flash-Next GSQ-RCO IQ3_S in Strata**, 100% at `medium` (20 min) and 97.8% at `low` (8.4 min), one run each.
+  - **Best quality per minute: Qwen3.8-27B EXL3 6.0 bpw at `low` on the 5090**: 94.4% in 6.5 min.
   - **Qwen3.8-Flash-Next UD-Q4_K_XL**: 95.8% over 2 runs, 20 min.
   - **GLM-5.3-Flash is the weakest and slowest.** At `high` it scored 82% and hit the 60-minute limit on `h_p3_line_diff` in 3 of 3 runs, so a run takes 90–115 min. At `low` it scored 78%.
-- **"strata" makes Flash-Next about 3.7× faster**, with the same file and the same memory use: 125–141 tok/s from time against 35. What the "strata" setting is is not recorded in the run data.
+- **The Strata engine makes Flash-Next about 3.7× faster than llama.cpp**, with the same file and the same memory use: 125–141 tok/s from time against 35. [Strata](https://github.com/Niko1221/Strata) v0.1.30 is an inference server built for MoE models on consumer GPUs; it manages which experts are cached on the GPU.
 - **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. GLM needs `high` on the base suite, but on the hard suite even `high` runs out of time.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
@@ -21,7 +21,7 @@
 
 - **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows. All runs from 25 Sep and 28–30 Sep.
 - **PC B:** RTX 4080 16 GB VRAM + 32 GB DDR5 RAM, Windows. All Qwen3.8-27B 2–3-bit runs from 26–27 Sep.
-- Backends: llama.cpp (`llama-server --jinja`) and ExLlamaV3 (TabbyAPI).
+- Backends: llama.cpp (`llama-server --jinja`), ExLlamaV3 (TabbyAPI) and, for two Flash-Next runs per suite on 30 Sep, [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models.
 - Base suite, 10 tasks: 6 × TypeScript + Three.js, checked in a real browser (`tsc --strict` compile, rendering, animation, clicking, window resize), and 4 × Python with hidden correctness and performance tests. Hard suite: 6 tasks (`--suite hard`, see the README).
 - Every run: temperature 1.0, sampling as recommended by the model makers (`--preset glm` / `qwen-think`), 60-minute limit per task. Token limit per task: 65,536; the runs from 30 Sep used 98,304 (the new default in `run_eval.py`).
 - Many settings were run once; some 2–3 times. The tables show the mean.
@@ -122,16 +122,16 @@ Test time = tokens ÷ speed. A model finishes fast either because it writes fast
 
 | Model | Quant | Backend | Effort | Score | Time (min) | Total tokens | Avg tok/s (from time) | Decode tok/s | VRAM / RAM GB |
 |---|---|---|---|---|---|---|---|---|---|
-| Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | low | **100.0%** | **5.0** | 30.5k | 108.1 | 134 | 26.9 / 17 |
-| Qwen3.8-27B | EXL3 (bpw not in label) | ExLlamaV3 | medium | **100.0%** | 6.5 | ~42.7k | 114.7 | 135 | 26.9 / 19 |
+| Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | low | **100.0%** | **5.0** | 30.5k | 108.1 | 134 | 26.9 / 17 |
+| Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | medium | **100.0%** | 6.5 | ~42.7k | 114.7 | 135 | 26.9 / 19 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | **100.0%** | 31.3 | 65.6k | 35.3 | 38 | 30.8 / 68 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | medium | **100.0%** | 35.3 | 73.3k | 35.0 | 38 | 30.8 / 73 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | low | 90.9% | 5.1 | 35.4k | 125.4 | 141 | 30.5 / 70 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | llama.cpp | medium | **100.0%** | **4.9** | 34.8k | 129.0 | 145 | 30.5 / 68 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | low | 90.9% | 5.1 | 35.4k | 125.4 | 141 | 30.5 / 70 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | medium | **100.0%** | **4.9** | 34.8k | 129.0 | 145 | 30.5 / 68 |
 
-- **Qwen3.8-27B in EXL3 is as good as Q6 in llama.cpp and a little faster**: 134 tok/s decode against 121. The label does not say the bpw; it used 26.9 GB VRAM.
+- **Qwen3.8-27B EXL3 6.0 bpw is as good as Q6 in llama.cpp and a little faster**: 134 tok/s decode against 121, with 26.9 GB VRAM.
 - **Flash-Next GSQ-RCO IQ3_S scored 100% at both levels**, but at 35 tok/s it needs over 30 minutes, like the other Flash-Next files.
-- **The "strata" runs of the same file ran 3.7× faster** (125–141 tok/s from time), with the same VRAM and RAM use. With it, the Flash-Next MoE is as fast as the dense 27B. Its `low` run lost points on `p1` (accepted "1 h"), `p2` (an `IndexError`, as in many runs), a TypeScript type error in `t3` and one check in `t6`.
+- **The same file in [Strata](https://github.com/Niko1221/Strata) v0.1.30 ran 3.7× faster** (125–141 tok/s from time), with the same VRAM and RAM use. Strata is a separate inference server for MoE models that manages which experts are cached on the GPU. With it, the Flash-Next MoE is as fast as the dense 27B. Its `low` run lost points on `p1` (accepted "1 h"), `p2` (an `IndexError`, as in many runs), a TypeScript type error in `t3` and one check in `t6`.
 
 # Part 2: Qwen3.8-27B at 2–3 bits on the RTX 4080 16 GB (26–27 Sep)
 
@@ -200,10 +200,10 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 
 | # | Model | Quant | GPU | Effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | medium | 1 | **100.0%** | – | 20.0 | 138.2k | 116.3 |
-| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S strata | 5090 | low | 1 | **97.8%** | – | 8.4 | 70.4k | 141.3 |
+| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | medium | 1 | **100.0%** | – | 20.0 | 138.2k | 116.3 |
+| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | **97.8%** | – | 8.4 | 70.4k | 141.3 |
 | 3 | Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | **95.8%** | 93–98 | 19.9 | 44.1k | 37.3 |
-| 4 | Qwen3.8-27B | EXL3 (bpw not in label) | 5090 | low | 1 | **94.4%** | – | **6.5** | ~46.1k | 121.9 |
+| 4 | Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | **94.4%** | – | **6.5** | ~46.1k | 121.9 |
 | 5 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 82.9 |
 | 6 | Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 83–94 | 17.8 | 67.4k | 63.9 |
 | 7 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | 5090 | medium | 1 | 84.9% | – | 29.2 | 54.0k | 31.0 |
@@ -212,7 +212,7 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 | 10 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 2 | 81.9% | 82–82 | 102.6 | ~65.9k | 10.7 |
 | 11 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | 5090 | medium | 2 | 79.8% | 77–83 | 90.0 | 184.8k | 34.3 |
 | 12 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 71–84 | 19.4 | ~13.2k | 11.6 |
-| 13 | Qwen3.8-27B | EXL3 (bpw not in label) | 5090 | medium | 1 | 77.8% | – | 10.4 | ~67.6k | 110.4 |
+| 13 | Qwen3.8-27B | EXL3 6.0 bpw | 5090 | medium | 1 | 77.8% | – | 10.4 | ~67.6k | 110.4 |
 | 14 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | 4080 | medium | 1 | 66.7% | – | 10.9 | ~53.9k | 83.2 |
 
 Qwen3.8-27B UD-Q6_K_M, the base-suite winner, has not been run on the hard suite yet.
@@ -220,7 +220,7 @@ Qwen3.8-27B UD-Q6_K_M, the base-suite winner, has not been run on the hard suite
 **`h_p3_line_diff` (minimal diff, needs Myers' algorithm) decides most of the ranking.** Only 8 of 21 runs solved it fully.
 
 - **GLM-5.3-Flash at `high` hit the 60-minute limit on it in 3 of 3 runs**, both EXL3 and GSQ-RCO. At 11–14 tok/s it cannot think long enough within the hour, so each run took 90–115 minutes and scored about 82%.
-- **Flash-Next GSQ-RCO IQ3_S without "strata" ran out of tokens on it in 3 of 3 runs**: 65,536 twice and 98,304 once, at about 34 tok/s after 32–50 minutes. The two "strata" runs of the same file solved it: 28k tokens at `low` and 81k at `medium`. With one run each, this may be luck rather than a difference in the model.
+- **Flash-Next GSQ-RCO IQ3_S in llama.cpp ran out of tokens on it in 3 of 3 runs**: 65,536 twice and 98,304 once, at about 34 tok/s after 32–50 minutes. The two runs of the same file in Strata solved it, with 28k tokens at `low` and 81k at `medium`. With one run each, this may be luck rather than a difference between the engines.
 - **Flash-Next UD-Q4_K_XL, IQ3_XXS and 27B EXL3 at `low` solved it.**
 
 **Other findings:**
@@ -239,7 +239,7 @@ Qwen3.8-27B UD-Q6_K_M, the base-suite winner, has not been run on the hard suite
 - **The base suite is too easy for the best settings.** Ten tasks, and the best already score about 100%, so it does not separate them. It mainly measures one-shot code writing, not long agentic work (where, according to the model cards, GLM and DeepSeek have an edge).
 - **The hard suite still lacks Qwen3.8-27B Q6**, the base-suite winner, and most settings have one run.
 - **Token limits differ.** Runs from 30 Sep used 98,304 tokens per task, earlier ones 65,536. This matters only for runs that hit the limit (Flash-Next IQ3_S on `h_p3`, which hit it either way).
-- **Unknown settings.** "strata" (Flash-Next, 30 Sep) and the bpw of "Qwen3.8-27B-exl3" (29 Sep) are only known from the labels.
+- **Strata runs have one run per setting.** They are also a different engine from llama.cpp, so they compare engines as well as files. The 29 Sep Qwen3.8-27B EXL3 folders were renamed to add `6.0bpw`, which was missing from the label.
 - **The two PCs are not directly comparable on time.** GPU, RAM and file size all differ.
 - **Specific files, not models.** The quants differ in size, maker and backend, so this compares specific files on this hardware.
 - **Labels and folders:**
@@ -267,8 +267,8 @@ Earlier tests from 24 Sep (temperature 0, 12,000-token limit, older script) are 
 
 ## Next steps
 
-- **Everyday coding on a 32 GB card:** Qwen3.8-27B at `low`, Q6 in llama.cpp or EXL3 in ExLlamaV3. Both reach 100% on the base suite in about 5 minutes, and EXL3 scored 94.4% on the hard suite in 6.5 min.
-- **Hardest tasks, if time allows:** Qwen3.8-Flash-Next with "strata" at `medium` (100% on the hard suite in 20 min) or UD-Q4_K_XL at `medium` (95.8%). Worth a second run of each before trusting the ranking.
+- **Everyday coding on a 32 GB card:** Qwen3.8-27B at `low`, Q6 in llama.cpp or EXL3 6.0 bpw in ExLlamaV3. Both reach 100% on the base suite in about 5 minutes, and EXL3 scored 94.4% on the hard suite in 6.5 min.
+- **Hardest tasks, if time allows:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S in Strata at `medium` (100% on the hard suite in 20 min) or UD-Q4_K_XL at `medium` (95.8%). Worth a second run of each before trusting the ranking.
 - **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`, or AP IQ3_S at `medium` in llama.cpp. Avoid `qv44` and anything below 3 bits.
 - **GLM-5.3-Flash:** fine on the base suite at `high`, but too slow for the hard suite on this hardware.
 - **To fill the gaps:**
