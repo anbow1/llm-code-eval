@@ -653,8 +653,8 @@ def main():
     ap.add_argument("--min-p", type=float, default=None)
     ap.add_argument("--presence-penalty", type=float, default=None)
     ap.add_argument("--repetition-penalty", type=float, default=None)
-    ap.add_argument("--max-tokens", type=int, default=65536,
-                    help="thinking + answer; thinking models need a lot (default 65536)")
+    ap.add_argument("--max-tokens", type=int, default=98304,
+                    help="thinking + answer; thinking models need a lot (default 98304)")
     ap.add_argument("--task-timeout-min", type=float, default=60.0, help="max time for one task (default 60)")
     ap.add_argument("--budget-min", type=float, default=0,
                     help="hard limit for the whole run, 0 = no limit (default)")

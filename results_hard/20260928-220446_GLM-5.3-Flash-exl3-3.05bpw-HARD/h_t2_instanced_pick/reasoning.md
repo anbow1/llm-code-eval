@@ -1,0 +1,1 @@
+The grid must be raycastable — mesh.frustumCulled default fine. Write code.

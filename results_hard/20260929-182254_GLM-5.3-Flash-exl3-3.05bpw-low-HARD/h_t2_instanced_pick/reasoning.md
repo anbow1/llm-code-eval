@@ -1,0 +1,1 @@
+Grid 30x30, size 0.8. Camera z distance: grid extends ±14.5+0.4 ≈ ±15. Use fov 50, z = 40.

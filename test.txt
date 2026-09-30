@@ -1,0 +1,56 @@
+Masz gotowy zestaw: 6 zadań TypeScript + Three.js i 4 zadania Python. Wszystko jest sprawdzane automatycznie w mniej niż 30 minut. Pliki do pobrania są niżej.
+
+Szczegóły
+
+Działa z każdym serwerem zgodnym z OpenAI: llama.cpp, LM Studio, Ollama.
+Sprawdziłem go na wzorcowych rozwiązaniach: dostają 100%. Na zepsutym kodzie wyniki spadają tak, jak powinny.
+Samo sprawdzanie trwa około 1 minuty. Resztę czasu zajmuje generowanie odpowiedzi przez model.
+Każde zadanie Three.js musi się skompilować w tsc --strict, załadować bez błędów, coś pokazać na ekranie i obsłużyć zmianę rozmiaru okna.
+t1 cube: podstawy, czyli światło i animacja z delta time.
+t2 solar: hierarchia obiektów, orbity z różnymi prędkościami i księżyc jako dziecko planety.
+t3 instanced: 10 000 kostek w jednym InstancedMesh, z falą i kolorami.
+t4 shader: własny GLSL i uniform uTime.
+t5 raycast: skrypt sam klika w kostki i sprawdza, czy zmieniają kolor.
+t6 terrain: własna BufferGeometry. Sprawdza, czy normalne patrzą w górę (ten test oblewa wiele modeli) i czy import OrbitControls z addons jest poprawny.
+Python: parser czasu, mediana w oknie, sortowanie topologiczne i asyncio z limitem. Testy są ukryte i sprawdzają też wydajność.
+Wyniki trafiają do results/. Znajdziesz tam raport, kod modelu i zrzut ekranu z każdego zadania.
+Prompty są w tasks.py, więc łatwo je zmienić albo dodać własne.
+
+Co zrobić
+
+Rozpakuj zip i zainstaluj narzędzia: pip install playwright pillow, a potem python -m playwright install chromium.
+Upewnij się, że masz Node.js 20 lub nowszy.
+Uruchom test: 
+
+GLM: python run_eval.py --label glm-exl3-3.05 --preset glm
+Qwen z myśleniem: python run_eval.py --label qwen-flash-iq3xxs --preset qwen-think
+Qwen bez myślenia: python run_eval.py --label qwen-flash-iq3xxs-nothink --preset qwen-instruct --think off
+
+
+
+python run_eval.py --base-url http://localhost:8080/v1 --model GLM-5.3-Flash-exl3-3.05bpw --label GLM-5.3-Flash-exl3-3.05bpw --preset glm
+
+python run_eval.py --base-url http://localhost:8080/v1 --model Qwen38-exl3-505 --label Qwen38-exl3-505 --preset qwen-think
+
+python run_eval.py --base-url http://localhost:8080/v1 --model GLM-5.3-Flash-GSQ-RCO\GLM-5.3-Flash-GSQ-RCO-3.5bit.gguf --label GLM-5.3-Flash-GSQ-RCO-3.5bit --preset glm
+
+python run_eval.py --base-url http://localhost:8080/v1 --model GLM-5.3-Flash-GSQ-RCO\GLM-5.3-Flash-GSQ-RCO-3.0bit.gguf --label GLM-5.3-Flash-GSQ-RCO-3.0bit --preset glm
+
+python run_eval.py --base-url http://localhost:8080/v1 --model Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf --label Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS --preset qwen-think
+
+python run_eval.py --base-url http://localhost:8080/v1 --model G:\models\Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --label Qwen3.8-Flash-Next-UD-Q4_K_XL --preset qwen-think
+
+python run_eval.py --base-url http://localhost:8080/v1 --model G:\models\Qwen3.8\Qwen3.8-27B-UD-Q6_K_M.gguf.gguf --label Qwen3.8-27B-UD-Q6_K_M --preset qwen-think
+
+
+
+Powtórz dla każdej kwantyzacji, a potem wpisz python compare.py, żeby zobaczyć tabelę porównań.
+
+Uruchom model na serwerze, wejdź do folderu llm-code-eval i wpisz:
+python run_eval.py --base-url http://localhost:8080/v1 --model TWOJ_MODEL --label Q4_K_M
+Jeśli używasz LM Studio, zmień port na 1234. Dla Ollamy zmień go na 11434.
+
+Też warto wiedzieć
+
+Pierwszy start potrwa trochę dłużej, bo skrypt instaluje three, typescript i esbuild do ts_env/. Dzieje się to tylko raz.
+Jeśli test przeglądarki pokaże błąd o brakującym „headless shell”, wpisz python -m playwright install --force chromium.
