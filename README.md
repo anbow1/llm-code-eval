@@ -12,6 +12,10 @@ The repository has two test suites, kept apart everywhere:
 
 Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
+![Top 10 settings by the average of both suites](top10.jpg)
+
+Top 10 settings that have results in both suites, ranked by the average of the two scores. Regenerate it with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
+
 ## Base suite: results (25–30 Sep 2026)
 
 **The base suite no longer separates the best models: on the RTX 5090 seven settings score 100%.** The fastest of them take about 5 minutes. The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
