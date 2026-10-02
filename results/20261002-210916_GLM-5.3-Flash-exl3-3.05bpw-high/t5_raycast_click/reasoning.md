@@ -1,0 +1,1 @@
+Grid in XY plane, camera looking straight at it (camera along -Z or +Z). Raycaster click handler. Delta time — but no animation needed; still use setAnimationLoop. Need __ready after first frame.

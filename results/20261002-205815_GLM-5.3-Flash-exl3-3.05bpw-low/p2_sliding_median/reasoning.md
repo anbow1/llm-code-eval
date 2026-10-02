@@ -1,0 +1,3 @@
+Use two heaps with lazy deletion, or sorted list via bisect with insort (k=1000 insort is O(k) shifts — 200k windows * 1000 = fine actually ~2e8 element moves in C, acceptable but heap is safer). Simpler: use bisect.insort on a sorted list — removal via index find with bisect. That's O(n*k) for insort... insort is O(k) per op → 200k*1000 = 2e8 shifts, C memmove, probably ~0.5s. Fine.
+
+But median finding needs index; bisect gives O(log k). Implement two piles? Just bisect.

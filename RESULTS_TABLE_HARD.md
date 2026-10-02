@@ -19,7 +19,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 9 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | 1 | **84.9%** | – | 29.2 | 54.0k | 31.0 | 24.5 |
 | 10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **82.9%** | – | 57.3 | 120.1k | 35.1 | 30.8 |
 | 11 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | RTX 5090 32 GB | high | 1 | **82.9%** | – | 98.3 | ~80.2k | 13.6 | 31.0 |
-| 12 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 2 | **81.9%** | 82–82 | 102.6 | ~65.9k | 10.7 | 30.2 |
+| 12 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 3 | **80.0%** | 76–82 | 95.7 | ~61.1k | 10.7 | 30.2 |
 | 13 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 2 | **79.8%** | 77–83 | 90.0 | 184.8k | 34.3 | 31.0 |
 | 14 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 2 | **77.9%** | 71–84 | 19.4 | ~13.2k | 11.6 | 30.2 |
 | 15 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **77.8%** | – | 10.4 | ~67.6k | 110.4 | 26.9 |
@@ -50,8 +50,9 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 19 | 28.09 20:34 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | **81.7%** | 65.9 | 97.4 | 89.7 | ~58.1k | ~52.2k | ~5.9k | **10.8** | 12 | 30.2 | 115.0 |
 | 20 | 29.09 07:25 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | **77.8%** | 66.7 | 88.9 | 10.4 | ~67.6k | ~61.1k | ~6.5k | **110.5** | 128 | 26.9 | 19.1 |
 | 21 | 30.09 00:28 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | **76.7%** | 66.7 | 86.7 | 117.3 | 237.4k | 229.8k | 7.6k | **33.8** | 36 | 31.0 | 79.6 |
-| 22 | 29.09 18:22 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | **71.4%** | 55.6 | 87.2 | 12.4 | 9.0k | 2.9k | 6.1k | **12.6** | 14 | 30.2 | 114.0 |
-| 23 | 27.09 10:18 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | **66.7%** | 33.3 | 100.0 | 10.9 | ~53.9k | ~49.6k | ~4.3k | **83.4** | 88 | 15.5 | 14.7 |
+| 22 | 02.10 21:41 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | **76.2%** | 52.4 | 100.0 | 81.8 | ~51.7k | ~46.4k | ~5.3k | **10.6** | 13 | 30.2 | 116.4 |
+| 23 | 29.09 18:22 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | **71.4%** | 55.6 | 87.2 | 12.4 | 9.0k | 2.9k | 6.1k | **12.6** | 14 | 30.2 | 114.0 |
+| 24 | 27.09 10:18 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | **66.7%** | 33.3 | 100.0 | 10.9 | ~53.9k | ~49.6k | ~4.3k | **83.4** | 88 | 15.5 | 14.7 |
 
 ## Score per task (%)
 
@@ -78,6 +79,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 28.09 20:34 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / high | 92 | 100 | 100 | 100 | 98 | 0 (time) |
 | 29.09 07:25 | Qwen3.8-27B EXL3 6.0 bpw (ExLlamaV3) / medium | 100 | 100 | 67 | 100 | 100 | 0 (none) |
 | 30.09 00:28 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (llama.cpp) / medium | 60 | 100 | 100 | 100 | 100 | 0 (limit) |
+| 02.10 21:41 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / high | 100 | 100 | 100 | 57 | 100 | 0 (time) |
 | 29.09 18:22 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / low | 62 | 100 | 100 | 57 | 93 | 17 |
 | 27.09 10:18 | Qwen3.8-27B EXL3 3.0 bpw qv44 (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 0 (none) | 0 (none) |
 

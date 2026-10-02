@@ -1,0 +1,1 @@
+Create the ocean plane with shaders, camera at angle, delta-based uTime via clock. Include __ready after first rendered frame — set after first frame via a flag in the animation loop.

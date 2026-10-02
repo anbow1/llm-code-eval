@@ -1,0 +1,1 @@
+Kahn with heap. Check cycle via count.
