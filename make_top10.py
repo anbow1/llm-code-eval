@@ -115,8 +115,8 @@ TypeScript + Three.js in a real browser and Python with hidden tests. {date.toda
 Scores, time and tokens are means over the runs of each setting; bars span 50–100%.
 Speed = all generated tokens ÷ all generation time over both suites (prompt processing included).
 Time and tokens are per full suite, thinking included. ~ = token count partly estimated from the text length
-(ExLlamaV3 under-reports it). Only settings run on both suites are ranked ({n_settings} so far); Qwen3.8-27B Q6,
-the base-suite winner, has no hard-suite run yet. Temperature 1.0; with 1–3 runs per setting, differences under
+(ExLlamaV3 under-reports it). Only settings run on both suites are ranked ({n_settings} so far).
+Token limit per task 65,536 (98,304 from 30 Sep). Temperature 1.0; with 1–3 runs per setting, differences under
 ~5 points are noise. RTX 5090 32 GB + 128 GB RAM, RTX 4080 16 GB + 32 GB RAM.
 Details: SUMMARY.md, RESULTS_TABLE.md, RESULTS_TABLE_HARD.md.
 </div></div></body></html>"""

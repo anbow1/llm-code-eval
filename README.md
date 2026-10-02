@@ -42,11 +42,12 @@ RTX 5090 32 GB + 128 GB RAM:
 
 All 42 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
-## Hard suite: results (27–30 Sep 2026)
+## Hard suite: results (27 Sep – 2 Oct 2026)
 
-**The hard suite separates the models.** Scores are means where a setting was run more than once. Qwen3.8-27B Q6 has not been run on it yet.
+**The hard suite separates the models.** Scores are means where a setting was run more than once.
 
 - **Best:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S run in [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models. It is 3.7× faster than the same file in llama.cpp.
+- **Qwen3.8-27B Q6 at `medium`:** 97.6% in 9 minutes. On both suites together it is second (98.1%). At `low` it dropped to 88.5%.
 - **Fastest good result:** Qwen3.8-27B EXL3 6.0 bpw at `low`.
 - **GLM-5.3-Flash** hits the 60-minute limit on `h_p3_line_diff` at `high`.
 
@@ -54,14 +55,16 @@ All 42 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 |---|---|---|---|---|---|---|---|---|
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
+| Qwen3.8-27B | UD-Q6_K_M | 5090 | medium | 1 | 97.6% | 9.0 min | 50.7k | 96.1 |
 | Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | 95.8% | 19.9 min | 44.1k | 37.3 |
 | Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
+| Qwen3.8-27B | UD-Q6_K_M | 5090 | low | 1 | 88.5% | 8.1 min | 47.1k | 99.3 |
 | Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 2 | 81.9% | 102.6 min | ~65.9k | 10.7 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 19.4 min | ~13.2k | 11.6 |
 
-All 21 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+All 23 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
 Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
 
