@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 def describe(label, model):
     """Readable model / quant / backend from the run label and model path (case-insensitive)."""
     m = f"{label} {model}".replace("\\", "/").lower()
-    backend = "ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata([_-]|$)", m) else "llama.cpp"
+    backend = "ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata(?![a-z0-9])", m) else "llama.cpp"
     bit = re.search(r"(\d\.\d+)\s*-?bit", m)
     bpw = re.search(r"(\d\.\d+)\s*-?bpw|(\d\.\d+)_exl3|exl3-(\d)(\d{2})", m)
     if re.search(r"27b|3\.8-27[_-]", m):
@@ -35,7 +35,7 @@ def describe(label, model):
         else:
             quant = "?"
         prefix = "GSQ-RCO " if "gsq-rco" in m else "AP " if "-ap-" in m else ""
-        suffix = "".join(f" {x}" for x in ("MTP", "qv44") if re.search(rf"[_-]{x.lower()}([_-]|$)", m))
+        suffix = "".join(f" {x}" for x in ("MTP", "qv44") if re.search(rf"[_-]{x.lower()}(?![a-z0-9])", m))
         return name, prefix + quant + suffix, backend
     if "glm" in m:
         if "exl3" in m:
@@ -44,6 +44,8 @@ def describe(label, model):
             quant = f"GSQ-RCO {bit.group(1)}-bit"
         else:
             quant = "?"
+        if re.search(r"[_-]nomtp(?![a-z0-9])", m):
+            quant += " no MTP"
         return "GLM-5.3-Flash", quant, backend
     if "flash-next" in m or "qwen" in m:
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)

@@ -16,18 +16,19 @@ Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
 Top 10 settings that have results in both suites, ranked by the average of the two scores. Regenerate it with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
 
-## Base suite: results (25 Sep – 2 Oct 2026)
+## Base suite: results (25 Sep – 6 Oct 2026)
 
-**The base suite no longer separates the best models: on the RTX 5090 seven settings score 100%.** The fastest of them take about 5 minutes. The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
+**The base suite no longer separates the best models: on the RTX 5090 six settings score 100%.** The fastest take about 5 minutes. The reasoning level matters more than the choice of model: Qwen does best at `low`/`medium` (`xhigh` thinks 8× longer on code), GLM does best at `high`.
 
 RTX 5090 32 GB + 128 GB RAM:
 
 | Model | Quant | Backend | Effort | Score | Time | Total tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|
 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | low | 100.0% | 4.7 min | 28.7k | 108.9 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | medium | 100.0% | 4.9 min | 34.8k | 129.0 |
 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | low | 100.0% | 5.0 min | 30.5k | 108.1 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | low (mean of 2 runs) | 95.5% | 5.2 min | 36.2k | 124.5 |
 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | medium | 100.0% | 6.5 min | ~42.7k | 114.7 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | medium (mean of 2 runs) | 96.0% | 7.2 min | 31.1k | 78.0 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high (mean of 2 runs) | 99.3% | 25.8 min | ~18.8k | 12.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | 100.0% | 31.3 min | 65.6k | 35.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
@@ -40,14 +41,14 @@ RTX 5090 32 GB + 128 GB RAM:
 | Qwen3.8-27B | EXL3 3.0 bpw | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
 | Qwen3.8-27B | EXL3 2.2 bpw | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
 
-All 44 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+All 52 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
-## Hard suite: results (27 Sep – 2 Oct 2026)
+## Hard suite: results (27 Sep – 6 Oct 2026)
 
 **The hard suite separates the models.** Scores are means where a setting was run more than once.
 
-- **Best:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S run in [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models. It is 3.7× faster than the same file in llama.cpp.
-- **Qwen3.8-27B Q6 at `medium`:** 97.6% in 9 minutes. On both suites together it is second (98.1%). At `low` it dropped to 88.5%.
+- **Highest score:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S run in [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models, one run per level. Strata is 2.2–3.7× faster than the same file in llama.cpp.
+- **Qwen3.8-27B Q6 at `medium`:** 97.6% in 9 minutes. It is the best setting on both suites together (98.1%). At `low` it dropped to 88.5%.
 - **Fastest good result:** Qwen3.8-27B EXL3 6.0 bpw at `low`.
 - **GLM-5.3-Flash** hits the 60-minute limit on `h_p3_line_diff` at `high` in 5 of 5 runs, so it scores about 80% and needs over 80 minutes.
 
@@ -56,7 +57,8 @@ All 44 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
 | Qwen3.8-27B | UD-Q6_K_M | 5090 | medium | 1 | 97.6% | 9.0 min | 50.7k | 96.1 |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 2 | 95.8% | 19.9 min | 44.1k | 37.3 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL (Strata) | 5090 | medium | 2 | 93.0% | 15.7 min | 75.4k | 81.1 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 3 | 90.3% | 18.7 min | 41.1k | 37.0 |
 | Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
 | Qwen3.8-27B | UD-Q6_K_M | 5090 | low | 1 | 88.5% | 8.1 min | 47.1k | 99.3 |
@@ -64,7 +66,7 @@ All 44 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 3 | 80.0% | 95.7 min | ~61.1k | 10.7 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 19.4 min | ~13.2k | 11.6 |
 
-All 25 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+All 28 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
 Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
 
