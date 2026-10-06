@@ -1,0 +1,1 @@
+Use two heaps with lazy deletion, or sorted list with bisect insort (O(n*k) worst but insort is fast C... 200k * 1000 log — insort into 1000-length list is fine actually: 200k insertions each O(k) memmove ~ fast). Simpler: use bisect insort into sorted window: each step insort O(log n + k/2 memmove) which for k=1000 is trivial. Total ~200k * couple microseconds. Fine.

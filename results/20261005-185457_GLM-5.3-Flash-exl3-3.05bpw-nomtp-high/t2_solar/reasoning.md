@@ -1,0 +1,7 @@
+Simple task. Planets orbit with pivots or compute positions directly. Use angle accumulators with delta time. PointLight with decay 2 physically-based — intensity in candela; for distances ~10 need intensity ≈ distance² × desired... With decay 2, irradiance = intensity / dist². At dist 10, intensity 300 gives 3.0 — quite bright. Use intensity maybe 250. Let's use PointLight(0xffffff, 300, 0, 2). Ambient 0.15.
+
+Moon: child of planet mesh, orbiting — rotate moon around planet; if moon is child, its orbit position can be set each frame via angle. Simpler: put moon at offset on a child pivot? "added as a child of the planet mesh... orbiting that planet" — set moon local position each frame with angle, or rotate a pivot. But moon as child of planet, planet spins — moon position would spin too. That's fine: moon orbits because planet spins... Actually if planet rotates on its axis, child moon at (1,0,0) will orbit with the spin. But "moon orbiting that planet" at its own speed. To be safe, set moon.position each frame: moon.position.set(Math.cos(moonAngle)*1.6, 0, Math.sin(moonAngle)*1.6). Moon is child of planet; planet spin rotates the mesh's local frame but setting position in local coordinates each frame works regardless.
+
+Camera: position (0, 12, 16) look at origin. fov 45. Distances up to 10 → fine.
+
+Write code with strict typing.

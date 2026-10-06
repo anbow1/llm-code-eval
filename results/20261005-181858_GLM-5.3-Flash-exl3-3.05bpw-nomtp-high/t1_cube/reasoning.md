@@ -1,0 +1,1 @@
+Simple straightforward. Also handle resize, __ready after first frame.

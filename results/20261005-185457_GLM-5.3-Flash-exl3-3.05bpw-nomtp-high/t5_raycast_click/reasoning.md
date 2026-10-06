@@ -1,0 +1,1 @@
+Grid of 25 cubes in XY plane, camera at z. Spacing 1.5, cube size 1. Grid centered. Click handler via pointerdown on renderer canvas or window? Use renderer.domElement click. Compute NDC from canvas bounding rect.

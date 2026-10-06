@@ -1,0 +1,1 @@
+5x5 at spacing 1.2, size 1. Gap 0.2. Grid centered.

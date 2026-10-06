@@ -1,0 +1,1 @@
+Simple. Use PointLight intensity high with decay 2 for r=10 (e.g. 300). Also set light decay 2 default. Write code.

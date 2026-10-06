@@ -1,0 +1,1 @@
+Note: exception might be raised when calling func() itself (sync). Handle: treat as failure. Also "first exception" — the first that occurs; cancel others and re-raise it. Use TaskGroup? TaskGroup cancels and raises combined ExceptionGroup. Simpler: manual implementation.

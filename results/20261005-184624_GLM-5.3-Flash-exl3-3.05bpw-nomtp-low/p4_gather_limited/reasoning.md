@@ -1,0 +1,1 @@
+Write implementation. Edge: callable raising synchronously.

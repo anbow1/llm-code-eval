@@ -1,0 +1,1 @@
+Simple cube grid 5x5 with raycasting. Use pointerdown listener on renderer.domElement. Compute NDC from canvas bounding rect. Set __ready after first frame via a flag in animation loop.

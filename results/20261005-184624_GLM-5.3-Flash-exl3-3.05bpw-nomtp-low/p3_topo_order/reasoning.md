@@ -1,0 +1,1 @@
+Use Kahn's with heapq.

@@ -1,0 +1,1 @@
+The instruction says reply with a single ts code block and nothing else. But I should include explanation? Conflict: developer says reply with a single ```ts code block and nothing else. Follow that.

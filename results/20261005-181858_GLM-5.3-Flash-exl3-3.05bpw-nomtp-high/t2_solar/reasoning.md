@@ -1,0 +1,1 @@
+Simple task. Write the code.

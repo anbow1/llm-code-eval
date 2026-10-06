@@ -1,0 +1,1 @@
+Create hand-made BufferGeometry with grid 128x128 vertices, positions, index, colors, normals. Winding counterclockwise when viewed from +Y so normals point up. Indices: a = i*z+ x... For cell with corners a (x,z), b (x+1,z), c (x,z+1), d (x+1,z+1). Viewed from above (+Y looking down), triangles (a, c, b) and (b, c, d) are counterclockwise.

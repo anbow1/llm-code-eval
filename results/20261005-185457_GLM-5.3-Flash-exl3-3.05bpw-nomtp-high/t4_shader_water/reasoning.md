@@ -1,0 +1,1 @@
+Write a single TypeScript file. Compute wave displacement in vertex shader based on position.xz and uTime. Pass height varying. Fragment shader colors by height.

@@ -1,0 +1,1 @@
+Use two heaps with lazy deletion, or sorted list via bisect — bisect insort on 200k/k... window size 1000, n=200k, insort is O(n) per op worst-case but list insert is memmove — fine in practice. Just use bisect.insort.

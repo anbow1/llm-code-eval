@@ -1,0 +1,1 @@
+Need to write strict TypeScript. Grid 100x100, instanced mesh, update Y each frame, colors gradient. Camera angled. Reuse dummy Object3D and Matrix4 — no allocations in loop. Note setColorAt once before loop.
