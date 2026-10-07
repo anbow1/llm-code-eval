@@ -2,7 +2,7 @@
 
 6 tasks (3 × TypeScript + Three.js, 3 × Python). Base-suite results are in [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
-Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged in the first table; every single run is listed in the second.
+Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged under "Mean per setting", and ranked by their best run under "Best run per setting"; every single run is listed under "Every run".
 
 ## Mean per setting
 
@@ -25,6 +25,30 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 15 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 2 | **77.9%** | 71–84 | 19.4 | ~13.2k | 11.6 | 30.2 |
 | 16 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **77.8%** | – | 10.4 | ~67.6k | 110.4 | 26.9 |
 | 17 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | **66.7%** | – | 10.9 | ~53.9k | 83.2 | 15.5 |
+
+## Best run per setting
+
+Ranked by each setting's single best run (on a tie, the faster one). Compare with the mean above: a setting that is high here but lower there is good on a lucky run, not every run.
+
+| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Best score | Best run | Time (min) | Tokens | Avg tok/s (from time) | Mean of all runs |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 1 | **100.0%** | 30.09 19:29 | 20.0 | 138.2k | 116.4 | 100.0% |
+| 2 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 2 | **99.6%** | 06.10 19:39 | 7.7 | 40.3k | 89.5 | 93.0% |
+| 3 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 3 | **98.1%** | 29.09 01:32 | 17.6 | 39.3k | 37.7 | 90.3% |
+| 4 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | 1 | **97.8%** | 30.09 19:20 | 8.4 | 70.4k | 142.1 | 97.8% |
+| 5 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | medium | 1 | **97.6%** | 02.10 20:00 | 9.0 | 50.7k | 96.1 | 97.6% |
+| 6 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **94.4%** | 29.09 07:19 | 6.5 | ~46.1k | 122.3 | 94.4% |
+| 7 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 2 | **94.1%** | 27.09 10:05 | 11.4 | ~52.4k | 77.9 | 93.1% |
+| 8 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 3 | **94.1%** | 27.09 10:54 | 13.7 | 59.5k | 73.1 | 87.8% |
+| 9 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | 1 | **88.5%** | 02.10 19:42 | 8.1 | 47.1k | 99.7 | 88.5% |
+| 10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | 1 | **84.9%** | 28.09 22:36 | 29.2 | 54.0k | 31.0 | 84.9% |
+| 11 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 2 | **84.4%** | 28.09 22:04 | 26.5 | ~17.3k | 11.1 | 77.9% |
+| 12 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **82.9%** | 29.09 21:25 | 57.3 | 120.1k | 35.0 | 82.9% |
+| 13 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 2 | **82.9%** | 29.09 22:23 | 62.6 | 132.1k | 35.3 | 79.8% |
+| 14 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | RTX 5090 32 GB | high | 2 | **82.9%** | 02.10 23:08 | 84.4 | ~68.9k | 13.6 | 82.9% |
+| 15 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 3 | **82.1%** | 28.09 18:25 | 115.5 | ~73.6k | 10.6 | 80.0% |
+| 16 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **77.8%** | 29.09 07:25 | 10.4 | ~67.6k | 110.5 | 77.8% |
+| 17 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | **66.7%** | 27.09 10:18 | 10.9 | ~53.9k | 83.4 | 66.7% |
 
 ## Every run
 

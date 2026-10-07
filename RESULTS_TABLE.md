@@ -2,7 +2,7 @@
 
 10 tasks (6 × TypeScript + Three.js, 4 × Python). Hard-suite results are in [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
-Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged in the first table; every single run is listed in the second.
+Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged under "Mean per setting"; every single run is listed under "Every run".
 
 ## Mean per setting
 

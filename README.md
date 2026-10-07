@@ -14,7 +14,7 @@ Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
 ![Top 10 settings by the average of both suites](top10.jpg)
 
-Top 10 settings that have results in both suites, ranked by the average of the two scores. Regenerate it with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
+Top 10 settings that have results in both suites, ranked by the average of the two scores. The hard suite alone is ranked in [top10_hard.jpg](top10_hard.jpg) below. Regenerate both images with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
 
 ## Base suite: results (25 Sep – 6 Oct 2026)
 
@@ -45,26 +45,30 @@ All 52 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 
 ## Hard suite: results (27 Sep – 6 Oct 2026)
 
-**The hard suite separates the models.** Scores are means where a setting was run more than once.
+**The hard suite separates the models.** It is ranked two ways:
+- **by each setting's best run**: what the setting can do on a good run;
+- **by the mean of all its runs**: what to expect from it on a typical run.
 
-- **Highest score:** Qwen3.8-Flash-Next GSQ-RCO IQ3_S run in [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models, one run per level. Strata is 2.2–3.7× faster than the same file in llama.cpp.
-- **Qwen3.8-27B Q6 at `medium`:** 97.6% in 9 minutes. It is the best setting on both suites together (98.1%). At `low` it dropped to 88.5%.
-- **Fastest good result:** Qwen3.8-27B EXL3 6.0 bpw at `low`.
-- **GLM-5.3-Flash** hits the 60-minute limit on `h_p3_line_diff` at `high` in 5 of 5 runs, so it scores about 80% and needs over 80 minutes.
+Settings with one run have the same score in both, so only repeated ones move. On both suites together the best setting is Qwen3.8-27B Q6 at `medium` (98.1%, see the image above). GLM-5.3-Flash hits the 60-minute limit on `h_p3_line_diff` at `high` in 5 of 5 runs.
 
-| Model | Quant | GPU | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
-|---|---|---|---|---|---|---|---|---|
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | medium | 1 | 100.0% | 20.0 min | 138.2k | 116.3 |
-| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | 97.8% | 8.4 min | 70.4k | 141.3 |
-| Qwen3.8-27B | UD-Q6_K_M | 5090 | medium | 1 | 97.6% | 9.0 min | 50.7k | 96.1 |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL (Strata) | 5090 | medium | 2 | 93.0% | 15.7 min | 75.4k | 81.1 |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 3 | 90.3% | 18.7 min | 41.1k | 37.0 |
-| Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | 94.4% | 6.5 min | ~46.1k | 121.9 |
-| Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | 93.1% | 11.0 min | ~54.0k | 82.9 |
-| Qwen3.8-27B | UD-Q6_K_M | 5090 | low | 1 | 88.5% | 8.1 min | 47.1k | 99.3 |
-| Qwen3.8-27B | AP IQ3_S | 4080 | medium | 3 | 87.8% | 17.8 min | 67.4k | 63.9 |
-| GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | high | 3 | 80.0% | 95.7 min | ~61.1k | 10.7 |
-| GLM-5.3-Flash | EXL3 3.05 bpw | 5090 | low | 2 | 77.9% | 19.4 min | ~13.2k | 11.6 |
+![Hard suite: top 10 by best run and by mean](top10_hard.jpg)
+
+| # | By best run | Best | Mean | Runs | | By mean of all runs | Mean | Worst | Runs |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100.0% | 1 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100% | 1 |
+| 2 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 99.6% | 93.0% | 2 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 98% | 1 |
+| 3 | Flash-Next UD-Q4_K_XL (5090) `medium` | 98.1% | 90.3% | 3 | | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 98% | 1 |
+| 4 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 97.8% | 1 | | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94% | 1 |
+| 5 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 97.6% | 1 | | 27B EXL3 3.0 bpw (4080) `medium` | 93.1% | 92% | 2 |
+| 6 | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94.4% | 1 | | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 93.0% | 86% | 2 |
+| 7 | 27B EXL3 3.0 bpw (4080) `medium` | 94.1% | 93.1% | 2 | | Flash-Next UD-Q4_K_XL (5090) `medium` | 90.3% | 79% | 3 |
+| 8 | 27B AP IQ3_S (4080) `medium` | 94.1% | 87.8% | 3 | | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88% | 1 |
+| 9 | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88.5% | 1 | | 27B AP IQ3_S (4080) `medium` | 87.8% | 83% | 3 |
+| 10 | Flash-Next GSQ-RCO IQ3_XXS (5090) `medium` | 84.9% | 84.9% | 1 | | Flash-Next GSQ-RCO IQ3_XXS (5090) `medium` | 84.9% | 85% | 1 |
+
+- **Flash-Next UD-Q4_K_XL is the clearest case of "good, but not every time".** In Strata its best run is 99.6% in 7.7 min (2nd), but its mean is 93.0% (6th). In llama.cpp it drops from 3rd (98.1%) to 7th (90.3%, worst run 79%).
+- **Qwen3.8-27B EXL3 3.0 bpw on the 16 GB card is the steadiest repeated setting:** 92–94% in both runs.
+- **The top four by mean rest on one run each.** Repeating them is the most useful next test.
 
 All 28 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 

@@ -252,6 +252,11 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 2. Qwen3.8-27B EXL3 6.0 bpw at `low`: 97.2%.
 3. Flash-Next IQ3_S in Strata at `medium`: 96.9%. Before the 3 Oct base-suite repeat it was first with 100%.
 
+**Best run against mean.** [top10_hard.jpg](top10_hard.jpg) and [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) rank the settings both by their best run and by the mean of all runs. Only repeated settings can move between the two:
+- **Flash-Next UD-Q4_K_XL moves the most.** In Strata it is 2nd by best run (99.6% in 7.7 min) but 6th by mean (93.0%). In llama.cpp it is 3rd by best run (98.1%) but 7th by mean (90.3%).
+- **27B AP IQ3_S on the 4080** is 8th by best run (94.1%) and 9th by mean (87.8%).
+- **27B EXL3 3.0 bpw on the 4080 is the steadiest:** 92–94% in both runs.
+
 **`h_p3_line_diff` (minimal diff, needs Myers' algorithm) decides most of the ranking.** Only 11 of 28 runs solved it fully.
 
 - **GLM-5.3-Flash at `high` hit the 60-minute limit on it in 5 of 5 runs**: 3 with EXL3 and 2 with GSQ-RCO. At 11–14 tok/s it cannot think long enough within the hour, so each run took 82–116 minutes and scored 76–83%.

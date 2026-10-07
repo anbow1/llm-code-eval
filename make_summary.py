@@ -137,9 +137,10 @@ def main():
         lines = [title, "", note, "",
                  "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says "
                  "which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and "
-                 "65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once are averaged in the first "
-                 "table; every single run is listed in the second.", ""]
-        lines += section(runs)
+                 "65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once "
+                 "are averaged under \"Mean per setting\"" + (", and ranked by their best run under \"Best run per "
+                 "setting\"" if folder == "results_hard" else "") + "; every single run is listed under \"Every run\".", ""]
+        lines += section(runs, best_table=folder == "results_hard")
         lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "
                   "(including prompt processing and waiting for the first token). This is the real working speed.",
                   "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
@@ -153,12 +154,27 @@ def main():
         print("\n".join(lines))
 
 
+def rank_settings(runs):
+    """One entry per setting (model + quant + backend + GPU + effort): its runs, mean, worst and best run."""
+    groups = {}
+    for r in runs:
+        groups.setdefault((r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]), []).append(r)
+    out = []
+    for (model, quant, backend, gpu, effort), rs in groups.items():
+        out.append({"model": model, "quant": quant, "backend": backend, "gpu": gpu, "effort": effort, "runs": rs,
+                    "mean": sum(r["overall"] for r in rs) / len(rs), "worst": min(r["overall"] for r in rs),
+                    "mean_minutes": sum(r["minutes"] for r in rs) / len(rs),
+                    # best run; on a tie the faster one
+                    "best": min(rs, key=lambda r: (-r["overall"], r["minutes"]))})
+    return out
+
+
 def when(run):
     """'26.09 19:42' from the run folder name."""
     return f"{run[6:8]}.{run[4:6]} {run[9:11]}:{run[11:13]}"
 
 
-def section(runs):
+def section(runs, best_table=False):
     k = lambda x: f"{x / 1000:.1f}k" if isinstance(x, (int, float)) else "n/a"
     n = lambda x, p=1: f"{x:.{p}f}" if isinstance(x, (int, float)) else "n/a"
     mean = lambda xs: sum(xs) / len(xs) if xs else None
@@ -187,6 +203,20 @@ def section(runs):
                      f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | 1 | **{n(sc)}%** "
                      f"| – | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |")
 
+    if best_table:
+        ranked = sorted(rank_settings(runs), key=lambda g: (-g["best"]["overall"], g["best"]["minutes"]))
+        lines += ["", "## Best run per setting", "",
+                  "Ranked by each setting's single best run (on a tie, the faster one). Compare with the mean above: "
+                  "a setting that is high here but lower there is good on a lucky run, not every run.", "",
+                  "| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Best score | Best run | Time (min) "
+                  "| Tokens | Avg tok/s (from time) | Mean of all runs |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+        for i, g in enumerate(ranked, 1):
+            b = g["best"]
+            ap = "~" if b["tokens_approx"] else ""
+            lines.append(f"| {i} | {g['model']} | {g['quant']} | {g['backend']} | {g['gpu']} | {g['effort']} "
+                         f"| {len(g['runs'])} | **{n(b['overall'])}%** | {when(b['run'])} | {n(b['minutes'])} "
+                         f"| {ap}{k(b['tokens'])} | {n(b['tok_s_time'])} | {n(g['mean'])}% |")
     lines += ["", "## Every run", "",
               "| # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) "
               "| Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) "
