@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Correct token counts that the server under-reported, in results/*/ and results_hard/*/summary.json.
+"""Correct token counts that the server under-reported, in the results folders' summary.json files.
 
     python fix_token_counts.py
 
@@ -30,7 +30,8 @@ def chars(task_dir):
 
 
 def main():
-    runs = [(f, json.loads(f.read_text(encoding="utf-8"))) for pattern in ("results/*/summary.json", "results_hard/*/summary.json")
+    runs = [(f, json.loads(f.read_text(encoding="utf-8"))) for pattern in ("results/*/summary.json", "results_hard/*/summary.json",
+                                                               "results_practical/*/summary.json")
             for f in sorted(HERE.glob(pattern))]
 
     # characters per token, measured where the server counts correctly (llama.cpp)

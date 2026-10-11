@@ -1,14 +1,17 @@
 # llm-code-eval — a quick coding test for local LLMs
 
-The repository has two test suites, kept apart everywhere:
+The repository has four test suites, kept apart everywhere:
 
-| | Base suite | Hard suite |
-|---|---|---|
-| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × TypeScript + Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) |
-| Run with | `python run_eval.py ...` | `python run_eval.py --suite hard ...` |
-| Raw results | `results/` | `results_hard/` |
-| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) |
-| Compare | `python compare.py` | `python compare.py --hard` |
+| | Base | Hard | Practical | Tools |
+|---|---|---|---|---|
+| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) |
+| Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` |
+| Default limits | lenient (comparable with older runs) | lenient | practical | practical |
+| Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | `RESULTS_TABLE_PRACTICAL.md` | `RESULTS_TABLE_TOOLS.md` |
+| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` |
+
+The practical and tool-calling suites are new (11 Oct 2026) and have no results yet; their tables appear after the first run.
 
 Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
@@ -95,14 +98,14 @@ Main options:
 - `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, and `-strata` for runs in Strata (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
-- `--max-tokens 98304`: token limit per task, thinking included (default 98304; runs before 30 Sep used 65536)
-- `--task-timeout-min 60`: time limit per task (default 60 min)
-- `--budget-min 0`: time limit for the whole run, 0 = none (default)
+- `--limits practical` / `lenient`: the time and token limits (see [Limits](#limits)). Default: practical for `--suite practical` and `--suite tools`, lenient for base and hard
+- `--max-tokens`, `--task-timeout-min`, `--budget-min`: override single limits (token limit per request, thinking included; minutes per task; minutes for the whole run, 0 = none)
+- `--repeat 3`: run the suite 3 times, each as its own run with the same label. The tables then show the mean, the spread and a stability table. With `--temperature 0` it also shows whether the backend gives the same answer every time
 - `--think off`: turns thinking off (`enable_thinking=false` in the Qwen/GLM chat template)
 - `--reasoning-effort low`: reasoning level (e.g. low / medium / high / xhigh), if the chat template supports it
 - `--reasoning-effort off,low,xhigh`: runs the full test once per level, each with its own report
 - `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
-- `--suite hard`: run the hard suite instead of the base one (see [Hard suite: tasks](#hard-suite-tasks))
+- `--suite hard` / `practical` / `tools`: run another suite instead of the base one (see the task sections below)
 - `--only three` / `--only python`, `--tasks t5_raycast_click`: run only some tasks
 
 | Preset | Settings |
@@ -111,18 +114,20 @@ Main options:
 | qwen-instruct | temperature 0.7, top_p 0.80, top_k 20, min_p 0, presence_penalty 1.5, repetition_penalty 1.0 (use with `--think off`) |
 | glm | temperature 1.0, top_p 1.0 |
 
-At temperature 1.0 results vary between runs. For comparisons, run each model twice.
+At temperature 1.0 results vary between runs (up to ~19 points so far). For comparisons use `--repeat 3`.
 
 Memory measurement needs `psutil`; VRAM is read from `nvidia-smi`.
 
 Compare runs (latest run per name; `--all` shows every run):
 
 ```
-python compare.py          # base suite
-python compare.py --hard   # hard suite
+python compare.py               # base suite
+python compare.py --hard        # hard suite
+python compare.py --practical   # practical suite
+python compare.py --tools       # tool-calling suite
 ```
 
-Rebuild the result tables of both suites from the data:
+Rebuild the result tables of all suites from the data:
 
 ```
 python make_summary.py
@@ -130,9 +135,36 @@ python make_summary.py
 
 Runs made with an older `run_eval.py` against ExLlamaV3 (TabbyAPI) may have token counts that are far too low. Run `python fix_token_counts.py` once to re-estimate them from the saved text; it keeps the server's numbers and is safe to run again.
 
+## Limits
+
+The limits decide what counts as a useful answer. A local model that thinks for 40 minutes about one function is not useful in daily work, even if it gets it right in the end. What the runs so far show (688 tasks, base and hard suites):
+
+| Per task | Tasks | Fully solved |
+|---|---|---|
+| under 2 min | 529 | 85% |
+| 2–10 min | 120 | 65% |
+| 10–20 min | 14 | 86% |
+| over 20 min | 25 | 56% |
+| under 8k tokens | 572 | 85% |
+| 8k–32k tokens | 87 | 63% |
+| over 32k tokens | 29 | 48% |
+
+95% of the fully solved tasks took under 10 minutes and under 19k tokens. Past 32k tokens the model is usually lost or looping. So:
+
+| Profile | Per task | Tokens per task | Whole run | Default for |
+|---|---|---|---|---|
+| **practical** | 10 min (tool tasks: 5 min for all turns) | 32,768 | base 30 min, hard 30 min, practical 30 min, tools 15 min | `practical`, `tools` |
+| lenient | 60 min | 98,304 | none | `base`, `hard` (so new runs stay comparable with the old ones) |
+
+The whole battery (all four suites) then takes at most about 1 h 45 min; a usable setup finishes it in 30–45 minutes. The tables also show **Score @10 min/32k** for every setting: the score with the practical limits applied after the fact to runs made with the lenient ones (later tasks count as 0). Dense Qwen3.8-27B keeps its score; Flash-Next in llama.cpp and GLM lose 8–25 points.
+
+`w_longctx` sends about 25k tokens of code, so the server needs a context of at least prompt + `--max-tokens`, i.e. 64k with the practical limits.
+
 ## What is measured
 
-- score and status of every task: `ok`, `max_tokens` (ran out of tokens), `task_timeout`, `no_answer` (stopped while still thinking), `server_crash`, `server_down`
+- score and status of every task: `ok`, `max_tokens` (ran out of tokens), `task_timeout`, `no_answer` (stopped while still thinking), `max_turns` (tool tasks: no final answer), `server_crash`, `server_down`
+- **broken generations**: tasks where generation itself failed (out of tokens or time, stopped mid-thought, a loop, no final answer), shown as a share in the tables
+- **stability** for settings run 2+ times (`--repeat`): mean, standard deviation, worst run, tasks solved in every run, identical answers
 - "fin.": average score over the tasks the model finished (separates quality from speed)
 - time, tokens (including thinking tokens), generation speed (tok/s), time to first token
 - peak VRAM and RAM, and how many GB were read from disk during the run
@@ -186,17 +218,47 @@ python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort
 python compare.py --hard
 ```
 
+## Practical suite: tasks
+
+Everyday work on existing code rather than writing from scratch. All graded by hidden Python tests.
+
+| Task | What it tests |
+|---|---|
+| w_edit | add a parameter and a function to an existing module; the rest of the file must stay byte-for-byte the same (checked per function on the syntax tree) |
+| w_bugfix | fix two bugs from a CI failure (failing test + assertion), checked on hidden cases too |
+| w_refactor | split a 50-line function into three helpers; same results on 43 inputs, short main function |
+| w_sql | four SQLite queries (top customers, monthly revenue, never paid, average per country), run on hidden data |
+| w_json | extract 6 records from customer messages into JSON that matches a schema (structured output) |
+| w_longctx | find the cause of a bug report in a ~25k-token module and return only the fixed function (long context) |
+
+## Tool-calling suite: tasks
+
+The model gets OpenAI-style `tools` for a fake shop backend; `run_eval.py` executes every call against fake data (no network, no real side effects) and sends the result back, until the model answers without a tool. Graded on which tools were called, with what arguments, and what the final answer says.
+
+| Task | What it tests |
+|---|---|
+| t_select | the right tool out of 10 similar ones, no needless calls, nothing that changes data |
+| t_args | arguments that match the schema: enum, date format, integer id, array of tags, short title |
+| t_chain | 3 dependent calls: find the customer by email (a similar name is a trap), their latest order, refund it in full |
+| t_parallel | three independent lookups in one turn instead of one by one |
+| t_error | the service fails once with a 503 (retry), and an order does not exist (say so, do not invent a status) |
+| t_no_tool | a question that needs no tool: no call, a short answer |
+| t_agent_fix | coding agent: `list_files`, `read_file`, `write_file`, `run_tests` on a small repo with 2 bugs; the tests must pass, also hidden ones, the test file must stay unchanged, at most 12 tool calls |
+
+Every tool task also checks that the calls are well-formed (valid JSON, not written as text) and that a final answer came. The server must support tool calls: llama.cpp needs `--jinja` and a chat template with tools; TabbyAPI has its own tool-call support; for other servers check their docs. A model or server that cannot call tools scores close to 0 here, which is the point.
+
 ## Output
 
-Each run is saved to `results/<date>_<name>/` (base suite) or `results_hard/<date>_<name>-HARD/` (hard suite):
+Each run is saved to `results/<date>_<name>/` (base suite), `results_hard/<date>_<name>-HARD/`, `results_practical/<date>_<name>-PRACTICAL/` or `results_tools/<date>_<name>-TOOLS/`:
 - `report.md`: what passed, what failed and why
 - `summary.json`: numbers for comparisons
-- one folder per task with the model's full answer, its code, its thinking and `screenshot.png`
+- one folder per task with the model's full answer, its code, its thinking and `screenshot.png`; tool tasks also have `transcript.json` (every call and result) and, for the agent task, the repository it edited
 
-`make_summary.py` also writes `results_table.csv` into each of the two folders.
+`make_summary.py` also writes `results_table.csv` into each results folder.
 
 ## Tips
 
 - Use the preset recommended for the model.
 - Thinking models can write for a very long time. If time runs out, lower the reasoning level, turn thinking off or lower `--max-tokens`.
-- Tasks and tests live in `tasks.py` and `tasks_hard.py`; adding your own is easy.
+- Tasks and tests live in `tasks.py`, `tasks_hard.py`, `tasks_practical.py` and `tasks_tools.py`; adding your own is easy.
+- A full battery with useful limits: `--suite base`, `hard`, `practical`, `tools`, each with `--limits practical --repeat 2`.

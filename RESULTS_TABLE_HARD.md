@@ -6,25 +6,42 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 
 ## Mean per setting
 
-| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |
+**Score @10 min/32k** = the score if every task had to finish within 10 minutes and 32,768 tokens (the `--limits practical` profile; later tasks count as 0). **Broken** = share of tasks where generation itself failed: ran out of tokens or time, stopped mid-thought, looped, or gave no final answer.
+
+| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 66.7% | 0% | 20.0 | 138.2k | 116.3 | 30.5 |
+| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | 1 | **97.8%** | – | 97.8% | 0% | 8.4 | 70.4k | 141.3 | 30.5 |
+| 3 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | medium | 1 | **97.6%** | – | 97.6% | 0% | 9.0 | 50.7k | 96.1 | 30.8 |
+| 4 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **94.4%** | – | 94.4% | 0% | 6.5 | ~46.1k | 121.9 | 26.9 |
+| 5 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 2 | **93.1%** | 92–94 | 93.1% | 0% | 11.0 | ~54.0k | 82.9 | 15.6 |
+| 6 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 2 | **93.0%** | 86–100 | 84.8% | 0% | 15.7 | 75.4k | 81.1 | 31.3 |
+| 7 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 3 | **90.3%** | 79–98 | 90.3% | 0% | 18.7 | 41.1k | 37.0 | 30.4 |
+| 8 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | 1 | **88.5%** | – | 88.5% | 0% | 8.1 | 47.1k | 99.3 | 30.8 |
+| 9 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 3 | **87.8%** | 83–94 | 87.8% | 6% | 17.8 | 67.4k | 63.9 | 15.4 |
+| 10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | 1 | **84.9%** | – | 69.0% | 0% | 29.2 | 54.0k | 31.0 | 24.5 |
+| 11 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **82.9%** | – | 66.3% | 17% | 57.3 | 120.1k | 35.1 | 30.8 |
+| 12 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | RTX 5090 32 GB | high | 2 | **82.9%** | 83–83 | 74.6% | 17% | 91.3 | ~74.5k | 13.6 | 31.0 |
+| 13 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 3 | **80.0%** | 76–82 | 68.9% | 17% | 95.7 | ~61.1k | 10.7 | 30.2 |
+| 14 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 2 | **79.8%** | 77–83 | 54.8% | 17% | 90.0 | 184.8k | 34.3 | 31.0 |
+| 15 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 2 | **77.9%** | 71–84 | 69.6% | 0% | 19.4 | ~13.2k | 11.6 | 30.2 |
+| 16 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **77.8%** | – | 77.8% | 17% | 10.4 | ~67.6k | 110.4 | 26.9 |
+| 17 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | **66.7%** | – | 66.7% | 33% | 10.9 | ~53.9k | 83.2 | 15.5 |
+
+## Stability (settings run 2+ times)
+
+**Solved every run** = tasks with 100% in all runs. **Identical answers** = tasks where every run produced exactly the same code or answer; expect 0 at temperature 1.0, and close to all at temperature 0 on a deterministic backend.
+
+| Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run | Broken | Identical answers |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 20.0 | 138.2k | 116.3 | 30.5 |
-| 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | 1 | **97.8%** | – | 8.4 | 70.4k | 141.3 | 30.5 |
-| 3 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | medium | 1 | **97.6%** | – | 9.0 | 50.7k | 96.1 | 30.8 |
-| 4 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **94.4%** | – | 6.5 | ~46.1k | 121.9 | 26.9 |
-| 5 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 82.9 | 15.6 |
-| 6 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 2 | **93.0%** | 86–100 | 15.7 | 75.4k | 81.1 | 31.3 |
-| 7 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 3 | **90.3%** | 79–98 | 18.7 | 41.1k | 37.0 | 30.4 |
-| 8 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | 1 | **88.5%** | – | 8.1 | 47.1k | 99.3 | 30.8 |
-| 9 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 3 | **87.8%** | 83–94 | 17.8 | 67.4k | 63.9 | 15.4 |
-| 10 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | 1 | **84.9%** | – | 29.2 | 54.0k | 31.0 | 24.5 |
-| 11 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **82.9%** | – | 57.3 | 120.1k | 35.1 | 30.8 |
-| 12 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | RTX 5090 32 GB | high | 2 | **82.9%** | 83–83 | 91.3 | ~74.5k | 13.6 | 31.0 |
-| 13 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 3 | **80.0%** | 76–82 | 95.7 | ~61.1k | 10.7 | 30.2 |
-| 14 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 2 | **79.8%** | 77–83 | 90.0 | 184.8k | 34.3 | 31.0 |
-| 15 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 2 | **77.9%** | 71–84 | 19.4 | ~13.2k | 11.6 | 30.2 |
-| 16 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | medium | 1 | **77.8%** | – | 10.4 | ~67.6k | 110.4 | 26.9 |
-| 17 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | **66.7%** | – | 10.9 | ~53.9k | 83.2 | 15.5 |
+| Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | 2 | **93.1%** | 1.4 | 92.1% | 3/6 | 0% | 0/6 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 1 | 2 | **93.0%** | 9.3 | 86.5% | 3/6 | 0% | 0/6 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 1 | 3 | **90.3%** | 9.8 | 79.3% | 1/6 | 0% | 0/6 |
+| Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 1 | 3 | **87.8%** | 5.6 | 83.3% | 4/6 | 6% | 0/6 |
+| GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | RTX 5090 32 GB | high | 1 | 2 | **82.9%** | 0.0 | 82.9% | 4/6 | 17% | 0/6 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 1 | 3 | **80.0%** | 3.3 | 76.2% | 1/6 | 17% | 0/6 |
+| Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 1 | 2 | **79.8%** | 4.4 | 76.7% | 3/6 | 17% | 0/6 |
+| GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | 2 | **77.9%** | 9.2 | 71.4% | 0/6 | 0% | 0/6 |
 
 ## Best run per setting
 

@@ -284,6 +284,27 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 - **ExLlamaV3 stopped mid-thought in 3 tasks:** twice with `qv44` on the 4080 and once on the 5090. Each time the stream ended with `finish_reason = stop` while the model was still thinking. On the 5090 this happened at about 33k tokens, which matches a 32,768-token context. It is worth checking TabbyAPI's `max_seq_len` / cache size: it should be at least prompt + `--max-tokens`.
 - **Three.js tasks are mostly solved.** Most misses are TypeScript compile errors from APIs that do not exist (`renderer.getDelta()`, `getAnimationLoop()`, `ShaderPass.name`, a wrong namespace), plus the `output` shader error above.
 
+# Part 4: Practical limits and new suites (11 Oct)
+
+**What counts as useful.** Across all 688 tasks run so far, 95% of the fully solved ones took under 10 minutes and under 19k tokens. Past 32k tokens only about half were solved, mostly because the model was lost or looping. The new `--limits practical` profile therefore allows 10 minutes and 32,768 tokens per task (tool tasks: 5 minutes) and a budget per suite: base 30, hard 30, practical 30, tools 15 minutes. See the README for the full numbers.
+
+**The same limits applied to the existing runs** (column *Score @10 min/32k* in the results tables):
+- **Dense Qwen3.8-27B is unaffected.** Q6, EXL3 and the 3-bit files on the 4080 keep their scores in both suites.
+- **Flash-Next GSQ-RCO IQ3_S in Strata at `medium`** falls from 100% to 66.7% on the hard suite: its `h_p3` solution took 81k tokens. At `low` it keeps 97.8%, so under practical limits `low` is the better choice.
+- **Flash-Next in llama.cpp and GLM-5.3-Flash lose 8–25 points.** They are too slow at 12–37 tok/s to finish the hard tasks in 10 minutes.
+- **The best hard-suite settings under practical limits:**
+  - Flash-Next IQ3_S in Strata at `low`: 97.8%;
+  - Qwen3.8-27B Q6 at `medium`: 97.6%;
+  - Qwen3.8-27B EXL3 6.0 bpw at `low`: 94.4%.
+
+**New suites, no results yet:**
+- **`--suite practical`:** editing an existing module, fixing a bug from a CI failure, a refactor, SQL, JSON extraction, and a bug hunt in a ~25k-token module.
+- **`--suite tools`:** tool calling against a fake shop backend, including a small coding agent.
+
+**New stability measures:**
+- **`--repeat N`** runs a suite N times. The tables then add a stability section: standard deviation, worst run, tasks solved in every run, identical answers (useful with `--temperature 0`).
+- **"Broken"** is the share of tasks where generation itself failed.
+
 ## Caveats
 
 - **Few runs, temperature 1.0.** Most settings were run once, some 2–3 times. The repeats show how big the noise is: the same setting ranged over 16 points (EXL3 3.0 bpw `medium`: 84–100%). Treat differences under about 5 points as noise. The differences in time and token count are much more stable.
@@ -328,6 +349,7 @@ Earlier tests from 24 Sep (temperature 0, 12,000-token limit, older script) are 
 - **A larger model, fast:** Qwen3.8-Flash-Next in Strata. IQ3_S at `low` is the most stable choice: 95.5% on the base suite (2 runs) and 97.8% on the hard suite, in about 5 and 8 minutes. At `medium` it scored higher on the hard suite but looped once on the base suite. Worth more hard-suite repeats before trusting the ranking.
 - **On a 16 GB card:** Qwen3.8-27B EXL3 3.0 bpw at `low`, or AP IQ3_S at `medium` in llama.cpp. Avoid `qv44` and anything below 3 bits.
 - **GLM-5.3-Flash:** fine on the base suite at `high`, but too slow for the hard suite on this hardware.
+- **Next test round:** run all four suites with `--limits practical --repeat 2`, starting with the settings at the top of [top10.jpg](top10.jpg).
 - **To fill the gaps:**
   - repeat the single-run hard-suite settings;
   - check TabbyAPI's context length (the mid-thought stops).

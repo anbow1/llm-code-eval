@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Compare runs:  python compare.py         base suite (results/)
-                python compare.py --hard  hard suite (results_hard/)
+"""Compare runs:  python compare.py              base suite (results/)
+                python compare.py --hard       hard suite (results_hard/)
+                python compare.py --practical  practical suite (results_practical/)
+                python compare.py --tools      tool-calling suite (results_tools/)
 Add --all to show every run of a model, not only the newest."""
 import json
 import sys
 from pathlib import Path
 
 rows = []
-folder = "results_hard" if "--hard" in sys.argv else "results"
+folder = next((f"results_{x}" for x in ("hard", "practical", "tools") if f"--{x}" in sys.argv), "results")
 for f in sorted(Path(__file__).resolve().parent.glob(f"{folder}/*/summary.json")):
     d = json.loads(f.read_text(encoding="utf-8"))
     S = d.get("summary") or {}

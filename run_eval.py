@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Local LLM code eval: 4 Python tasks + 6 TypeScript/Three.js tasks, ~30 min max.
+Local LLM code eval. Four suites (--suite):
+  base       4 Python + 6 TypeScript/Three.js tasks
+  hard       3 Python + 3 TypeScript/Three.js harder tasks
+  practical  6 everyday tasks: edit, bug fix, refactor, SQL, JSON extraction, long context
+  tools      7 tool-calling tasks against a fake shop backend, incl. a small coding agent
 
 Works with any OpenAI-compatible server:
   llama.cpp  --base-url http://localhost:8080/v1
@@ -10,6 +14,7 @@ Works with any OpenAI-compatible server:
 Example:
   python run_eval.py --model qwen3-27b --label qwen27b-Q4_K_M
   python run_eval.py --label glm-exl3-3.05 --think off      (thinking off)
+  python run_eval.py --suite tools --label qwen27b-Q6 --preset qwen-think --reasoning-effort medium --repeat 2
 """
 import argparse
 import datetime as dt
@@ -27,6 +32,22 @@ from pathlib import Path
 
 import tasks as T
 import tasks_hard as TH
+import tasks_practical as TP
+import tasks_tools as TT
+
+SUITES = {  # module, results folder, run-name suffix
+    "base": (T, "results", ""),
+    "hard": (TH, "results_hard", "-HARD"),
+    "practical": (TP, "results_practical", "-PRACTICAL"),
+    "tools": (TT, "results_tools", "-TOOLS"),
+}
+# --limits. practical: what is still useful in daily work. 95% of the fully solved tasks so far took under
+# 10 minutes and under 19k tokens; above 32k tokens only about half were solved. lenient: the old defaults.
+LIMITS = {
+    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5}, "default_timeout_min": 10,
+                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15}},
+    "lenient": {"max_tokens": 98304, "task_timeout_min": {}, "default_timeout_min": 60, "budget_min": {}},
+}
 
 HERE = Path(__file__).resolve().parent
 TS_ENV = HERE / "ts_env"
@@ -130,11 +151,11 @@ class ServerDown(Exception):
     pass
 
 
-def chat(args, system, prompt, timeout):
-    """Streaming call. Returns a dict with answer, reasoning, timings and token counts."""
+def chat(args, system, prompt, timeout, messages=None, tools=None):
+    """Streaming call. Returns a dict with answer, reasoning, tool calls, timings and token counts."""
     body = {
         "model": args.model,
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+        "messages": messages or [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
         "temperature": args.temperature,
         "max_tokens": args.max_tokens,
         "stream": True,
@@ -154,6 +175,9 @@ def chat(args, system, prompt, timeout):
         ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM chat templates read it here
     if ctk:
         body["chat_template_kwargs"] = ctk
+    if tools:
+        body["tools"] = tools
+        body["parallel_tool_calls"] = True
     req = urllib.request.Request(
         args.base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode(),
@@ -163,6 +187,7 @@ def chat(args, system, prompt, timeout):
     t0 = time.perf_counter()
     first = first_answer = None
     answer, reasoning = [], []
+    calls = {}  # index -> {"id", "name", "arguments"}
     chunks = think_chunks = 0
     usage, finish = {}, None
     timed_out = False
@@ -193,6 +218,16 @@ def chat(args, system, prompt, timeout):
                 d = ch.get("delta") or {}
                 rc = d.get("reasoning_content") or d.get("reasoning") or ""
                 c = d.get("content") or ""
+                for j, tc in enumerate(d.get("tool_calls") or []):
+                    slot = calls.setdefault(tc.get("index", j), {"id": None, "name": "", "arguments": ""})
+                    slot["id"] = slot["id"] or tc.get("id")
+                    fn = tc.get("function") or {}
+                    slot["name"] += fn.get("name") or ""
+                    a = fn.get("arguments")
+                    slot["arguments"] += a if isinstance(a, str) else (json.dumps(a) if a else "")
+                    chunks += 1
+                    first = first or time.perf_counter()
+                    first_answer = first_answer or time.perf_counter()
                 if rc or c:
                     chunks += 1
                     now = time.perf_counter()
@@ -213,9 +248,11 @@ def chat(args, system, prompt, timeout):
     if m:
         think += m.group(1)
         text = text[m.end():]
+    tool_calls = [{"id": v["id"] or f"call_{k}", "name": v["name"], "arguments": v["arguments"]}
+                  for k, v in sorted(calls.items())]
     comp = usage.get("completion_tokens")
     rtok = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
-    chars = len(think) + len(text)
+    chars = len(think) + len(text) + sum(len(c["name"]) + len(c["arguments"]) for c in tool_calls)
     # Some servers (TabbyAPI / ExLlamaV3) report far too few completion tokens on long answers.
     # Code and English run at ~3-4.7 characters per token, so more than 6 means the count is wrong.
     approx = not comp or chars / comp > 6
@@ -231,7 +268,7 @@ def chat(args, system, prompt, timeout):
             rtok = 0
     decode_s = (end - first) if first else None
     return {
-        "text": text, "reasoning": think, "finish": "timeout" if timed_out else finish,
+        "text": text, "reasoning": think, "finish": "timeout" if timed_out else finish, "tool_calls": tool_calls,
         "secs": end - t0,
         "ttft": (first - t0) if first else None,
         "think_secs": ((first_answer or end) - first) if first and think else 0.0,
@@ -336,6 +373,76 @@ def extract_code(text, langs):
     if pool:
         return max(pool, key=len)
     return text.strip()
+
+
+# ---------------------------------------------------------------- tool-calling tasks
+def run_tool_task(args, task, wd, timeout):
+    """Multi-turn loop: send the conversation, execute the tool calls, repeat until a plain answer."""
+    env = task["env"](wd)
+    names = "|".join(re.escape(t["function"]["name"]) for t in env.tools)
+    messages = [{"role": "system", "content": task["system"]}, {"role": "user", "content": task["prompt"]}]
+    log = {"turns": 0, "calls_per_turn": [], "bad_json": 0, "text_tool_calls": 0, "notes": []}
+    transcript, reasoning = [], []
+    t0 = time.perf_counter()
+    tokens = rtokens = 0
+    decode_s, approx, ttft, finish, final = 0.0, False, None, None, ""
+    for turn in range(1, task["max_turns"] + 1):
+        left = timeout - (time.perf_counter() - t0)
+        if left < 5:
+            finish = "timeout"
+            break
+        g = chat(args, None, None, left, messages=messages, tools=env.tools)
+        log["turns"] = turn
+        tokens += g["tokens"] or 0
+        rtokens += g["reasoning_tokens"] or 0
+        approx = approx or g["tokens_approx"]
+        ttft = ttft if ttft is not None else g["ttft"]
+        if g["ttft"] is not None:
+            decode_s += g["secs"] - g["ttft"]
+        if g["reasoning"]:
+            reasoning.append(f"--- turn {turn} ---\n{g['reasoning']}")
+        finish = g["finish"]
+        calls = g["tool_calls"]
+        transcript.append({"turn": turn, "assistant": g["text"], "tool_calls": calls, "finish": finish})
+        if finish in ("timeout", "length"):
+            final = g["text"]
+            break
+        if not calls:
+            if re.search(r"<tool_call>|\"name\"\s*:\s*\"(%s)\"" % names, g["text"]):
+                log["text_tool_calls"] += 1
+                log["notes"].append("the model wrote a tool call as plain text instead of calling the tool")
+            final = g["text"]
+            break
+        log["calls_per_turn"].append(len(calls))
+        messages.append({"role": "assistant", "content": g["text"] or None, "tool_calls": [
+            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": c["arguments"] or "{}"}}
+            for c in calls]})
+        for c in calls:
+            try:
+                a = json.loads(c["arguments"] or "{}")
+            except json.JSONDecodeError:
+                a = None
+            if not isinstance(a, dict):
+                log["bad_json"] += 1
+                result = {"error": "arguments are not valid JSON"}
+                env.calls.append({"turn": turn, "name": c["name"], "args": {}, "result": result,
+                                  "schema_errors": ["invalid JSON arguments"]})
+            else:
+                result = env.call(turn, c["name"], a)
+            content = result if isinstance(result, str) else json.dumps(result, ensure_ascii=False)
+            messages.append({"role": "tool", "tool_call_id": c["id"], "name": c["name"], "content": content})
+            transcript.append({"tool": c["name"], "arguments": c["arguments"], "result": content[:3000]})
+    else:
+        finish = "max_turns"
+        log["notes"].append(f"no final answer after {task['max_turns']} model turns")
+    checks = task["grade"](env, log, final)
+    checks["gave_final_answer"] = bool(final.strip()) and finish not in ("timeout", "length", "max_turns")
+    (wd / "transcript.json").write_text(json.dumps(transcript, indent=2, ensure_ascii=False), encoding="utf-8")
+    secs = time.perf_counter() - t0
+    g = {"text": final, "reasoning": "\n\n".join(reasoning), "finish": finish, "secs": secs, "ttft": ttft,
+         "think_secs": 0.0, "prompt_tokens": None, "tokens": tokens, "reasoning_tokens": rtokens,
+         "tokens_approx": approx, "decode_tps": tokens / decode_s if decode_s > 0 and tokens else None}
+    return g, checks, log["notes"] + [f"tool calls: {len(env.calls)} in {log['turns']} model turns"]
 
 
 # ---------------------------------------------------------------- python tasks
@@ -638,6 +745,15 @@ def sweep_effort(levels):
     print("\nAll levels done. Run:  python compare.py")
 
 
+def repeat_runs(n):
+    """Run the same suite n times, each as its own run with its own report (same label)."""
+    argv = [a for a in sys.argv[1:]]
+    for i in range(1, n + 1):
+        print(f"\n######## repeat {i}/{n} ########\n", flush=True)
+        subprocess.run([sys.executable, str(Path(__file__).resolve())] + argv + ["--repeat", "1"], cwd=HERE)
+    print("\nAll repeats done. Run:  python make_summary.py")
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -653,11 +769,16 @@ def main():
     ap.add_argument("--min-p", type=float, default=None)
     ap.add_argument("--presence-penalty", type=float, default=None)
     ap.add_argument("--repetition-penalty", type=float, default=None)
-    ap.add_argument("--max-tokens", type=int, default=98304,
-                    help="thinking + answer; thinking models need a lot (default 98304)")
-    ap.add_argument("--task-timeout-min", type=float, default=60.0, help="max time for one task (default 60)")
-    ap.add_argument("--budget-min", type=float, default=0,
-                    help="hard limit for the whole run, 0 = no limit (default)")
+    ap.add_argument("--limits", choices=["auto", "practical", "lenient"], default="auto",
+                    help="practical: 32k tokens and 10 min per task (tools: 5 min), a time budget per suite; "
+                         "lenient: 98k tokens, 60 min, no budget. auto (default) = practical for the practical "
+                         "and tools suites, lenient for base and hard (comparable with older runs)")
+    ap.add_argument("--max-tokens", type=int, default=None, help="thinking + answer per request (overrides --limits)")
+    ap.add_argument("--task-timeout-min", type=float, default=None, help="max time for one task (overrides --limits)")
+    ap.add_argument("--budget-min", type=float, default=None,
+                    help="limit for the whole run, 0 = none (overrides --limits)")
+    ap.add_argument("--repeat", type=int, default=1,
+                    help="run the whole suite N times, each as its own run (for mean, spread and stability)")
     ap.add_argument("--think", choices=["default", "on", "off"], default="default",
                     help="off sends enable_thinking=false (Qwen/GLM chat templates)")
     ap.add_argument("--reasoning-effort", default="",
@@ -670,8 +791,9 @@ def main():
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")
     ap.add_argument("--probe-question", choices=["easy", "hard"], default="easy",
                     help="easy = count the 7s from 1 to 1000; hard = digit sums (needs real thinking)")
-    ap.add_argument("--suite", choices=["base", "hard"], default="base",
-                    help="base = 10 original tasks, hard = 6 harder tasks")
+    ap.add_argument("--suite", choices=list(SUITES), default="base",
+                    help="base = 10 original tasks, hard = 6 harder tasks, practical = 6 everyday tasks, "
+                         "tools = 7 tool-calling tasks")
     ap.add_argument("--only", choices=["python", "three"], default=None)
     ap.add_argument("--tasks", default="", help="comma list of task ids, e.g. t5_raycast_click,p1_parse_duration")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
@@ -681,31 +803,42 @@ def main():
             setattr(args, k, v)
     if args.temperature is None:
         args.temperature = 1.0
+    if args.limits == "auto":
+        args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"
+    L = LIMITS[args.limits]
+    if args.max_tokens is None:
+        args.max_tokens = L["max_tokens"]
+    if args.task_timeout_min is None:
+        args.task_timeout_min = L["task_timeout_min"].get(args.suite, L["default_timeout_min"])
+    if args.budget_min is None:
+        args.budget_min = L["budget_min"].get(args.suite, 0)
     if args.probe_effort is not None:
         return probe_effort(args)
     levels = [x.strip() for x in args.reasoning_effort.split(",") if x.strip()]
     if len(levels) > 1:
         return sweep_effort(levels)
+    if args.repeat > 1:
+        return repeat_runs(args.repeat)
     if levels == ["off"]:
         args.think, args.reasoning_effort = "off", ""
 
     start = time.perf_counter()
     deadline = start + args.budget_min * 60 if args.budget_min > 0 else float("inf")
     name = args.label or Path(args.model).stem
-    if args.suite == "hard" and not name.endswith("-HARD"):
-        name += "-HARD"
+    S_, results_dir, suffix = SUITES[args.suite]
+    if suffix and not name.endswith(suffix):
+        name += suffix
     safe = re.sub(r"[^\w.-]+", "_", name)[:80]
-    results_dir = "results_hard" if args.suite == "hard" else "results"
     run_dir = HERE / results_dir / f"{dt.datetime.now():%Y%m%d-%H%M%S}_{safe}"
     run_dir.mkdir(parents=True)
 
     # interleave Python and Three.js so a stop does not wipe out one whole part
-    S_ = TH if args.suite == "hard" else T
-    py = [("python", t) for t in S_.PY_TASKS] if args.only != "three" else []
-    th = [("three", t) for t in S_.THREE_TASKS] if args.only != "python" else []
+    py = [("python", t) for t in getattr(S_, "PY_TASKS", [])] if args.only != "three" else []
+    th = [("three", t) for t in getattr(S_, "THREE_TASKS", [])] if args.only != "python" else []
     jobs = []
     for i in range(max(len(py), len(th))):
         jobs += th[i:i + 1] + py[i:i + 1]
+    jobs += [("tools", t) for t in getattr(S_, "TASKS", [])]
     if args.tasks:
         want = {x.strip() for x in args.tasks.split(",") if x.strip()}
         jobs = [(k, t) for k, t in jobs if t["id"] in want]
@@ -738,9 +871,14 @@ def main():
                 results.append({**base, "status": "budget", "notes": ["skipped: time budget"]})
                 continue
             print(f"[gen ] {task['id']} ...", flush=True)
-            system = T.PY_SYSTEM if kind == "python" else T.THREE_SYSTEM
+            system = task.get("system") or (T.PY_SYSTEM if kind == "python" else T.THREE_SYSTEM)
+            wd = run_dir / task["id"]
             try:
-                g = chat(args, system, task["prompt"], timeout=min(args.task_timeout_min * 60, left))
+                if kind == "tools":
+                    wd.mkdir()
+                    g, tool_checks, tool_notes = run_tool_task(args, task, wd, min(args.task_timeout_min * 60, left))
+                else:
+                    g = chat(args, system, task["prompt"], timeout=min(args.task_timeout_min * 60, left))
             except ServerDown as e:
                 server_down = True
                 print("       server refused the connection: stopping (restart the server and rerun)")
@@ -757,8 +895,7 @@ def main():
                 results.append({**base, "status": status, "notes": [f"request failed: {e}"]})
                 continue
 
-            wd = run_dir / task["id"]
-            wd.mkdir()
+            wd.mkdir(exist_ok=True)
             (wd / "raw_response.md").write_text(g["text"], encoding="utf-8")
             if g["reasoning"]:
                 (wd / "reasoning.md").write_text(g["reasoning"], encoding="utf-8")
@@ -768,7 +905,13 @@ def main():
                              f"{'while still thinking, no answer' if not g['text'].strip() else 'answer may be cut'}")
             if g["finish"] == "timeout":
                 notes.append(f"stopped after {args.task_timeout_min:g} min task timeout")
-            if kind == "python":
+            if kind == "tools":
+                checks, n2 = tool_checks, tool_notes
+            elif kind == "python" and task.get("answer") == "json":
+                (wd / "answer.json").write_text(extract_code(g["text"], {"json"}), encoding="utf-8")
+                code = 'import json\nDATA = json.loads(open("answer.json", encoding="utf-8").read())\n'
+                checks, n2 = run_python_task(task, code, wd)
+            elif kind == "python":
                 code = extract_code(g["text"], {"python", "py"})
                 checks, n2 = run_python_task(task, code, wd)
             else:
@@ -780,7 +923,7 @@ def main():
                                                  "no_console_errors")}
                     n2 = ["no code in the answer"]
             score = sum(checks.values()) / max(1, len(checks))
-            status = {"length": "max_tokens", "timeout": "task_timeout"}.get(g["finish"], "ok")
+            status = {"length": "max_tokens", "timeout": "task_timeout", "max_turns": "max_turns"}.get(g["finish"], "ok")
             if status == "ok" and not g["text"].strip():
                 status = "no_answer"  # stream ended while the model was still thinking
                 notes.append("model stopped inside its thinking and never wrote an answer")
@@ -815,15 +958,21 @@ def main():
     write_report(run_dir, name, args, results, total, res)
 
 
+def is_broken(r):
+    """Broken generation (not wrong code): out of tokens or time, stopped mid-thought, a loop, or no final answer."""
+    return r["status"] in ("max_tokens", "task_timeout", "no_answer", "max_turns") or any(
+        "loop" in n for n in r.get("notes", []))
+
+
 def summarize(results):
     def avg(rs):
         return 100 * sum(r["score"] for r in rs) / len(rs) if rs else None
 
     out = {}
-    for kind in ("python", "three"):
+    for kind in ("python", "three", "tools"):
         rs = [r for r in results if r["kind"] == kind]
         out[kind] = avg(rs)
-    parts = [x for x in (out["python"], out["three"]) if x is not None]
+    parts = [x for x in (out["python"], out["three"], out["tools"]) if x is not None]
     out["overall"] = sum(parts) / len(parts) if parts else 0.0
     done = [r for r in results if r["status"] in ("ok", "max_tokens", "task_timeout")]
     out["answered_score"] = avg([r for r in done if r["status"] == "ok"])
@@ -831,6 +980,7 @@ def summarize(results):
     out["tasks_answered"] = sum(r["status"] == "ok" for r in results)
     out["hit_max_tokens"] = sum(r["status"] == "max_tokens" for r in results)
     out["timeouts"] = sum(r["status"] == "task_timeout" for r in results)
+    out["broken"] = sum(is_broken(r) for r in results)
     out["not_run"] = sum(r["status"] in ("budget", "server_down", "server_crash", "error") for r in results)
     toks = [r.get("tokens") or 0 for r in results]
     out["tokens_total"] = sum(toks)
@@ -861,7 +1011,7 @@ def write_report(run_dir, name, args, results, total, res):
              f"- Peak VRAM: {f(res['vram_peak_gb'], ' GB')} | Peak RAM: {f(res['ram_peak_gb'], ' GB')} "
              f"(at start {f(res['ram_at_start_gb'], ' GB')}) | Disk read: {f(res['disk_read_gb'], ' GB')}",
              f"- Tasks: {S['tasks_answered']}/{S['tasks_total']} answered, {S['hit_max_tokens']} hit max_tokens, "
-             f"{S['timeouts']} timed out, {S['not_run']} not run",
+             f"{S['timeouts']} timed out, {S['not_run']} not run, {S['broken']} broken generations",
              "", "| Part | Score |", "|---|---|"]
     if res.get("note"):
         lines.insert(9, f"- Note: {res['note']}")
@@ -869,6 +1019,8 @@ def write_report(run_dir, name, args, results, total, res):
         lines.append(f"| Python | {pct(S['python'])} |")
     if S["three"] is not None:
         lines.append(f"| TypeScript + Three.js | {pct(S['three'])} |")
+    if S["tools"] is not None:
+        lines.append(f"| Tool calling | {pct(S['tools'])} |")
     lines += [f"| **Overall** | **{pct(S['overall'])}** |",
               f"| Only tasks it finished | {pct(S['answered_score'])} |", ""]
     lines += ["| Task | Score | Status | Time s | Tokens | Thinking | tok/s |", "|---|---|---|---|---|---|---|"]
@@ -886,13 +1038,13 @@ def write_report(run_dir, name, args, results, total, res):
         lines.append("")
     (run_dir / "report.md").write_text("\n".join(lines), encoding="utf-8")
     (run_dir / "summary.json").write_text(json.dumps(
-        {"name": name, "model": args.model, "python": S["python"], "three": S["three"],
+        {"name": name, "model": args.model, "python": S["python"], "three": S["three"], "tools": S["tools"],
          "overall": S["overall"], "summary": S, "resources": res,
          "settings": {"preset": args.preset, "max_tokens": args.max_tokens, "temperature": args.temperature,
                       **{k: getattr(args, k) for k in SAMPLING_KEYS},
                       "think": args.think, "reasoning_effort": args.reasoning_effort,
                       "task_timeout_min": args.task_timeout_min, "budget_min": args.budget_min,
-                      "suite": args.suite},
+                      "limits": args.limits, "suite": args.suite},
          "minutes": round(total / 60, 1), "results": results}, indent=2), encoding="utf-8")
 
     print("\n" + "=" * 60)
@@ -900,6 +1052,8 @@ def write_report(run_dir, name, args, results, total, res):
         print(f"Python:                {pct(S['python']):>7}")
     if S["three"] is not None:
         print(f"TypeScript + Three.js: {pct(S['three']):>7}")
+    if S["tools"] is not None:
+        print(f"Tool calling:          {pct(S['tools']):>7}")
     print(f"Overall:               {pct(S['overall']):>7}   ({total / 60:.1f} min)")
     print(f"Finished tasks only:   {pct(S['answered_score']):>7}   "
           f"({S['tasks_answered']}/{S['tasks_total']} answered, {S['hit_max_tokens']} hit max_tokens)")

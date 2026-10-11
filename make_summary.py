@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Build results tables from results/*/summary.json (base suite) and results_hard/*/summary.json (hard suite).
+"""Build results tables for every suite from <results folder>/*/summary.json.
 
     python make_summary.py
 
 Writes:
-  RESULTS_TABLE.md, results/results_table.csv                - base suite
-  RESULTS_TABLE_HARD.md, results_hard/results_table.csv      - hard suite
+  RESULTS_TABLE.md, results/results_table.csv                          - base suite
+  RESULTS_TABLE_HARD.md, results_hard/results_table.csv                - hard suite
+  RESULTS_TABLE_PRACTICAL.md, results_practical/results_table.csv      - practical suite
+  RESULTS_TABLE_TOOLS.md, results_tools/results_table.csv              - tool-calling suite
 """
+import hashlib
 import csv
 import json
 import re
@@ -82,7 +85,40 @@ SUITES = {
     "hard": ("results_hard", "RESULTS_TABLE_HARD.md", "# Results table: hard suite (--suite hard)",
              "6 tasks (3 × TypeScript + Three.js, 3 × Python). Base-suite results are in "
              "[RESULTS_TABLE.md](RESULTS_TABLE.md)."),
+    "practical": ("results_practical", "RESULTS_TABLE_PRACTICAL.md",
+                  "# Results table: practical suite (--suite practical)",
+                  "6 everyday tasks: edit a module, fix a bug from a failing test, refactor, SQL, JSON extraction, "
+                  "and a bug hunt in a ~24k-token module (long context)."),
+    "tools": ("results_tools", "RESULTS_TABLE_TOOLS.md", "# Results table: tool-calling suite (--suite tools)",
+              "7 tasks against a fake shop backend: pick the right tool, fill the arguments, chain calls, parallel "
+              "calls, recover from an error, answer without a tool, and a small coding agent that fixes a repo."),
 }
+# "practical" limits, applied after the fact to runs made with the older, lenient ones
+PRACTICAL_SECONDS, PRACTICAL_TOKENS = 600, 32768
+BROKEN_STATUS = ("max_tokens", "task_timeout", "no_answer", "max_turns")
+
+
+def is_broken(r):
+    """Broken generation (not wrong code): out of tokens or time, stopped mid-thought, a loop, no final answer."""
+    return r.get("status") in BROKEN_STATUS or any("loop" in n for n in r.get("notes", []))
+
+
+def practical_score(results):
+    """Overall score if every task had to finish within 10 minutes and 32k tokens (later ones count as 0)."""
+    parts = {}
+    for r in results:
+        ok = (r.get("gen_seconds") or 0) <= PRACTICAL_SECONDS and (r.get("tokens") or 0) <= PRACTICAL_TOKENS
+        parts.setdefault(r["kind"], []).append(r["score"] if ok else 0.0)
+    return 100 * sum(sum(v) / len(v) for v in parts.values()) / len(parts) if parts else 0.0
+
+
+def answer_hash(task_dir):
+    """Hash of what the model produced for a task: the code if any, else the raw answer."""
+    for name in ("solution.py", "main.ts", "answer.json", "raw_response.md"):
+        p = task_dir / name
+        if p.is_file() and p.read_bytes().strip():
+            return hashlib.sha1(p.read_bytes()).hexdigest()
+    return None
 
 
 def load_runs(folder):
@@ -95,6 +131,8 @@ def load_runs(folder):
         name, quant, backend = describe(label, d.get("model", ""))
         gen_s = sum(r.get("gen_seconds") or 0 for r in d["results"])
         effort = s.get("reasoning_effort") or "default (xhigh)"
+        if s.get("temperature") not in (None, 1.0):  # keep e.g. temperature-0 repeats apart from the usual runs
+            effort += f", temp {s['temperature']:g}"
         runs.append({
             "run": f.parent.name, "suite": s.get("suite", "base"), "model": name, "quant": quant, "backend": backend,
             "gpu": gpu_of(R, name, quant),
@@ -114,6 +152,12 @@ def load_runs(folder):
             "tok_s": S.get("tok_per_s"), "vram_gb": R.get("vram_peak_gb"), "ram_gb": R.get("ram_peak_gb"),
             "disk_read_gb": R.get("disk_read_gb"),
             "tasks": {r["id"]: (round(r["score"] * 100), r["status"]) for r in d["results"]},
+            "tools": round(d["tools"], 1) if d.get("tools") is not None else None,
+            "n_tasks": len(d["results"]),
+            "broken": sum(is_broken(r) for r in d["results"]),
+            "practical": round(practical_score(d["results"]), 1),
+            "limits": s.get("limits") or ("lenient" if (s.get("max_tokens") or 0) > PRACTICAL_TOKENS else "practical"),
+            "answers": {r["id"]: answer_hash(f.parent / r["id"]) for r in d["results"]},
         })
     runs.sort(key=lambda r: (-r["overall"], r["minutes"]))
     return runs
@@ -122,7 +166,8 @@ def load_runs(folder):
 def main():
     cols = ["run", "suite", "model", "quant", "backend", "gpu", "effort", "temperature", "overall", "python", "three",
             "finished_only", "answered", "minutes", "gen_minutes", "tokens", "thinking", "answer_tokens",
-            "tokens_approx", "tok_s_time", "tok_s", "vram_gb", "ram_gb", "disk_read_gb"]
+            "tokens_approx", "tok_s_time", "tok_s", "vram_gb", "ram_gb", "disk_read_gb", "tools", "broken",
+            "practical", "limits"]
     for folder, table, title, note in SUITES.values():
         runs = load_runs(folder)
         if not runs:
@@ -174,6 +219,38 @@ def when(run):
     return f"{run[6:8]}.{run[4:6]} {run[9:11]}:{run[11:13]}"
 
 
+def stability_table(groups):
+    """Settings run 2+ times: spread, tasks solved every time, broken generations, identical answers."""
+    rows = []
+    for (model, quant, backend, gpu, effort), rs in groups.items():
+        if len(rs) < 2:
+            continue
+        scores = [r["overall"] for r in rs]
+        m = sum(scores) / len(scores)
+        sd = (sum((x - m) ** 2 for x in scores) / (len(scores) - 1)) ** 0.5
+        ids = sorted(set.intersection(*(set(r["tasks"]) for r in rs)))
+        solid = sum(all(r["tasks"][t][0] == 100 for r in rs) for t in ids)
+        same = sum(len({r["answers"].get(t) for r in rs}) == 1 and rs[0]["answers"].get(t) is not None for t in ids)
+        broken = 100 * sum(r["broken"] for r in rs) / max(1, sum(r["n_tasks"] for r in rs))
+        temps = sorted({r["temperature"] for r in rs if r["temperature"] is not None})
+        rows.append((m, sd, model, quant, backend, gpu, effort, len(rs), min(scores), solid, len(ids), broken, same,
+                     "/".join(f"{t:g}" for t in temps)))
+    if not rows:
+        return []
+    out = ["", "## Stability (settings run 2+ times)", "",
+           "**Solved every run** = tasks with 100% in all runs. **Identical answers** = tasks where every run produced "
+           "exactly the same code or answer; expect 0 at temperature 1.0, and close to all at temperature 0 on a "
+           "deterministic backend.", "",
+           "| Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run "
+           "| Broken | Identical answers |",
+           "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for m, sd, model, quant, backend, gpu, effort, nr, worst, solid, nt, broken, same, temps in sorted(
+            rows, key=lambda x: (-x[0], x[1])):
+        out.append(f"| {model} | {quant} | {backend} | {gpu} | {effort} | {temps} | {nr} | **{m:.1f}%** | {sd:.1f} "
+                   f"| {worst:.1f}% | {solid}/{nt} | {broken:.0f}% | {same}/{nt} |")
+    return out
+
+
 def section(runs, best_table=False):
     k = lambda x: f"{x / 1000:.1f}k" if isinstance(x, (int, float)) else "n/a"
     n = lambda x, p=1: f"{x:.{p}f}" if isinstance(x, (int, float)) else "n/a"
@@ -191,17 +268,23 @@ def section(runs, best_table=False):
                     max((r["vram_gb"] for r in rs if r["vram_gb"] is not None), default=None)))
     agg.sort(key=lambda a: (-a[2], a[3]))
     lines = ["## Mean per setting", "",
-             "| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Mean time (min) "
-             "| Mean tokens | Avg tok/s (from time) | VRAM GB |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+             "**Score @10 min/32k** = the score if every task had to finish within 10 minutes and 32,768 tokens "
+             "(the `--limits practical` profile; later tasks count as 0). **Broken** = share of tasks where "
+             "generation itself failed: ran out of tokens or time, stopped mid-thought, looped, or gave no final answer.",
+             "",
+             "| # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Mean score | Min–max | Score @10 min/32k "
+             "| Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | VRAM GB |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i, ((model, quant, backend, gpu, effort), rs, sc, mins, tok, tps, vram) in enumerate(agg, 1):
         lo, hi = min(r["overall"] for r in rs), max(r["overall"] for r in rs)
         ap = "~" if any(r["tokens_approx"] for r in rs) else ""
+        rng = f"{n(lo, 0)}–{n(hi, 0)}" if len(rs) > 1 else "–"
+        prac = mean([r["practical"] for r in rs])
+        broken = 100 * sum(r["broken"] for r in rs) / max(1, sum(r["n_tasks"] for r in rs))
         lines.append(f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | {len(rs)} | **{n(sc)}%** "
-                     f"| {n(lo, 0)}–{n(hi, 0)} | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |"
-                     if len(rs) > 1 else
-                     f"| {i} | {model} | {quant} | {backend} | {gpu} | {effort} | 1 | **{n(sc)}%** "
-                     f"| – | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |")
+                     f"| {rng} | {n(prac)}% | {n(broken, 0)}% | {n(mins)} | {ap}{k(tok)} | {n(tps)} | {n(vram)} |")
+
+    lines += stability_table(groups)
 
     if best_table:
         ranked = sorted(rank_settings(runs), key=lambda g: (-g["best"]["overall"], g["best"]["minutes"]))
