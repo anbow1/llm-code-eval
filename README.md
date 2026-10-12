@@ -83,14 +83,14 @@ GLM-5.3-Flash has its own table across all four suites: [RESULTS_TABLE_GLM.md](R
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
-| GSQ-RCO 3.5-bit maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
-| derisked maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
-| EXL3 3.05 bpw | high | **99.3%** (2) | 80.0% (3) | – | – |
-| GSQ-RCO 3.5-bit | high | 93.9% (1) | 82.9% (2) | – | – |
-| GSQ-RCO 3.5-bit maya | high | 99.2% (1) | – | – | – |
+| GSQ-RCO 3.5-bit · Maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
+| derisked Maya-M · Maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
+| EXL3 3.05 bpw · ExLlamaV3 | high | **99.3%** (2) | 80.0% (3) | – | – |
+| GSQ-RCO 3.5-bit · llama.cpp | high | 93.9% (1) | 82.9% (2) | – | – |
+| GSQ-RCO 3.5-bit · Maya | high | 99.2% (1) | – | – | – |
 
-- **On the base suite GLM needs `high`.** EXL3 and the maya variant both score about 99% there.
-- **On the hard suite `high` is too slow.** It hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs. The maya variants at `medium` solved that task in 4 of 6 runs, in 24–47 minutes, and score 84–90%.
+- **On the base suite GLM needs `high`.** EXL3 in ExLlamaV3 and GSQ-RCO 3.5-bit in Maya both score about 99% there.
+- **On the hard suite `high` is too slow.** It hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs. Runs in the Maya engine at `medium` solved that task in 4 of 6 runs, in 24–47 minutes, and score 84–90%.
 - **On the new practical and tool-calling suites GLM is close to perfect.** These tasks need little thinking, so its low speed (11–24 tok/s) matters less: about 3–5 minutes per suite.
 
 ## Setup (once)
@@ -104,14 +104,14 @@ You also need Node.js 20+ (`node -v`). On the first run the script installs thre
 
 ## Running
 
-Serve the model with any OpenAI-compatible server (llama.cpp, TabbyAPI, Strata, LM Studio, Ollama), then:
+Serve the model with any OpenAI-compatible server (llama.cpp, TabbyAPI, Strata, Maya, LM Studio, Ollama), then:
 
 ```
 python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 ```
 
 Main options:
-- `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, and `-strata` for runs in Strata (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
+- `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, `-strata` for runs in Strata and `-maya` for runs in Maya (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--limits practical` / `lenient`: the time and token limits (see [Limits](#limits)). Default: practical for `--suite practical` and `--suite tools`, lenient for base and hard

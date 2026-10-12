@@ -21,7 +21,8 @@ HERE = Path(__file__).resolve().parent
 def describe(label, model):
     """Readable model / quant / backend from the run label and model path (case-insensitive)."""
     m = f"{label} {model}".replace("\\", "/").lower()
-    backend = "ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata(?![a-z0-9])", m) else "llama.cpp"
+    backend = ("ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata(?![a-z0-9])", m)
+               else "Maya" if re.search(r"[_-]maya(?![a-z0-9])", m) else "llama.cpp")
     bit = re.search(r"(\d\.\d+)\s*-?bit", m)
     bpw = re.search(r"(\d\.\d+)\s*-?bpw|(\d\.\d+)_exl3|exl3-(\d)(\d{2})", m)
     if re.search(r"27b|3\.8-27[_-]", m):
@@ -49,8 +50,8 @@ def describe(label, model):
             quant = "?"
         if re.search(r"[_-]nomtp(?![a-z0-9])", m):
             quant += " no MTP"
-        if re.search(r"[_-]maya(?![a-z0-9])", m):
-            quant = "maya" if quant == "?" else quant + " maya"
+        if "derisked" in m and quant == "?":
+            quant = "Maya-M"  # GLM-5.3 Maya-M derisked: a model file made for the Maya engine
         name = "GLM-5.3-Flash derisked" if "derisked" in m else "GLM-5.3-Flash"
         return name, quant, backend
     if "flash-next" in m or "qwen" in m:
@@ -204,7 +205,7 @@ def main():
         "GLM-5.3-Flash", "RESULTS_TABLE_GLM.md", "# Results table: GLM-5.3-Flash",
         "Every GLM-5.3-Flash variant that has been run, in all four suites. GLM-5.3-Flash is a large MoE model; on "
         "the RTX 5090 + 128 GB RAM most experts sit in system RAM, so it runs at 11–24 tok/s. The chat template "
-        "knows the levels `low` and `high` (and `max`); `medium` was used with the maya variants.")
+        "knows the levels `low` and `high` (and `max`); `medium` was used with the Maya engine.")
 
 
 def rank_settings(runs):

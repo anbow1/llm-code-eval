@@ -17,14 +17,14 @@
 - **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high` on the base suite, but on the hard suite even `high` runs out of time.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
-- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). The new "maya" variants at `medium` are its best setting on the hard suite (89.9% over 4 runs), and GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
+- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). Run in the Maya engine at `medium` it does best on the hard suite (89.9% over 4 runs), and GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 
 ## Hardware and settings
 
 - **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows. All runs from 25 Sep and 28 Sep – 6 Oct.
 - **PC B:** RTX 4080 16 GB VRAM + 32 GB DDR5 RAM, Windows. All Qwen3.8-27B 2–3-bit runs from 26–27 Sep.
-- Backends: llama.cpp (`llama-server --jinja`), ExLlamaV3 (TabbyAPI) and, for Qwen3.8-Flash-Next from 30 Sep, [Strata](https://github.com/Niko1221/Strata) v0.1.30, an inference server for MoE models.
+- Backends: llama.cpp (`llama-server --jinja`), ExLlamaV3 (TabbyAPI), [Strata](https://github.com/Niko1221/Strata) v0.1.30 (an inference server for MoE models; Qwen3.8-Flash-Next from 30 Sep) and Maya (another inference engine; GLM-5.3-Flash from 9 Oct).
 - Base suite, 10 tasks: 6 × TypeScript + Three.js, checked in a real browser (`tsc --strict` compile, rendering, animation, clicking, window resize), and 4 × Python with hidden correctness and performance tests. Hard suite: 6 tasks (`--suite hard`, see the README).
 - Every run: temperature 1.0, sampling as recommended by the model makers (`--preset glm` / `qwen-think`), 60-minute limit per task. Token limit per task: 65,536; the runs from 30 Sep used 98,304 (the new default in `run_eval.py`).
 - Many settings were run once; some 2–3 times. The tables show the mean.
@@ -312,20 +312,21 @@ All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md). Ne
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
-| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | low | 86.3% (2 runs) | 81.1% (1) | – | – |
-| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
-| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | high | 99.2% (1) | – | – | – |
-| GLM-5.3-Flash derisked maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | low | 86.3% (2 runs) | 81.1% (1) | – | – |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 99.2% (1) | – | – | – |
+| GLM-5.3 Maya-M derisked · Maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
 
-What "maya" and "derisked" stand for is not recorded in the run data; the tables treat them as a variant of the quant and of the model.
+Maya is an inference engine, like llama.cpp, TabbyAPI or Strata. "Derisked" is the model file GLM-5.3 Maya-M derisked, run in Maya; the tables list it as GLM-5.3-Flash derisked, quant Maya-M.
 
-**Hard suite: `medium` with maya is better than `high` without it.**
+**Hard suite: `medium` in Maya is better than `high` in llama.cpp or ExLlamaV3.**
 - **Plain GLM at `high`** (EXL3 and GSQ-RCO) hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs and scored 80–83%.
-- **The maya variants at `medium`** solved `h_p3` in 4 of 6 runs, in 24–47 minutes, and scored 84–90%.
+- **The Maya runs at `medium`** solved `h_p3` in 4 of 6 runs, in 24–47 minutes, and scored 84–90%.
 - **The other 2 runs stopped mid-thought without an answer** (after about 4k and 16k tokens), the same failure seen with ExLlamaV3 before.
-- **Still too slow for practical use.** A full hard run takes 20–71 minutes. With the practical limits (10 min, 32k tokens per task) the maya variant drops from 89.9% to 73.2%.
+- **Two things changed at once** (engine and reasoning level), so this does not say which one helped. Maya at `high` has no hard-suite run yet.
+- **Still too slow for practical use.** A full hard run takes 20–71 minutes. With the practical limits (10 min, 32k tokens per task) GSQ-RCO 3.5-bit in Maya drops from 89.9% to 73.2%.
 
-**Base suite.** Maya at `high` scored 99.2% in 15 min, about as good as EXL3 at `high` (99.3%) and faster. At `medium` it scored only 89.5%. Its mistakes were TypeScript errors (`renderer.getDelta()`, which does not exist) and `p2_sliding_median`.
+**Base suite.** GSQ-RCO 3.5-bit in Maya at `high` scored 99.2% in 15 min, about as good as EXL3 at `high` (99.3%) and faster: 15.7 against 12.3 tok/s. The same file in llama.cpp scored 93.9% at 12.4 tok/s. At `medium` it scored only 89.5%. Its mistakes were TypeScript errors (`renderer.getDelta()`, which does not exist) and `p2_sliding_median`.
 
 **Practical suite (first results).** Both variants scored 97.6%, in 3–5 minutes:
 - **`w_refactor` lost points:** `process_orders` stayed longer than the 15 lines asked for.
@@ -353,7 +354,7 @@ What "maya" and "derisked" stand for is not recorded in the run data; the tables
 - **Strata is a different engine from llama.cpp**, so its rows compare engines as well as files. The 29 Sep Qwen3.8-27B EXL3 folders were renamed to add `6.0bpw`, which was missing from the label.
 - **The two PCs are not directly comparable on time.** GPU, RAM and file size all differ.
 - **Specific files, not models.** The quants differ in size, maker and backend, so this compares specific files on this hardware.
-- **Unknown labels:** what "maya" and "derisked" (GLM, 9–11 Oct) mean is not recorded; their backend is assumed to be llama.cpp.
+- **Maya runs:** the `-maya` label marks the Maya engine. It was the only engine that ran GLM at `medium`; whether the GLM chat template there honours `medium`, or treats it as another level, has not been checked yet.
 - **Labels and folders:**
   - The labels `qwen27b-q6-temp0-*` are misleading: those runs used temperature 1.0, not 0.
   - Some 4080 folders were renamed after the run (e.g. `-low` dropped from the hard-suite labels, which ran at `medium`). The tables use the folder names.
@@ -373,7 +374,7 @@ Their raw data has been removed from `results/` and `results_hard/`; only these 
 - 6–9 Oct, removed on 12 Oct:
   - Qwen3.8-Flash-Next GSQ-RCO IQ1_M in Strata: three base-suite attempts, each stopped after 3 tasks;
   - Flash-Next UD-Q4_K_XL in Strata at `low`, hard suite: stopped after 1 task;
-  - GLM-5.3-Flash GSQ-RCO 3.5-bit maya: base `high` (2 tasks) and two hard-suite attempts (1 and 5 tasks).
+  - GLM-5.3-Flash GSQ-RCO 3.5-bit in Maya: base `high` (2 tasks) and two hard-suite attempts (1 and 5 tasks).
 - GLM-5.3-Flash EXL3, hard suite on the 5090:
   - `high` on 26 Sep, stopped after 4 tasks;
   - `max` on 26 Sep: the server stopped answering (timeouts) and no task was answered;
