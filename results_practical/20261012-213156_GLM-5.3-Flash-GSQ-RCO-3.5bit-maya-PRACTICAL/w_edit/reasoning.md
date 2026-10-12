@@ -1,1 +1,0 @@
-Just modify low_stock and add value_by_category.

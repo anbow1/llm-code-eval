@@ -200,51 +200,67 @@ def collect_family(prefix):
     rows = []
     for (model, quant, backend, effort), suites in by.items():
         cells = {}
+        best = {}
         for su, rs in suites.items():
             cells[su] = {"score": sum(r["overall"] for r in rs) / len(rs), "runs": len(rs),
                          "minutes": sum(r["minutes"] for r in rs) / len(rs)}
-        mean = sum(c["score"] for c in cells.values()) / len(cells)
+            b = min(rs, key=lambda r: (-r["overall"], r["minutes"]))  # best run; on a tie the faster one
+            best[su] = {"score": b["overall"], "runs": len(rs), "minutes": b["minutes"]}
         rows.append({"model": model, "quant": quant, "backend": backend, "effort": effort, "cells": cells,
-                     "mean": mean, "n": len(cells)})
-    rows.sort(key=lambda r: (-r["n"], -r["mean"]))
-    return rows
+                     "best": best, "n": len(cells),
+                     "mean": sum(c["score"] for c in cells.values()) / len(cells),
+                     "best_mean": sum(c["score"] for c in best.values()) / len(best)})
+    by_mean = sorted(rows, key=lambda r: (-r["n"], -r["mean"]))
+    by_best = sorted(rows, key=lambda r: (-r["n"], -r["best_mean"]))
+    return by_mean, by_best
 
 
-def build_family_html(rows, title, lede):
+def family_table(rows, key, mean_key, time_note):
     e = html.escape
     suites = list(ms.SUITES)
     body = []
     for i, r in enumerate(rows, 1):
         tds = []
         for su in suites:
-            c = r["cells"].get(su)
+            c = r[key].get(su)
             tds.append(f'<td>{bar(c["score"])}<div class="meta">{c["runs"]}× · {c["minutes"]:.0f} min</div></td>'
                        if c else '<td class="none">–</td>')
         body.append(f"""<tr>
 <td class="rank">{i}</td>
 <td><div class="model">{e(r['quant'])} · {e(r['backend'])}</div><div class="sub">{e(r['model'])}</div></td>
 <td>{e(r['effort'])}</td>{''.join(tds)}
-<td class="avg">{bar(r['mean'])}<div class="meta">{r['n']} of {len(suites)} suites</div></td>
+<td class="avg">{bar(r[mean_key])}<div class="meta">{r['n']} of {len(suites)} suites</div></td>
 </tr>""")
+    return f"""<table><thead><tr>
+<th>#</th><th>Variant<small>quant · engine</small></th><th>Effort</th>
+<th>Base<small>10 tasks</small></th><th>Hard<small>6 tasks</small></th><th>Practical<small>6 tasks</small></th>
+<th>Tools<small>7 tasks</small></th><th>Mean<small>of the suites run</small></th>
+</tr></thead><tbody>{''.join(body)}</tbody></table>
+<p class="tnote">Under each score: runs × {time_note}.</p>"""
+
+
+def build_family_html(by_mean, by_best, title, lede):
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
 .wrap {{ width:1640px; }}
 .meta {{ font-size:12px; color:var(--muted); margin-top:4px; }}
 td.none {{ color:var(--muted); text-align:center; }}
+h2 {{ font-size:21px; margin:26px 0 2px; }}
+.h2note {{ font-size:14px; color:var(--text2); margin:0 0 10px; }}
+.tnote {{ font-size:12px; color:var(--muted); margin:6px 0 0; }}
 tr:nth-child(3) td {{ background:none; }}
 </style></head><body><div class="wrap">
 <h1>{title}</h1>
 <p class="lede">{lede} {date.today():%d %b %Y}.</p>
-<table><thead><tr>
-<th>#</th><th>Variant<small>quant · engine</small></th><th>Effort</th>
-<th>Base<small>10 tasks</small></th><th>Hard<small>6 tasks</small></th><th>Practical<small>6 tasks</small></th>
-<th>Tools<small>7 tasks</small></th><th>Mean<small>of the suites run</small></th>
-</tr></thead><tbody>{''.join(body)}</tbody></table>
+<h2>By mean of all runs</h2><p class="h2note">What to expect from a setting on a typical run.</p>
+{family_table(by_mean, "cells", "mean", "mean minutes per run")}
+<h2>By best run</h2><p class="h2note">What a setting can do on a good run: the best single run per suite.</p>
+{family_table(by_best, "best", "best_mean", "minutes of that best run")}
 <div class="notes">
-Mean score per suite over the runs of each setting (runs × mean minutes per run); bars span 50–100%. Sorted by the number
-of suites run, then by the mean, so the first rows are the best-tested. Maya, ExLlamaV3 and llama.cpp are inference engines;
-"derisked" is the model file GLM-5.3 Maya-M derisked. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM.
-Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
+Bars span 50–100%. Both rankings are sorted by the number of suites run, then by the mean, so the first rows are the
+best-tested; settings with one run per suite score the same in both. Maya, ExLlamaV3 and llama.cpp are inference engines;
+"derisked" is the model file GLM-5.3 Maya-M derisked. Runs started with "medium" ran at "high" (the GLM chat template has
+no medium) and are listed as high. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM. Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
 </div></div></body></html>"""
 
 
@@ -256,7 +272,7 @@ def main():
         # CHROMIUM_PATH: use a specific Chromium build if Playwright's own is not installed
         browser = pw.chromium.launch(executable_path=os.environ.get("CHROMIUM_PATH") or None)
         page = browser.new_page(viewport={"width": 1960, "height": 900}, device_scale_factor=2)
-        glm = build_family_html(collect_family("GLM-5.3-Flash"), "GLM-5.3-Flash: every variant, every suite",
+        glm = build_family_html(*collect_family("GLM-5.3-Flash"), "GLM-5.3-Flash: every variant, every suite",
                                 "GLM-5.3-Flash with different quants, engines and reasoning levels, on the base, hard, "
                                 "practical and tool-calling suites.")
         for page_html, out in ((build_html(rows, n), OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),

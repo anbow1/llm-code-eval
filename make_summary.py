@@ -21,8 +21,9 @@ HERE = Path(__file__).resolve().parent
 def describe(label, model):
     """Readable model / quant / backend from the run label and model path (case-insensitive)."""
     m = f"{label} {model}".replace("\\", "/").lower()
-    backend = ("ExLlamaV3" if "exl3" in m else "Strata" if re.search(r"[_-]strata(?![a-z0-9])", m)
-               else "Maya" if re.search(r"[_-]maya(?![a-z0-9])", m) else "llama.cpp")
+    # the engine label wins over the file format: an EXL3 file run in Maya is a Maya run
+    backend = ("Maya" if re.search(r"[_-]maya(?![a-z0-9])", m) else "Strata" if re.search(r"[_-]strata(?![a-z0-9])", m)
+               else "ExLlamaV3" if "exl3" in m else "llama.cpp")
     bit = re.search(r"(\d\.\d+)\s*-?bit", m)
     bpw = re.search(r"(\d\.\d+)\s*-?bpw|(\d\.\d+)_exl3|exl3-(\d)(\d{2})", m)
     if re.search(r"27b|3\.8-27[_-]", m):
@@ -135,6 +136,9 @@ def load_runs(folder):
         name, quant, backend = describe(label, d.get("model", ""))
         gen_s = sum(r.get("gen_seconds") or 0 for r in d["results"])
         effort = s.get("reasoning_effort") or "default (xhigh)"
+        if name.startswith("GLM") and effort == "medium":
+            # GLM-5.3-Flash's chat template has no "medium": the runs labelled medium actually ran at high
+            effort = "high"
         if s.get("temperature") not in (None, 1.0):  # keep e.g. temperature-0 repeats apart from the usual runs
             effort += f", temp {s['temperature']:g}"
         runs.append({
@@ -205,7 +209,7 @@ def main():
         "GLM-5.3-Flash", "RESULTS_TABLE_GLM.md", "# Results table: GLM-5.3-Flash",
         "Every GLM-5.3-Flash variant that has been run, in all four suites. GLM-5.3-Flash is a large MoE model; on "
         "the RTX 5090 + 128 GB RAM most experts sit in system RAM, so it runs at 11–24 tok/s. The chat template "
-        "knows the levels `low` and `high` (and `max`); `medium` was used with the Maya engine.")
+        "knows the levels `low`, `high` and `max`; runs started with `medium` actually ran at `high` and are listed as `high`.")
 
 
 def rank_settings(runs):

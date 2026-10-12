@@ -1,1 +1,0 @@
-The user asked to return the module in one ```python block, but system prompt says "in the language asked for" — python.
