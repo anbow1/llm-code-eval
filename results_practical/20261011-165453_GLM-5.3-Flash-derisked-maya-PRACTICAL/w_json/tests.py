@@ -12,7 +12,7 @@ else:
 
 EXP = [("Piotr Zieliński", "A-2231", "damaged", False), ("Maria Lewandowska", "A-2240", "late", True),
        ("K. Wójcik", "A-2252", "wrong_item", False), ("Tomasz Kamiński", "A-2261", "refund_request", False),
-       ("Agnieszka Dąbrowska", None, "other", False), ("Paweł Szymański", "A-2270", "damaged", True)]
+       ("Agnieszka Dąbrowska", None, "other", False), ("Paweł Szymański", "A-2270", ("damaged", "late"), True)]
 D = S.DATA
 def t(): assert isinstance(D, list) and len(D) == 6, f"got {type(D).__name__} of length {len(D) if hasattr(D, '__len__') else '?'}"
 TESTS.append(("array of 6 records", t))
@@ -25,7 +25,8 @@ TESTS.append(("every record matches the schema", t))
 for i, (cust, oid, issue, urg) in enumerate(EXP):
     def t(i=i, oid=oid): assert D[i]["order_id"] == oid, D[i]["order_id"]
     TESTS.append((f"#{i + 1} order_id", t))
-    def t(i=i, issue=issue): assert D[i]["issue"] == issue, D[i]["issue"]
+    def t(i=i, issue=issue):  # message 6 is both late and damaged: either label is right
+        assert D[i]["issue"] in (issue if isinstance(issue, tuple) else (issue,)), D[i]["issue"]
     TESTS.append((f"#{i + 1} issue", t))
     def t(i=i, urg=urg): assert D[i]["urgent"] is urg, D[i]["urgent"]
     TESTS.append((f"#{i + 1} urgent", t))

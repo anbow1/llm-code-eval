@@ -103,3 +103,7 @@
 - PASS at_most_12_tool_calls
 - PASS gave_final_answer
   - note: tool calls: 5 in 5 model turns
+
+## Re-graded 2026-10-12
+
+A test was fixed after this run; the saved answers were graded again: t_agent_fix 88% -> 100%. New overall: 98.4%.

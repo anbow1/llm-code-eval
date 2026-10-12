@@ -100,3 +100,7 @@
 - PASS missing SKU still None
 - PASS normalize_sku spec
 - PASS legacy function unchanged
+
+## Re-graded 2026-10-12
+
+A test was fixed after this run; the saved answers were graded again: w_json 95% -> 100%. New overall: 97.6%.

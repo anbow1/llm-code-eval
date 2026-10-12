@@ -1,16 +1,16 @@
 {
   "name": "GLM-5.3-Flash-derisked-maya-PRACTICAL",
   "model": "local",
-  "python": 99.20634920634922,
+  "python": 97.61904761904763,
   "three": null,
   "tools": null,
-  "overall": 99.20634920634922,
+  "overall": 97.61904761904763,
   "summary": {
-    "python": 99.20634920634922,
+    "python": 97.61904761904763,
     "three": null,
     "tools": null,
-    "overall": 99.20634920634922,
-    "answered_score": 99.20634920634922,
+    "overall": 97.61904761904763,
+    "answered_score": 97.61904761904763,
     "tasks_total": 6,
     "tasks_answered": 6,
     "hit_max_tokens": 0,
@@ -110,7 +110,7 @@
     {
       "id": "w_refactor",
       "kind": "python",
-      "score": 1.0,
+      "score": 0.8571428571428571,
       "checks": {
         "same results on 43 inputs": true,
         "has parse_line": true,
@@ -118,9 +118,12 @@
         "has summarize": true,
         "to_pln": true,
         "parse_line": true,
-        "process_orders is short": true
+        "process_orders is short": false
       },
-      "notes": [],
+      "notes": [
+        "process_orders is short: AssertionError: process_orders body has 16 lines (max 15)",
+        "re-graded 2026-10-12 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 95.3,
@@ -159,7 +162,7 @@
     {
       "id": "w_json",
       "kind": "python",
-      "score": 0.9523809523809523,
+      "score": 1.0,
       "checks": {
         "array of 6 records": true,
         "every record matches the schema": true,
@@ -179,12 +182,12 @@
         "#5 issue": true,
         "#5 urgent": true,
         "#6 order_id": true,
-        "#6 issue": false,
+        "#6 issue": true,
         "#6 urgent": true,
         "customer names": true
       },
       "notes": [
-        "#6 issue: AssertionError: late"
+        "re-graded 2026-10-12 after a test fix"
       ],
       "status": "ok",
       "finish": "stop",

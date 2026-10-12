@@ -8,10 +8,10 @@ The repository has four test suites, kept apart everywhere:
 | Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` |
 | Default limits | lenient (comparable with older runs) | lenient | practical | practical |
 | Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` |
-| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | `RESULTS_TABLE_PRACTICAL.md` | `RESULTS_TABLE_TOOLS.md` |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) |
 | Compare | `python compare.py` | `--hard` | `--practical` | `--tools` |
 
-The practical and tool-calling suites are new (11 Oct 2026) and have no results yet; their tables appear after the first run.
+The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3-Flash has been run on them. All GLM-5.3-Flash variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md).
 
 Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
@@ -31,7 +31,7 @@ RTX 5090 32 GB + 128 GB RAM:
 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | low | 100.0% | 5.0 min | 30.5k | 108.1 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | low (mean of 2 runs) | 95.5% | 5.2 min | 36.2k | 124.5 |
 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | medium | 100.0% | 6.5 min | ~42.7k | 114.7 |
-| Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | medium (mean of 2 runs) | 96.0% | 7.2 min | 31.1k | 78.0 |
+| Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | medium (mean of 3 runs) | 97.3% | 8.2 min | 37.6k | 80.8 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high (mean of 2 runs) | 99.3% | 25.8 min | ~18.8k | 12.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | low | 100.0% | 31.3 min | 65.6k | 35.3 |
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
@@ -44,7 +44,7 @@ RTX 5090 32 GB + 128 GB RAM:
 | Qwen3.8-27B | EXL3 3.0 bpw | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
 | Qwen3.8-27B | EXL3 2.2 bpw | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
 
-All 52 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+All 59 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
 ## Hard suite: results (27 Sep – 6 Oct 2026)
 
@@ -73,9 +73,25 @@ Settings with one run have the same score in both, so only repeated ones move. O
 - **Qwen3.8-27B EXL3 3.0 bpw on the 16 GB card is the steadiest repeated setting:** 92–94% in both runs.
 - **The top four by mean rest on one run each.** Repeating them is the most useful next test.
 
-All 28 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+All 35 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
 Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
+
+## GLM-5.3-Flash: all variants
+
+GLM-5.3-Flash has its own table across all four suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md). Summary (mean score, number of runs):
+
+| Variant | Effort | Base | Hard | Practical | Tools |
+|---|---|---|---|---|---|
+| GSQ-RCO 3.5-bit maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
+| derisked maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
+| EXL3 3.05 bpw | high | **99.3%** (2) | 80.0% (3) | – | – |
+| GSQ-RCO 3.5-bit | high | 93.9% (1) | 82.9% (2) | – | – |
+| GSQ-RCO 3.5-bit maya | high | 99.2% (1) | – | – | – |
+
+- **On the base suite GLM needs `high`.** EXL3 and the maya variant both score about 99% there.
+- **On the hard suite `high` is too slow.** It hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs. The maya variants at `medium` solved that task in 4 of 6 runs, in 24–47 minutes, and score 84–90%.
+- **On the new practical and tool-calling suites GLM is close to perfect.** These tasks need little thinking, so its low speed (11–24 tok/s) matters less: about 3–5 minutes per suite.
 
 ## Setup (once)
 

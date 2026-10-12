@@ -49,7 +49,10 @@ def describe(label, model):
             quant = "?"
         if re.search(r"[_-]nomtp(?![a-z0-9])", m):
             quant += " no MTP"
-        return "GLM-5.3-Flash", quant, backend
+        if re.search(r"[_-]maya(?![a-z0-9])", m):
+            quant = "maya" if quant == "?" else quant + " maya"
+        name = "GLM-5.3-Flash derisked" if "derisked" in m else "GLM-5.3-Flash"
+        return name, quant, backend
     if "flash-next" in m or "qwen" in m:
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m:
@@ -197,6 +200,11 @@ def main():
                   "(none) = stopped while still thinking, no answer.", ""]
         (HERE / table).write_text("\n".join(lines), encoding="utf-8")
         print("\n".join(lines))
+    write_family_table(
+        "GLM-5.3-Flash", "RESULTS_TABLE_GLM.md", "# Results table: GLM-5.3-Flash",
+        "Every GLM-5.3-Flash variant that has been run, in all four suites. GLM-5.3-Flash is a large MoE model; on "
+        "the RTX 5090 + 128 GB RAM most experts sit in system RAM, so it runs at 11–24 tok/s. The chat template "
+        "knows the levels `low` and `high` (and `max`); `medium` was used with the maya variants.")
 
 
 def rank_settings(runs):
@@ -212,6 +220,70 @@ def rank_settings(runs):
                     # best run; on a tie the faster one
                     "best": min(rs, key=lambda r: (-r["overall"], r["minutes"]))})
     return out
+
+
+def write_family_table(prefix, path, title, intro):
+    """One file for one model family (e.g. GLM-5.3-Flash): every variant in every suite, side by side."""
+    mean = lambda xs: sum(xs) / len(xs) if xs else None
+    per_suite = {}
+    for suite, (folder, *_r) in SUITES.items():
+        per_suite[suite] = [r for r in load_runs(folder) if r["model"].startswith(prefix)]
+    keys = []
+    for rs in per_suite.values():
+        for r in rs:
+            k = (r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])
+            if k not in keys:
+                keys.append(k)
+    if not keys:
+        return
+
+    def cell(suite, k):
+        rs = [r for r in per_suite[suite] if (r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]) == k]
+        if not rs:
+            return "–", None
+        sc = mean([r["overall"] for r in rs])
+        return f"**{sc:.1f}%** ({len(rs)}×, {mean([r['minutes'] for r in rs]):.0f} min)", sc
+
+    rows = []
+    for k in keys:
+        cells = [cell(su, k) for su in SUITES]
+        done = [c[1] for c in cells if c[1] is not None]
+        rows.append((k, cells, mean(done), len(done)))
+    rows.sort(key=lambda x: (-x[3], -(x[2] or 0)))
+    lines = [title, "", intro, "",
+             "## All suites", "",
+             "Mean score per suite, with the number of runs and the mean time of one run. Settings are sorted by how "
+             "many suites they were run on, then by the mean of their suite scores.", "",
+             "| # | Model | Quant | Backend | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites |",
+             "|---|---|---|---|---|" + "---|" * len(SUITES) + "---|"]
+    for i, ((model, quant, backend, gpu, effort), cells, m, nsu) in enumerate(rows, 1):
+        lines.append(f"| {i} | {model} | {quant} | {backend} | {effort} | " + " | ".join(c[0] for c in cells)
+                     + f" | {m:.1f}% ({nsu} of {len(SUITES)}) |")
+    for suite, rs in per_suite.items():
+        if not rs:
+            continue
+        groups = {}
+        for r in rs:
+            groups.setdefault((r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]), []).append(r)
+        lines += ["", f"## {suite.capitalize()} suite", "",
+                  "| Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) "
+                  "| Mean tokens | Avg tok/s (from time) |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+        for (model, quant, backend, gpu, effort), g in sorted(groups.items(), key=lambda kv: -mean([r["overall"] for r in kv[1]])):
+            sc = [r["overall"] for r in g]
+            tok = [r["tokens"] for r in g if r["tokens"]]
+            gen = sum(r["gen_minutes"] for r in g)
+            broken = 100 * sum(r["broken"] for r in g) / max(1, sum(r["n_tasks"] for r in g))
+            ap = "~" if any(r["tokens_approx"] for r in g) else ""
+            lines.append(f"| {model} | {quant} | {backend} | {effort} | {len(g)} | **{mean(sc):.1f}%** "
+                         f"| {f'{min(sc):.0f}–{max(sc):.0f}' if len(g) > 1 else '–'} "
+                         f"| {mean([r['practical'] for r in g]):.1f}% | {broken:.0f}% | {mean([r['minutes'] for r in g]):.1f} "
+                         f"| {ap}{mean(tok) / 1000:.1f}k | {sum(tok) / (gen * 60):.1f} |")
+    lines += ["", "Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. "
+              "Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, "
+              "looped, no final answer). `~` = token count partly estimated. All other suites' tables: "
+              "RESULTS_TABLE*.md.", ""]
+    (HERE / path).write_text("\n".join(lines), encoding="utf-8")
 
 
 def when(run):

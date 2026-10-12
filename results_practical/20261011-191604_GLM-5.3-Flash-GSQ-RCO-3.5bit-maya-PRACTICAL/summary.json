@@ -1,16 +1,16 @@
 {
   "name": "GLM-5.3-Flash-GSQ-RCO-3.5bit-maya-PRACTICAL",
   "model": "local",
-  "python": 96.82539682539682,
+  "python": 97.61904761904763,
   "three": null,
   "tools": null,
-  "overall": 96.82539682539682,
+  "overall": 97.61904761904763,
   "summary": {
-    "python": 96.82539682539682,
+    "python": 97.61904761904763,
     "three": null,
     "tools": null,
-    "overall": 96.82539682539682,
-    "answered_score": 96.82539682539682,
+    "overall": 97.61904761904763,
+    "answered_score": 97.61904761904763,
     "tasks_total": 6,
     "tasks_answered": 6,
     "hit_max_tokens": 0,
@@ -161,7 +161,7 @@
     {
       "id": "w_json",
       "kind": "python",
-      "score": 0.9523809523809523,
+      "score": 1.0,
       "checks": {
         "array of 6 records": true,
         "every record matches the schema": true,
@@ -181,12 +181,12 @@
         "#5 issue": true,
         "#5 urgent": true,
         "#6 order_id": true,
-        "#6 issue": false,
+        "#6 issue": true,
         "#6 urgent": true,
         "customer names": true
       },
       "notes": [
-        "#6 issue: AssertionError: late"
+        "re-graded 2026-10-12 after a test fix"
       ],
       "status": "ok",
       "finish": "stop",

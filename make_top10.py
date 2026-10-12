@@ -27,7 +27,8 @@ TOP = 10
 
 def collect():
     groups = defaultdict(lambda: {"base": [], "hard": []})
-    for suite, (folder, *_rest) in ms.SUITES.items():
+    for suite in ("base", "hard"):  # the image ranks by these two; the newer suites have their own tables
+        folder = ms.SUITES[suite][0]
         for r in ms.load_runs(folder):
             groups[(r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])][suite].append(r)
     rows = []

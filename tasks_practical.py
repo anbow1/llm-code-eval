@@ -220,7 +220,7 @@ Return the complete module in one ```python block.
 ```python
 {REPORT_PY}```"""
 REFACTOR_TESTS = r'''
-import ast, inspect, random
+import ast, inspect, random, textwrap
 REF = {}
 exec(__ORIGINAL__, REF)
 ref = REF["process_orders"]
@@ -262,8 +262,13 @@ def t():
     raise AssertionError("parse_line did not raise for a bad line")
 TESTS.append(("parse_line", t))
 def t():
-    n = len([l for l in inspect.getsource(S.process_orders).splitlines() if l.strip() and not l.strip().startswith('#')])
-    assert n <= 15 + 8, f"process_orders has {n} non-blank lines"  # +8 for signature and docstring
+    # count the body only: no signature, no docstring, no blank or comment lines
+    src = inspect.getsource(S.process_orders)
+    fn = ast.parse(textwrap.dedent(src)).body[0]
+    body = fn.body[1:] if isinstance(fn.body[0], ast.Expr) and isinstance(fn.body[0].value, ast.Constant) else fn.body
+    lines = textwrap.dedent(src).splitlines()[body[0].lineno - 1:fn.end_lineno] if body else []
+    n = len([l for l in lines if l.strip() and not l.strip().startswith("#")])
+    assert n <= 15, f"process_orders body has {n} lines (max 15)"
 TESTS.append(("process_orders is short", t))
 '''.replace("__ORIGINAL__", repr(REPORT_PY))
 
@@ -355,7 +360,7 @@ Reply with the JSON array only, in one ```json block, no comments.
 JSON_TESTS = r'''
 EXP = [("Piotr Zieliński", "A-2231", "damaged", False), ("Maria Lewandowska", "A-2240", "late", True),
        ("K. Wójcik", "A-2252", "wrong_item", False), ("Tomasz Kamiński", "A-2261", "refund_request", False),
-       ("Agnieszka Dąbrowska", None, "other", False), ("Paweł Szymański", "A-2270", "damaged", True)]
+       ("Agnieszka Dąbrowska", None, "other", False), ("Paweł Szymański", "A-2270", ("damaged", "late"), True)]
 D = S.DATA
 def t(): assert isinstance(D, list) and len(D) == 6, f"got {type(D).__name__} of length {len(D) if hasattr(D, '__len__') else '?'}"
 TESTS.append(("array of 6 records", t))
@@ -368,7 +373,8 @@ TESTS.append(("every record matches the schema", t))
 for i, (cust, oid, issue, urg) in enumerate(EXP):
     def t(i=i, oid=oid): assert D[i]["order_id"] == oid, D[i]["order_id"]
     TESTS.append((f"#{i + 1} order_id", t))
-    def t(i=i, issue=issue): assert D[i]["issue"] == issue, D[i]["issue"]
+    def t(i=i, issue=issue):  # message 6 is both late and damaged: either label is right
+        assert D[i]["issue"] in (issue if isinstance(issue, tuple) else (issue,)), D[i]["issue"]
     TESTS.append((f"#{i + 1} issue", t))
     def t(i=i, urg=urg): assert D[i]["urgent"] is urg, D[i]["urgent"]
     TESTS.append((f"#{i + 1} urgent", t))

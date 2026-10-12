@@ -1,4 +1,4 @@
-# Local model coding test: summary (25 Sep – 6 Oct 2026)
+# Local model coding test: summary (25 Sep – 11 Oct 2026)
 
 ## TL;DR
 
@@ -17,6 +17,7 @@
 - **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high` on the base suite, but on the hard suite even `high` runs out of time.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
+- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). The new "maya" variants at `medium` are its best setting on the hard suite (89.9% over 4 runs), and GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 
 ## Hardware and settings
@@ -297,13 +298,51 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
   - Qwen3.8-27B Q6 at `medium`: 97.6%;
   - Qwen3.8-27B EXL3 6.0 bpw at `low`: 94.4%.
 
-**New suites, no results yet:**
+**New suites** (first results in Part 5):
 - **`--suite practical`:** editing an existing module, fixing a bug from a CI failure, a refactor, SQL, JSON extraction, and a bug hunt in a ~25k-token module.
 - **`--suite tools`:** tool calling against a fake shop backend, including a small coding agent.
 
 **New stability measures:**
 - **`--repeat N`** runs a suite N times. The tables then add a stability section: standard deviation, worst run, tasks solved in every run, identical answers (useful with `--temperature 0`).
 - **"Broken"** is the share of tasks where generation itself failed.
+
+# Part 5: GLM-5.3-Flash variants and the first practical and tool-calling runs (7–11 Oct)
+
+All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md). New runs, all on the RTX 5090:
+
+| Variant | Effort | Base | Hard | Practical | Tools |
+|---|---|---|---|---|---|
+| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | low | 86.3% (2 runs) | 81.1% (1) | – | – |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | medium | 89.5% (2) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit maya | high | 99.2% (1) | – | – | – |
+| GLM-5.3-Flash derisked maya | medium | – | 84.3% (2) | 97.6% (2) | 99.2% (2) |
+
+What "maya" and "derisked" stand for is not recorded in the run data; the tables treat them as a variant of the quant and of the model.
+
+**Hard suite: `medium` with maya is better than `high` without it.**
+- **Plain GLM at `high`** (EXL3 and GSQ-RCO) hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs and scored 80–83%.
+- **The maya variants at `medium`** solved `h_p3` in 4 of 6 runs, in 24–47 minutes, and scored 84–90%.
+- **The other 2 runs stopped mid-thought without an answer** (after about 4k and 16k tokens), the same failure seen with ExLlamaV3 before.
+- **Still too slow for practical use.** A full hard run takes 20–71 minutes. With the practical limits (10 min, 32k tokens per task) the maya variant drops from 89.9% to 73.2%.
+
+**Base suite.** Maya at `high` scored 99.2% in 15 min, about as good as EXL3 at `high` (99.3%) and faster. At `medium` it scored only 89.5%. Its mistakes were TypeScript errors (`renderer.getDelta()`, which does not exist) and `p2_sliding_median`.
+
+**Practical suite (first results).** Both variants scored 97.6%, in 3–5 minutes:
+- **`w_refactor` lost points:** `process_orders` stayed longer than the 15 lines asked for.
+- **`w_longctx` passed** (a ~25k-token prompt). So the server's context was large enough.
+
+**Tool-calling suite (first results).** 99–100% in 2–3 minutes:
+- every tool task passed, including the coding agent (5 tool calls, tests pass, the test file was left alone);
+- the only miss was in `t_error`, in one run.
+
+**Test fixes and re-grading (12 Oct).** Three checks were wrong, not the models. They were fixed and the saved answers graded again with the new `regrade.py`, without asking the model again:
+- **`t_agent_fix` "tests not modified"** failed on Windows because writing the file turned `\n` into `\r\n`. Now the comparison ignores line endings, so all four runs go from 88% to 100% on this task.
+- **`w_json` message 6** describes a parcel that was both late and crushed. Both `late` and `damaged` now count.
+- **`w_refactor` "process_orders is short"** counted the docstring too. Now it counts only the body (at most 15 lines, as the prompt says). Both derisked runs had 16 lines and lose this check.
+
+**Flash-Next UD-Q4_K_XL in Strata, base suite repeats (7 Oct).**
+- At `medium`: 100% in 10.3 min. Over 3 runs it now averages 97.3%.
+- At `low`: 94.6% in 6.7 min. It lost points on `p2_sliding_median`.
 
 ## Caveats
 
@@ -314,6 +353,7 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 - **Strata is a different engine from llama.cpp**, so its rows compare engines as well as files. The 29 Sep Qwen3.8-27B EXL3 folders were renamed to add `6.0bpw`, which was missing from the label.
 - **The two PCs are not directly comparable on time.** GPU, RAM and file size all differ.
 - **Specific files, not models.** The quants differ in size, maker and backend, so this compares specific files on this hardware.
+- **Unknown labels:** what "maya" and "derisked" (GLM, 9–11 Oct) mean is not recorded; their backend is assumed to be llama.cpp.
 - **Labels and folders:**
   - The labels `qwen27b-q6-temp0-*` are misleading: those runs used temperature 1.0, not 0.
   - Some 4080 folders were renamed after the run (e.g. `-low` dropped from the hard-suite labels, which ran at `medium`). The tables use the folder names.
@@ -330,6 +370,10 @@ Their raw data has been removed from `results/` and `results_hard/`; only these 
 - Qwen3.8-Flash-Next UD-Q4_K_XL, first attempt (2 tasks).
 - Qwen3.8-27B abliterated GSQ-RCO IQ3_XXS `xhigh` on the 4080 (1 task).
 - Qwen3.8-27B AP IQ3_S, hard suite on the 4080: three attempts stopped after the first task.
+- 6–9 Oct, removed on 12 Oct:
+  - Qwen3.8-Flash-Next GSQ-RCO IQ1_M in Strata: three base-suite attempts, each stopped after 3 tasks;
+  - Flash-Next UD-Q4_K_XL in Strata at `low`, hard suite: stopped after 1 task;
+  - GLM-5.3-Flash GSQ-RCO 3.5-bit maya: base `high` (2 tasks) and two hard-suite attempts (1 and 5 tasks).
 - GLM-5.3-Flash EXL3, hard suite on the 5090:
   - `high` on 26 Sep, stopped after 4 tasks;
   - `max` on 26 Sep: the server stopped answering (timeouts) and no task was answered;
