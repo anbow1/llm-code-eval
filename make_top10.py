@@ -8,6 +8,7 @@ top10.jpg       every setting (model + quant + backend + GPU + reasoning effort)
                 that setting's runs)
 top10_hard.jpg  hard suite only, two rankings side by side: by each setting's best run, and by the mean
                 of all its runs
+glm_flash.jpg   every GLM-5.3-Flash variant in all four suites
 
 Needs Playwright with Chromium, like run_eval.py (set CHROMIUM_PATH to use another build).
 """
@@ -22,6 +23,7 @@ import make_summary as ms
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "top10.jpg"
 OUT_HARD = HERE / "top10_hard.jpg"
+OUT_GLM = HERE / "glm_flash.jpg"
 TOP = 10
 
 
@@ -188,6 +190,64 @@ RTX 4080 16 GB + 32 GB RAM. Details: RESULTS_TABLE_HARD.md, SUMMARY.md.
 </div></div></body></html>"""
 
 
+def collect_family(prefix):
+    """Every setting of one model family, with its mean per suite."""
+    by = defaultdict(lambda: defaultdict(list))
+    for suite, (folder, *_r) in ms.SUITES.items():
+        for r in ms.load_runs(folder):
+            if r["model"].startswith(prefix):
+                by[(r["model"], r["quant"], r["backend"], r["effort"])][suite].append(r)
+    rows = []
+    for (model, quant, backend, effort), suites in by.items():
+        cells = {}
+        for su, rs in suites.items():
+            cells[su] = {"score": sum(r["overall"] for r in rs) / len(rs), "runs": len(rs),
+                         "minutes": sum(r["minutes"] for r in rs) / len(rs)}
+        mean = sum(c["score"] for c in cells.values()) / len(cells)
+        rows.append({"model": model, "quant": quant, "backend": backend, "effort": effort, "cells": cells,
+                     "mean": mean, "n": len(cells)})
+    rows.sort(key=lambda r: (-r["n"], -r["mean"]))
+    return rows
+
+
+def build_family_html(rows, title, lede):
+    e = html.escape
+    suites = list(ms.SUITES)
+    body = []
+    for i, r in enumerate(rows, 1):
+        tds = []
+        for su in suites:
+            c = r["cells"].get(su)
+            tds.append(f'<td>{bar(c["score"])}<div class="meta">{c["runs"]}× · {c["minutes"]:.0f} min</div></td>'
+                       if c else '<td class="none">–</td>')
+        body.append(f"""<tr>
+<td class="rank">{i}</td>
+<td><div class="model">{e(r['quant'])} · {e(r['backend'])}</div><div class="sub">{e(r['model'])}</div></td>
+<td>{e(r['effort'])}</td>{''.join(tds)}
+<td class="avg">{bar(r['mean'])}<div class="meta">{r['n']} of {len(suites)} suites</div></td>
+</tr>""")
+    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+{STYLE}
+.wrap {{ width:1640px; }}
+.meta {{ font-size:12px; color:var(--muted); margin-top:4px; }}
+td.none {{ color:var(--muted); text-align:center; }}
+tr:nth-child(3) td {{ background:none; }}
+</style></head><body><div class="wrap">
+<h1>{title}</h1>
+<p class="lede">{lede} {date.today():%d %b %Y}.</p>
+<table><thead><tr>
+<th>#</th><th>Variant<small>quant · engine</small></th><th>Effort</th>
+<th>Base<small>10 tasks</small></th><th>Hard<small>6 tasks</small></th><th>Practical<small>6 tasks</small></th>
+<th>Tools<small>7 tasks</small></th><th>Mean<small>of the suites run</small></th>
+</tr></thead><tbody>{''.join(body)}</tbody></table>
+<div class="notes">
+Mean score per suite over the runs of each setting (runs × mean minutes per run); bars span 50–100%. Sorted by the number
+of suites run, then by the mean, so the first rows are the best-tested. Maya, ExLlamaV3 and llama.cpp are inference engines;
+"derisked" is the model file GLM-5.3 Maya-M derisked. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM.
+Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
+</div></div></body></html>"""
+
+
 def main():
     from playwright.sync_api import sync_playwright
     rows, n = collect()
@@ -196,7 +256,11 @@ def main():
         # CHROMIUM_PATH: use a specific Chromium build if Playwright's own is not installed
         browser = pw.chromium.launch(executable_path=os.environ.get("CHROMIUM_PATH") or None)
         page = browser.new_page(viewport={"width": 1960, "height": 900}, device_scale_factor=2)
-        for page_html, out in ((build_html(rows, n), OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD)):
+        glm = build_family_html(collect_family("GLM-5.3-Flash"), "GLM-5.3-Flash: every variant, every suite",
+                                "GLM-5.3-Flash with different quants, engines and reasoning levels, on the base, hard, "
+                                "practical and tool-calling suites.")
+        for page_html, out in ((build_html(rows, n), OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),
+                               (glm, OUT_GLM)):
             page.set_content(page_html)
             page.locator(".wrap").screenshot(path=str(out), type="jpeg", quality=92)
             print(f"wrote {out.name}")

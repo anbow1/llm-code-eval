@@ -308,7 +308,7 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 
 # Part 5: GLM-5.3-Flash variants and the first practical and tool-calling runs (7–11 Oct)
 
-All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md). New runs, all on the RTX 5090:
+All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and [glm_flash.jpg](glm_flash.jpg). New runs, all on the RTX 5090:
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
