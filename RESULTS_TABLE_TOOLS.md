@@ -12,6 +12,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | medium | 2 | **100.0%** | 100–100 | 100.0% | 0% | 3.0 | 1.2k | 6.7 | 31.2 |
 | 2 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | medium | 2 | **99.2%** | 98–100 | 99.2% | 0% | 1.9 | 1.2k | 10.4 | 31.1 |
+| 3 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | 2 | **98.2%** | 98–98 | 98.2% | 0% | 2.0 | 1.2k | 10.2 | 31.1 |
 
 ## Stability (settings run 2+ times)
 
@@ -21,6 +22,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | medium | 1 | 2 | **100.0%** | 0.0 | 100.0% | 7/7 | 0% | 3/7 |
 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | medium | 1 | 2 | **99.2%** | 1.1 | 98.4% | 6/7 | 0% | 2/7 |
+| GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | 1 | 2 | **98.2%** | 0.0 | 98.2% | 6/7 | 0% | 2/7 |
 
 ## Every run
 
@@ -30,6 +32,8 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 2 | 11.10 19:09 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | medium | **100.0%** | n/a | n/a | 2.9 | 1.1k | 0.2k | 0.9k | **6.4** | 14 | 31.2 | 113.7 |
 | 3 | 11.10 19:12 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | medium | **100.0%** | n/a | n/a | 3.0 | 1.2k | 0.2k | 1.0k | **6.8** | 15 | 31.2 | 113.7 |
 | 4 | 11.10 14:03 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | medium | **98.4%** | n/a | n/a | 1.9 | 1.2k | 0.2k | 1.0k | **10.6** | 24 | 31.1 | 98.9 |
+| 5 | 12.10 20:04 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | **98.2%** | n/a | n/a | 1.9 | 1.1k | 0.2k | 0.9k | **9.8** | 24 | 31.1 | 100.5 |
+| 6 | 12.10 20:06 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | **98.2%** | n/a | n/a | 2.1 | 1.4k | 0.3k | 1.1k | **10.9** | 24 | 31.1 | 100.5 |
 
 ## Score per task (%)
 
@@ -39,6 +43,8 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 11.10 19:09 | GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 11.10 19:12 | GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 11.10 14:03 | GLM-5.3-Flash derisked Maya-M (Maya) / medium | 100 | 100 | 100 | 89 | 100 | 100 | 100 |
+| 12.10 20:04 | GLM-5.3-Flash derisked Maya-M (Maya) / high | 88 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 12.10 20:06 | GLM-5.3-Flash derisked Maya-M (Maya) / high | 88 | 100 | 100 | 100 | 100 | 100 | 100 |
 
 - **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks (including prompt processing and waiting for the first token). This is the real working speed.
 - **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing speed).

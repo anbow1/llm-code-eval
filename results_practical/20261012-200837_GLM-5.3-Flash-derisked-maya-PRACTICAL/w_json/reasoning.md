@@ -1,0 +1,3 @@
+Note message 6 has two issues: late and damaged. But "one record per message" — one record per message, so pick... it says extract one record per message. But two issues. Choose "damaged" since it's the main? Or "late"? The message emphasizes both. I'll pick "damaged" since the item is broken... Actually "late" was the initial complaint, but the final state: box crushed, lamp broken. I'll choose "damaged". urgent true (URGENT).
+
+Order ID for msg 3: A-2252 (corrected).

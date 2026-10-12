@@ -1,0 +1,5 @@
+Straightforward. Grid 30x30 in XY plane centered. Camera at z distance to see whole grid with margin. FOV 50, grid extent ~30 units (from -14.5 to 14.5... actually 29 * spacing + 0.8 ≈ 29.8, half ~14.9). Distance needed: half height / tan(fov/2) = 14.9 / tan(25°) ≈ 31.96. Use z = 36 with margin. Use min of aspect handling? Just place at z=38; vertical fit governs for landscape; for narrow screens horizontal extent needs more: horizontal half fov = atan(tan(25°)*aspect). If aspect < 1, need larger distance. Could compute distance dynamically: fit both. Simpler: compute z so grid fits: zMax = halfSize / tan(fov/2) for vertical and halfSize / (tan(fov/2)*aspect) for horizontal; take max, add margin factor 1.25. Set on resize? Camera "no movement" — but on resize we adjust aspect anyway; recompute position to keep visible. That's fine.
+
+Raycast: need raycasting to work with InstancedMesh of MeshBasicMaterial — raycaster works with instanced mesh geometry regardless of material. Use raycaster.setFromCamera(ndc, camera); intersectObject(mesh). Toggle via stored state array.
+
+instanceColor: after setColorAt, set mesh.instanceColor.needsUpdate = true.

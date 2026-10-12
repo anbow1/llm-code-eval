@@ -1,0 +1,25 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_e389ceaae3bc4e9ebba515bf",
+        "name": "create_ticket",
+        "arguments": "{\"customer_id\":314,\"due_date\":\"2026-10-16\",\"priority\":\"urgent\",\"tags\":[\"mobile\", \"payments\"],\"title\":\"Checkout crash on iOS card payment\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "create_ticket",
+    "arguments": "{\"customer_id\":314,\"due_date\":\"2026-10-16\",\"priority\":\"urgent\",\"tags\":[\"mobile\", \"payments\"],\"title\":\"Checkout crash on iOS card payment\"}",
+    "result": "{\"ticket_id\": \"T-5521\", \"status\": \"open\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "Ticket **T-5521** has been opened for customer 314 — \"Checkout crash on iOS card payment\", priority urgent, due 2026-10-16, tagged mobile and payments.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

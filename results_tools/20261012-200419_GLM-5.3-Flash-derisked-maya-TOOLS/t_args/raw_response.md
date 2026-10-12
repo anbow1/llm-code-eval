@@ -1,0 +1,1 @@
+Ticket **T-5521** has been opened for customer 314 — "Checkout crash on iOS card payment", priority urgent, due 2026-10-16, tagged mobile and payments.

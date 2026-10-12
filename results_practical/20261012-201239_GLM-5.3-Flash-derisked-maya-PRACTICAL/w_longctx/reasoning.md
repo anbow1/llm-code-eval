@@ -1,0 +1,1 @@
+Bug: normalize_sku only removes spaces, not tabs/newlines. Fix: use "".join(raw.split()).upper() — split() handles all whitespace. But note " ab-12 x " -> split gives ["ab-12","x"], join -> "ab-12x" -> upper "AB-12X". Good. But the docstring says dashes kept; split removes all whitespace including inside. Fix normalize_sku only; find_product unchanged but include both.

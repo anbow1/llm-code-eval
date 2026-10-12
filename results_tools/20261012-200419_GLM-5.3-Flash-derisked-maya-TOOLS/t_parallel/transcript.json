@@ -1,0 +1,45 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_723d04907bf14076a1149aba",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1001\"}"
+      },
+      {
+        "id": "call_b9b515e102ec453288df7535",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1002\"}"
+      },
+      {
+        "id": "call_3dbb2351b9bb4b868589bdd1",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1003\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1001\"}",
+    "result": "{\"order_id\": \"A-1001\", \"status\": \"delivered on 2026-08-16\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1002\"}",
+    "result": "{\"order_id\": \"A-1002\", \"status\": \"in transit, at the Warsaw sorting hub\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1003\"}",
+    "result": "{\"order_id\": \"A-1003\", \"status\": \"waiting for pickup in parcel locker KRA-12\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "- **A-1001:** Delivered on 2026-08-16.\n- **A-1002:** In transit, currently at the Warsaw sorting hub.\n- **A-1003:** Waiting for pickup in parcel locker KRA-12.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

@@ -1,0 +1,1 @@
+Record 2: trip tomorrow morning — deadline within 48 hours → urgent true. Record 6: URGENT. Record 1: not urgent. Record 3: order A-2252, wrong_item.

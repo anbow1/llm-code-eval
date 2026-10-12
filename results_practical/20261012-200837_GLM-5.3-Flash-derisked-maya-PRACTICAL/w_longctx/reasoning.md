@@ -1,0 +1,1 @@
+Bug: normalize_sku only removes spaces, not tabs/newlines. Fix: use "".join(raw.split()).upper().
