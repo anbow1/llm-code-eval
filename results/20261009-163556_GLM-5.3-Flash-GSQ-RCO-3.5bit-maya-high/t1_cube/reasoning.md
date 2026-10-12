@@ -1,0 +1,1 @@
+Create a simple TypeScript Three.js file. Ensure strict typing, __ready after first frame.

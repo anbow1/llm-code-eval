@@ -1,0 +1,10 @@
+```json
+[
+  {"customer": "Piotr Zieliński", "order_id": "A-2231", "issue": "damaged", "urgent": false},
+  {"customer": "Maria Lewandowska", "order_id": "A-2240", "issue": "late", "urgent": true},
+  {"customer": "K. Wójcik", "order_id": "A-2252", "issue": "wrong_item", "urgent": false},
+  {"customer": "Tomasz Kamiński", "order_id": "A-2261", "issue": "refund_request", "urgent": false},
+  {"customer": "Agnieszka Dąbrowska", "order_id": null, "issue": "other", "urgent": false},
+  {"customer": "Paweł Szymański", "order_id": "A-2270", "issue": "damaged", "urgent": true}
+]
+```

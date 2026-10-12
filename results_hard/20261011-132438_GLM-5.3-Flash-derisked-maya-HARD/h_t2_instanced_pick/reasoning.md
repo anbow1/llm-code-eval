@@ -1,0 +1,1 @@
+User asks for a single TypeScript file, static scene, click toggle. No animation needed. Just output code block.

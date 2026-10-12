@@ -1,0 +1,1 @@
+Basic Three.js scene with rotating cube. Ensure strict TypeScript compile: renderer.setAnimationLoop callback types. Handle resize. Expose globals. Set __ready after first frame.

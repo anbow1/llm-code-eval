@@ -1,0 +1,1 @@
+100x100 grid, spacing say 1.2. Camera angled. Radial wave from center (0,0). Use dummy Object3D reused. Colors gradient by grid position — set once. Update Y each frame with setMatrixAt, instanceMatrix.needsUpdate = true.

@@ -1,0 +1,1 @@
+Raycaster on pointerdown. Cubes at XY plane (z=0), camera at +z. Grid spacing e.g. 1.2, cube size 1. Use raycaster.intersectObjects(cubes). Canvas bounding rect: renderer.domElement.getBoundingClientRect().

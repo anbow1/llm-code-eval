@@ -1,0 +1,1 @@
+Use raycaster with instanceId, needsUpdate on instanceColor. Grid centered: offset -(29)/2 = -14.5. Camera z distance to fit 30 units: FOV 50, distance = 15/tan(25°) ≈ 32.2, add margin → z=40.

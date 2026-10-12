@@ -1,0 +1,1 @@
+Heap-based Kahn's algorithm. Self-loop is a cycle; duplicates fine. Use adjacency lists and indegrees; detect remaining nodes.

@@ -1,0 +1,1 @@
+Let me write the file. Plain objects as ball state, physics step with substeps, wall and ball collisions, elastic.

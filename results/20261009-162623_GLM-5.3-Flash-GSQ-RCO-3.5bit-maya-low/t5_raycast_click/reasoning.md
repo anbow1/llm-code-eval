@@ -1,0 +1,1 @@
+Cube geometry: BoxGeometry(0.8,0.8,0.8), spacing 1. Grid centered: positions (i-2)*1. Camera at z such that grid fits. Grid size 5x5 span ~4.8. Camera fov 50, distance ~7.

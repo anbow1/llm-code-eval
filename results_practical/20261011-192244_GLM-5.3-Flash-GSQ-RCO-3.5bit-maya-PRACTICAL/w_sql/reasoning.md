@@ -1,0 +1,7 @@
+Careful with "top_customers": customers with highest revenue in 2026 — should it include customers with zero revenue? "the 3 customers with the highest revenue" — presumably only those with revenue > 0? Ambiguous; ties by name. I'll include only customers with revenue, ordered by revenue desc, name asc, limit 3. Actually if fewer than 3 customers have revenue... LIMIT 3 handles it. But should customers with zero revenue appear? Probably not — "highest revenue" implies positive. I'll use HAVING revenue > 0? Hmm, could also include zero. Safer to include only paid revenue > 0? Common solution: join paid orders in 2026, group, order by revenue desc, name, limit 3. Customers with no paid orders simply don't appear. That's typical.
+
+avg_items_per_order: average of total qty per paid order, per country. Paid order — all paid orders, not just 2026? Spec doesn't mention year, so all time. Per country of the customer. Avg of sums: AVG over per-order sums. Implement subquery grouping items per order, then avg per country.
+
+monthly_revenue: substr(ordered_at,1,7) = '2026-XX', group by month, only months with revenue (group by inherently gives only months present), order by month.
+
+never_paid: customers where not exists paid order, sorted by name.

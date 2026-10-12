@@ -1,0 +1,8 @@
+[
+  {
+    "turn": 1,
+    "assistant": "391",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

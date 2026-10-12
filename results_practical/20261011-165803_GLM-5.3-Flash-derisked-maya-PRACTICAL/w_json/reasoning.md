@@ -1,0 +1,1 @@
+Record 2: late, deadline tomorrow → urgent. Record 6: URGENT. Record 1: damaged. Record 3: wrong_item. Record 4: refund_request. Record 5: other, null order, not urgent.

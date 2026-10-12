@@ -1,0 +1,1 @@
+Implement Kahn's algorithm with a heap for lexicographically smallest order. Detect cycle if result length < n.

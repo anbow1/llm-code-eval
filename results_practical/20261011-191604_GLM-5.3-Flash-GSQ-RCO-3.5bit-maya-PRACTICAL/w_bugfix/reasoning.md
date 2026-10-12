@@ -1,0 +1,3 @@
+business_days_between: loop should exclude end (current < end), and if end <= start return 0. Currently `current <= end` includes end. With start=Oct 5 (Mon), end=Oct 12 (Mon, excluded): business days Oct 5-9 = 5. Fix: while current < end; also handle end <= start -> 0 (with <, end == start gives 0 already; end < start gives 0 too).
+
+add_business_days: needs to skip holidays and weekends. Add `and current not in holidays`.

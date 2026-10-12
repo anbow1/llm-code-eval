@@ -1,0 +1,52 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_01425e69605e44fb803354be",
+        "name": "get_exchange_rate",
+        "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}"
+      },
+      {
+        "id": "call_f7df0d3ceffb4284a7749f23",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-9999\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_exchange_rate",
+    "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}",
+    "result": "{\"error\": \"503 Service Unavailable: rate service temporarily down, try again\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-9999\"}",
+    "result": "{\"error\": \"order A-9999 not found\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_54fba40fa8d4446194a1dddc",
+        "name": "get_exchange_rate",
+        "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_exchange_rate",
+    "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}",
+    "result": "{\"base\": \"EUR\", \"quote\": \"PLN\", \"rate\": 4.27}"
+  },
+  {
+    "turn": 3,
+    "assistant": "Here's what I found:\n\n**Currency conversion:** Today's rate is 1 EUR = 4.27 PLN, so 250 EUR ≈ **1,067.50 PLN**.\n\n**Order A-9999:** Unfortunately, no order with that ID exists in our system. Could you double-check the order number? It should be in the format A-XXXX (e.g., A-1234), which you can find in your order confirmation email. If you give me the correct number (or your name/email), I'll look it up for you.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

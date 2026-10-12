@@ -1,0 +1,3 @@
+- **A-1001:** Delivered on 2026-08-16.
+- **A-1002:** In transit, currently at the Warsaw sorting hub.
+- **A-1003:** Waiting for pickup at parcel locker KRA-12.

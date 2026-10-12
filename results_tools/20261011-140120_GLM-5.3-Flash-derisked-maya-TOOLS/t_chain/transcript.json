@@ -1,0 +1,59 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_5c38af9cc15a4459b7d2c08d",
+        "name": "search_customers",
+        "arguments": "{\"query\":\"jan.nowak@example.com\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "search_customers",
+    "arguments": "{\"query\":\"jan.nowak@example.com\"}",
+    "result": "[{\"id\": 207, \"name\": \"Jan Nowak\", \"email\": \"jan.nowak@example.com\", \"city\": \"Poznań\"}]"
+  },
+  {
+    "turn": 2,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_18f0f5d9a1d44162a9cbc93d",
+        "name": "search_orders",
+        "arguments": "{\"customer_id\":207}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "search_orders",
+    "arguments": "{\"customer_id\":207}",
+    "result": "[{\"id\": \"A-1042\", \"customer_id\": 207, \"date\": \"2026-10-02\", \"total\": 349.5, \"status\": \"delivered\"}, {\"id\": \"A-1038\", \"customer_id\": 207, \"date\": \"2026-09-20\", \"total\": 59.0, \"status\": \"delivered\"}, {\"id\": \"A-1001\", \"customer_id\": 207, \"date\": \"2026-08-14\", \"total\": 129.99, \"status\": \"delivered\"}]"
+  },
+  {
+    "turn": 3,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_4d29f774a9d448278f3f8d08",
+        "name": "refund_order",
+        "arguments": "{\"amount\":349.5,\"order_id\":\"A-1042\",\"reason\":\"damaged\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "refund_order",
+    "arguments": "{\"amount\":349.5,\"order_id\":\"A-1042\",\"reason\":\"damaged\"}",
+    "result": "{\"refund_id\": \"R-88017\", \"order_id\": \"A-1042\", \"amount\": 349.5, \"status\": \"refunded\"}"
+  },
+  {
+    "turn": 4,
+    "assistant": "Jan Nowak's most recent order was **A-1042** (delivered, total 349.50 PLN). I've refunded it in full.\n\n**Refund number: R-88017** — 349.50 PLN, reason: damaged.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

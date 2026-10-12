@@ -1,0 +1,1 @@
+Hand-made BufferGeometry: 128x128 vertices grid, 20x20 units. Positions, colors, indices. Value noise function. Compute normals. Standard material vertexColors. Lights, OrbitControls with damping.

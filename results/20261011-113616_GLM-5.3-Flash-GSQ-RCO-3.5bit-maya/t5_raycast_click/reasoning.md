@@ -1,0 +1,1 @@
+Raycaster on pointerdown. 25 meshes, each own material. Grid spacing with gaps. Compute raycast using canvas bounding rect.

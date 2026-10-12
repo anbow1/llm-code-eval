@@ -1,0 +1,2 @@
+--- turn 3 ---
+Discount: 0.25 means 25% off. line_total(100,2,0.25) should be 150. So discount is a fraction, not percent. Fix: (1 - discount). Shipping: free at >= 200, so `subtotal >= 200`. cart_total test: 100 + 20 = 120 subtotal, shipping 14.99 → 134.99. OK.

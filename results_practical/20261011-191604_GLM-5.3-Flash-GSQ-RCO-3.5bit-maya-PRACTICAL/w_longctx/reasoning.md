@@ -1,0 +1,1 @@
+Bug: normalize_sku only removes spaces, not tabs/newlines. Fix to remove all whitespace. Use "".join(raw.split()).upper() — but split() removes all whitespace including tabs and newlines. Also handle \u00a0? split() handles unicode whitespace too. Keep dashes.

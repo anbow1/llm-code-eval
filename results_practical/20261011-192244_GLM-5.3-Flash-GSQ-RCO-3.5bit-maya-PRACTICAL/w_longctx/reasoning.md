@@ -1,0 +1,1 @@
+Bug: normalize_sku only removes spaces, not tabs/newlines. Fix to remove all whitespace. Provide normalize_sku (and maybe find_product unchanged). Reply with corrected functions only.

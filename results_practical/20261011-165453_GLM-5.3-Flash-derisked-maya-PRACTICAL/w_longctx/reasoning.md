@@ -1,0 +1,1 @@
+Fix normalize_sku to remove all whitespace, not just spaces.

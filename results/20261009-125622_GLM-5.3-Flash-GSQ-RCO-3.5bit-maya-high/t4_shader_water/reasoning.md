@@ -1,0 +1,1 @@
+Simple task. Write TypeScript with shader material, waves in vertex shader, height varying, color ramp in fragment.

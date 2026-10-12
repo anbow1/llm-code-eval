@@ -1,0 +1,1 @@
+Add category param and new function, keeping low_stock behavior otherwise.

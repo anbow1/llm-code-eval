@@ -1,0 +1,1 @@
+PointLight intensity with physically correct: use decay 2 default, intensity ~ e.g. 200 (r=10, intensity = 300 gives brightness 3 at 10). Use intensity 400.
