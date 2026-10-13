@@ -1,0 +1,3 @@
+Messages 2 and 6 both urgent (trip tomorrow = within 48 hours; URGENT + week late... the crushed box is urgent per "URGENT"). Message 6 has two issues? "one record per message" — pick one issue. Week late and damaged. Choose "damaged"? Or "late"? Urgent flag true. Hmm. One record per message; issue one value. The dominant complaint: box crushed, lamp broken — damaged. But late too. I'll pick "damaged" since that's the final state. Actually late a week... I'll go damaged.
+
+Order_id formats: A2252 corrected to A-2252. Message 5 null.

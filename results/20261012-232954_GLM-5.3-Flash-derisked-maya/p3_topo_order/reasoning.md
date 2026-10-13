@@ -1,0 +1,3 @@
+Kahn's algorithm with a min-heap. Detect cycles via count of processed nodes < n. Self-loops: in-degree includes self-edge, node never reaches 0 unless... self-loop gives indegree increment from itself; when processing node, its self-edge won't be removed again since node already removed. Actually in Kahn's: indegree[b] += 1 for each edge. Node with self-loop has indegree ≥1 from itself, and that indegree never decreases (since a only processed once, before it's removed). So node never enters heap → cycle detected. Good.
+
+Complexity: O((n+m) log n) — fine for 400k edges.

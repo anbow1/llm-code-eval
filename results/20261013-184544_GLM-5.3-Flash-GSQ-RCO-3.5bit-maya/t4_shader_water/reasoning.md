@@ -1,0 +1,1 @@
+Simple task. Write TypeScript with Three.js, ShaderMaterial, plane rotated -PI/2, wave displacement in vertex shader, height-based coloring. Ensure strict compile: uniforms typed, cast HTMLElement for appendChild maybe not needed. Renderer canvas appended. Handle resize.

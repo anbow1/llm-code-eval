@@ -1,0 +1,1 @@
+Single TypeScript file. 100x100 instanced cubes, wave animation, colors gradient, reusable Object3D.

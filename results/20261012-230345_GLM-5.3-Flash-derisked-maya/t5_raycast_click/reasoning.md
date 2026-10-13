@@ -1,0 +1,1 @@
+Standard grid of cubes, raycaster click handling. Use pointerdown or click on renderer.domElement.

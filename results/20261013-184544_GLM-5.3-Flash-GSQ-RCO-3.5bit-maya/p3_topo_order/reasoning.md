@@ -1,0 +1,1 @@
+Need Kahn's algorithm with a min-heap for lexicographically smallest order. Handle duplicates. Use heapq. O((V+E) log V) fine.

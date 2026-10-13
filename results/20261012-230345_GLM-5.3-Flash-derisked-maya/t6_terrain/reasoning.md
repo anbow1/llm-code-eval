@@ -1,0 +1,1 @@
+Hand-write BufferGeometry with 128x128 grid, positions, indices, colors, normals via computeVertexNormals.

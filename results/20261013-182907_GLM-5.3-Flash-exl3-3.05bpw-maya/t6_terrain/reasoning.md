@@ -1,0 +1,3 @@
+Hand-made BufferGeometry, 128x128 vertices grid, 20x20 units. Build positions, indices, colors by height, computeVertexNormals, sine layers.
+
+Winding: for +Y facing, with grid indexed along x (columns) then z (rows). Vertices: index = z * 128 + x. Quad corners: a = z*128+x, b = z*128+x+1, c = (z+1)*128+x, d = (z+1)*128+x+1. For upward normal, triangle (a, c, b) and (b, c, d)? Let's check: position a=(x,z), b=(x+1,z), c=(x,z+1). Cross of (c-a) and (b-a): c-a = (0,0,+dz), b-a=(+dx,0,0). Cross (0,0,d) × (dx,0,0) = (0*0 - d*0, d*dx - 0*0, 0) = (0, d*dx, 0) → +Y. So triangle (a, c, b) gives +Y. Second: (b, c, d): b=(x1,z), c=(x,z1), d=(x1,z1). (c-b)=(-dx,0,dz), (d-b)=(0,0,dz). Cross (c-b)×(d-b) = (0*dz - dz*0, dz*0 - (-dx)*dz, 0) = (0, dx*dz, 0) → +Y. Good.

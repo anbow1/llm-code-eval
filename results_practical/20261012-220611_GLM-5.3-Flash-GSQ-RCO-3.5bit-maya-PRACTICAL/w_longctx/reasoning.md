@@ -1,0 +1,1 @@
+Bug: normalize_sku only removes spaces, not tabs/newlines. Fix to remove all whitespace via split/join or regex.

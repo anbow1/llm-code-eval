@@ -1,0 +1,1 @@
+Kahn's algorithm with a min-heap. Self-loop detection: node with self-loop has indegree from itself; cycle detection via count of processed nodes < n.

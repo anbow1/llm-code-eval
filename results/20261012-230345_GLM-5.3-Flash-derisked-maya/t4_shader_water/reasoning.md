@@ -1,0 +1,1 @@
+Need to pass height as varying and also maybe world position. Simple.

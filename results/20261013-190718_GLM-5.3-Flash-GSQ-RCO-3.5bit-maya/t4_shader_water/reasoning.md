@@ -1,0 +1,1 @@
+Simple task. Write TypeScript with shader material, waves via sin combos, varying vHeight, gradient from deep blue to white. Camera angled.

@@ -1,0 +1,1 @@
+Simple instanced mesh wave. Reuse a dummy Object3D and Matrix4. Colors gradient. Ensure instanceColor exists after setColorAt.

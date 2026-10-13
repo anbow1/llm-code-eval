@@ -1,0 +1,1 @@
+Explanation: I'll write a self-contained Three.js scene: cube at origin, ambient + directional light, perspective camera at z=5, resize handling, setAnimationLoop with delta-time rotation, expose globals, and set __ready after the first frame via a flag checked in the loop.

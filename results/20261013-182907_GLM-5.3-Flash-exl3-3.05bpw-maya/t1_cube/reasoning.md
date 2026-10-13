@@ -1,0 +1,1 @@
+Write a simple TypeScript Three.js scene. Strict mode compliance.

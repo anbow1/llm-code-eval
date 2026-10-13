@@ -1,0 +1,1 @@
+Standard boilerplate. Write TypeScript file.

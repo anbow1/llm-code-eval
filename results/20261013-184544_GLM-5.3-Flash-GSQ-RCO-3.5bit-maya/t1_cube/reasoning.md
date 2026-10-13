@@ -1,0 +1,1 @@
+Basic Three.js scene with rotating cube. Need strict TypeScript, animation loop with delta, expose globals, set __ready after first frame.
