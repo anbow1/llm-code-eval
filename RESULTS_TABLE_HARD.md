@@ -17,7 +17,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 5 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 2 | **93.1%** | 92–94 | 93.1% | 0% | 11.0 | ~54.0k | 82.9 | 15.6 |
 | 6 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 2 | **93.0%** | 86–100 | 84.8% | 0% | 15.7 | 75.4k | 81.1 | 31.3 |
 | 7 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 3 | **90.3%** | 79–98 | 90.3% | 0% | 18.7 | 41.1k | 37.0 | 30.4 |
-| 8 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | 4 | **89.9%** | 83–96 | 73.2% | 8% | 53.0 | ~55.9k | 17.7 | 31.2 |
+| 8 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | 4 | **89.9%** | 83–96 | 73.2% | 8% | 52.9 | ~55.9k | 17.7 | 31.2 |
 | 9 | GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | 3 | **89.5%** | 72–100 | 78.4% | 6% | 31.9 | ~43.4k | 22.9 | 31.2 |
 | 10 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | low | 1 | **88.5%** | – | 88.5% | 0% | 8.1 | 47.1k | 99.3 | 30.8 |
 | 11 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | 3 | **87.8%** | 83–94 | 87.8% | 6% | 17.8 | 67.4k | 63.9 | 15.4 |

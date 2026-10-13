@@ -87,18 +87,20 @@ Summary (mean score, number of runs). All GLM runs are at `high` unless marked: 
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
-| GSQ-RCO 3.5-bit · Maya | high | 92.8% (3) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
-| derisked Maya-M · Maya | high | – | **89.5%** (3) | **98.8%** (4) | 99.6% (4) |
-| EXL3 3.05 bpw · Maya | high | – | 88.5% (1) | – | – |
+| GSQ-RCO 3.5-bit · Maya | high | 92.2% (5) | **89.9%** (4) | 97.6% (3) | **100.0%** (2) |
+| derisked Maya-M · Maya | high | 85.1% (2) | **89.5%** (3) | **98.8%** (4) | 99.6% (4) |
+| EXL3 3.05 bpw · Maya | high | **100.0%** (1) | 81.8% (4) | – | – |
 | EXL3 3.05 bpw · ExLlamaV3 | high | **99.3%** (2) | 80.0% (3) | – | – |
 | GSQ-RCO 3.5-bit · llama.cpp | high | 93.9% (1) | 82.9% (2) | – | – |
 
-- **The engine matters most for GLM.** At the same level (`high`), the hard suite gives:
-  - **in Maya: 88–90%**, 32–53 min per run on average, and no time-outs;
-  - **in llama.cpp and ExLlamaV3: 80–83%**, 91–96 min, because they hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs.
-
-  The same EXL3 3.05 bpw file scored 88.5% in Maya against 80.0% in ExLlamaV3.
-- **On the base suite GLM scores 93–99%.**
+- **Maya runs GLM about twice as fast on the hard suite and never hit the time limit.** At the same level (`high`):
+  - **in Maya:** 32–53 min per run on average, no time-outs in 11 runs;
+  - **in llama.cpp and ExLlamaV3:** 91–96 min, because they hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs.
+- **Whether that also raises the score depends on the file:**
+  - **GSQ-RCO 3.5-bit:** 89.9% in Maya against 82.9% in llama.cpp;
+  - **EXL3 3.05 bpw:** 81.8% in Maya against 80.0% in ExLlamaV3, about the same. In Maya it finishes `h_p3` in about 30 minutes, but the diff was wrong in 3 of 4 runs.
+- **Best GLM on the hard suite:** GSQ-RCO 3.5-bit and GLM-5.3 Maya-M derisked, both in Maya, at about 90%.
+- **On the base suite GLM scores 85–100%.** The derisked file is the weakest there (85.1%).
 - **On the new practical and tool-calling suites GLM is close to perfect.** These tasks need little thinking, so its low speed (11–24 tok/s) matters less: about 2–5 minutes per suite.
 
 ## Setup (once)

@@ -1,4 +1,4 @@
-# Local model coding test: summary (25 Sep – 12 Oct 2026)
+# Local model coding test: summary (25 Sep – 13 Oct 2026)
 
 ## TL;DR
 
@@ -17,7 +17,7 @@
 - **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high` on the base suite, but on the hard suite even `high` runs out of time.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
-- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). Run in the Maya engine it does best on the hard suite (88–90% at `high`, against 80–83% in llama.cpp or ExLlamaV3), and GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
+- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and never hits the time limit. Its best hard-suite scores are about 90%, with GSQ-RCO 3.5-bit and Maya-M derisked in Maya (80–83% in llama.cpp or ExLlamaV3), and GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 
 ## Hardware and settings
@@ -306,34 +306,37 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 - **`--repeat N`** runs a suite N times. The tables then add a stability section: standard deviation, worst run, tasks solved in every run, identical answers (useful with `--temperature 0`).
 - **"Broken"** is the share of tasks where generation itself failed.
 
-# Part 5: GLM-5.3-Flash variants and the first practical and tool-calling runs (7–12 Oct)
+# Part 5: GLM-5.3-Flash variants and the first practical and tool-calling runs (7–13 Oct)
 
 All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and [glm_flash.jpg](glm_flash.jpg). New runs, all on the RTX 5090:
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | low | 86.3% (2 runs) | 81.1% (1) | – | – |
-| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 92.8% (3) | **89.9%** (4) | 97.6% (2) | **100.0%** (2) |
-| GLM-5.3 Maya-M derisked · Maya | high | – | **89.5%** (3) | **98.8%** (4) | 99.6% (4) |
-| GLM-5.3-Flash EXL3 3.05 bpw · Maya | high | – | 88.5% (1) | – | – |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 92.2% (5) | **89.9%** (4) | 97.6% (3) | **100.0%** (2) |
+| GLM-5.3 Maya-M derisked · Maya | high | 85.1% (2) | **89.5%** (3) | **98.8%** (4) | 99.6% (4) |
+| GLM-5.3-Flash EXL3 3.05 bpw · Maya | high | **100.0%** (1) | 81.8% (4) | – | – |
 
 **Engines and levels.**
 - **Maya is an inference engine**, like llama.cpp, TabbyAPI or Strata.
 - **"Derisked"** is the model file GLM-5.3 Maya-M derisked, run in Maya. The tables list it as GLM-5.3-Flash derisked, quant Maya-M.
 - **There is no `medium` for GLM.** The GLM chat template has no `medium`, so the runs started with `medium` actually ran at `high`; the tables list them as `high`.
 
-**Hard suite: the Maya engine is what helps.** All the runs below are at `high`, so the engine is the only difference:
+**Hard suite: Maya is faster; whether it scores higher depends on the file.** All the runs below are at `high`.
 - **In llama.cpp and ExLlamaV3, GLM hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs.** They scored 80–83% and took 91–96 minutes per run.
-- **In Maya there was no time-out in 8 runs.**
-  - `h_p3` was solved in 5 runs, answered wrongly in 1 and abandoned mid-thought in 2.
-  - The scores are 88–90% on average, at 32–53 min per run.
-- **The same EXL3 3.05 bpw file scored 88.5% in Maya and 80.0% in ExLlamaV3.** In Maya it also ran faster: 19.4 against 10.7 tok/s from time.
+- **In Maya there was no time-out in 11 runs.**
+  - Runs took 32–53 min on average, about twice as fast.
+  - `h_p3` was solved in 6 runs, answered wrongly in 3 and abandoned mid-thought in 2.
+- **GSQ-RCO 3.5-bit:** 89.9% in Maya (4 runs) against 82.9% in llama.cpp (2 runs).
+- **EXL3 3.05 bpw:** 81.8% in Maya (4 runs: 88.5, 78.4, 69.4 and 91.0%) against 80.0% in ExLlamaV3 (3 runs). The score is about the same; Maya only made it faster (44 against 96 min, 18.7 against 10.7 tok/s). In Maya it finished `h_p3` in about 30 minutes, but the diff was wrong in 3 of 4 runs.
 - **GLM-5.3 Maya-M derisked scored 100% once** (12 Oct, 39 min), the only GLM run to solve all six hard tasks. Its other two runs scored 96% and 72%.
-- **Still slow for daily use.** With the practical limits (10 min, 32k tokens per task) the Maya runs drop to 73–83%.
+- **Still slow for daily use.** With the practical limits (10 min, 32k tokens per task) the Maya runs drop to 73–78%.
 
 **Base suite.**
-- **GSQ-RCO 3.5-bit in Maya:** 92.8% over 3 runs (99.2%, 92.6%, 86.5%). That is between the same file in llama.cpp (93.9%, one run) and EXL3 in ExLlamaV3 (99.3%).
-- **Typical mistakes:** TypeScript errors such as `renderer.getDelta()`, which does not exist, and `p2_sliding_median`.
+- **EXL3 3.05 bpw in Maya:** 100% in 13 min (one run, 13 Oct). EXL3 in ExLlamaV3 scored 99.3%.
+- **GSQ-RCO 3.5-bit in Maya:** 92.2% over 5 runs (86.5–99.2%). The same file in llama.cpp scored 93.9% (one run).
+- **GLM-5.3 Maya-M derisked:** 85.1% over 2 runs (13 Oct), the weakest GLM variant at `high` on this suite.
+- **The same mistakes keep coming back:** `renderer.getDelta()` and `renderer.clock`, which do not exist in Three.js, `p2_sliding_median`, and asyncio in `p4`. One GSQ-RCO run thought through all 98,304 tokens on `t6_terrain` without answering.
 
 **Practical suite (first results).** 97.6–98.8% in 3–5 minutes:
 - **`w_refactor`:** the first derisked runs and the GSQ-RCO runs left `process_orders` longer than the 15 lines asked for.
@@ -349,8 +352,8 @@ All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and
 - **`w_refactor` "process_orders is short"** counted the docstring too. Now it counts only the body (at most 15 lines, as the prompt says).
 
 **Removed on 12 Oct:**
-- 5 runs that stopped early (one hard, four practical);
-- 2 hard-suite runs of EXL3 in Maya at `medium`. They ended in 15 seconds with 0 tokens and no answer to any task, so the server was not working rather than the model failing.
+- 10 runs that stopped early (one hard on 12 Oct, nine practical on 12 Oct);
+- 2 hard-suite runs of EXL3 in Maya (started as `medium`, which runs at `high`). They ended in 15 seconds with 0 tokens and no answer to any task, so the server was not working rather than the model failing.
 
 **Flash-Next UD-Q4_K_XL in Strata, base suite repeats (7 Oct).**
 - At `medium`: 100% in 10.3 min. Over 3 runs it now averages 97.3%.
@@ -387,7 +390,7 @@ Their raw data has been removed from `results/` and `results_hard/`; only these 
   - Flash-Next UD-Q4_K_XL in Strata at `low`, hard suite: stopped after 1 task;
   - GLM-5.3-Flash GSQ-RCO 3.5-bit in Maya: base `high` (2 tasks) and two hard-suite attempts (1 and 5 tasks).
 - 12 Oct, removed the same day:
-  - GLM in Maya: one hard-suite and four practical-suite attempts that stopped after 1–2 tasks;
+  - GLM in Maya: one hard-suite and nine practical-suite attempts that stopped after 1–2 tasks;
   - two hard-suite runs of EXL3 in Maya that ended in 15 seconds with no answer at all (server not working).
 - GLM-5.3-Flash EXL3, hard suite on the 5090:
   - `high` on 26 Sep, stopped after 4 tasks;

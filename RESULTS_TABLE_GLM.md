@@ -38,7 +38,7 @@ Mean score per suite, with the number of runs and the mean time of one run. Sett
 
 | Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 4 | **89.9%** | 83–96 | 73.2% | 8% | 53.0 | ~55.9k | 17.7 |
+| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 4 | **89.9%** | 83–96 | 73.2% | 8% | 52.9 | ~55.9k | 17.7 |
 | GLM-5.3-Flash derisked | Maya-M | Maya | high | 3 | **89.5%** | 72–100 | 78.4% | 6% | 31.9 | ~43.4k | 22.9 |
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | 2 | **82.9%** | 83–83 | 74.6% | 17% | 91.3 | ~74.5k | 13.6 |
 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | 4 | **81.8%** | 69–91 | 74.2% | 4% | 44.1 | ~49.3k | 18.7 |
@@ -58,6 +58,6 @@ Mean score per suite, with the number of runs and the mean time of one run. Sett
 | Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 2 | **100.0%** | 100–100 | 100.0% | 0% | 3.0 | 1.2k | 6.7 |
-| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 1.9 | 1.2k | 10.3 |
+| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 2.0 | 1.2k | 10.3 |
 
 Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, looped, no final answer). `~` = token count partly estimated. All other suites' tables: RESULTS_TABLE*.md.
