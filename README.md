@@ -44,7 +44,7 @@ RTX 5090 32 GB + 128 GB RAM:
 | Qwen3.8-27B | EXL3 3.0 bpw | low | 3 | 98.5% | 7.3 min | ~34.7k | 83.8 |
 | Qwen3.8-27B | EXL3 2.2 bpw | low | 3 | 87.8% | 9.6 min | ~39.6k | 76.2 |
 
-All 59 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
+All 66 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md).
 
 ## Hard suite: results (27 Sep – 6 Oct 2026)
 
@@ -52,28 +52,30 @@ All 59 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 - **by each setting's best run**: what the setting can do on a good run;
 - **by the mean of all its runs**: what to expect from it on a typical run.
 
-Settings with one run have the same score in both, so only repeated ones move. On both suites together the best setting is Qwen3.8-27B Q6 at `medium` (98.1%, see the image above). GLM-5.3-Flash in llama.cpp or ExLlamaV3 hits the 60-minute limit on `h_p3_line_diff` at `high` in 5 of 5 runs.
+Settings with one run have the same score in both, so only repeated ones move. On both suites together the best setting is Qwen3.8-27B Q6 at `medium` (98.1%, see the image above). GLM-5.3-Flash in llama.cpp or ExLlamaV3 hits the 60-minute limit on `h_p3_line_diff` at `high` in 6 of 7 runs.
 
 ![Hard suite: top 10 by best run and by mean](top10_hard.jpg)
 
 | # | By best run | Best | Mean | Runs | | By mean of all runs | Mean | Worst | Runs |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100.0% | 1 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100% | 1 |
-| 2 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 99.6% | 93.0% | 2 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 98% | 1 |
-| 3 | Flash-Next UD-Q4_K_XL (5090) `medium` | 98.1% | 90.3% | 3 | | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 98% | 1 |
-| 4 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 97.8% | 1 | | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94% | 1 |
-| 5 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 97.6% | 1 | | 27B EXL3 3.0 bpw (4080) `medium` | 93.1% | 92% | 2 |
-| 6 | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94.4% | 1 | | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 93.0% | 86% | 2 |
-| 7 | 27B EXL3 3.0 bpw (4080) `medium` | 94.1% | 93.1% | 2 | | Flash-Next UD-Q4_K_XL (5090) `medium` | 90.3% | 79% | 3 |
-| 8 | 27B AP IQ3_S (4080) `medium` | 94.1% | 87.8% | 3 | | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88% | 1 |
-| 9 | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88.5% | 1 | | 27B AP IQ3_S (4080) `medium` | 87.8% | 83% | 3 |
-| 10 | Flash-Next GSQ-RCO IQ3_XXS (5090) `medium` | 84.9% | 84.9% | 1 | | Flash-Next GSQ-RCO IQ3_XXS (5090) `medium` | 84.9% | 85% | 1 |
+| 1 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100.0% | 2 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100% | 2 |
+| 2 | GLM EXL3 3.05 bpw · Maya (5090) `high` | 100.0% | 86.0% | 6 | | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 98% | 1 |
+| 3 | GLM derisked Maya-M · Maya (5090) `high` | 100.0% | 86.5% | 4 | | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 98% | 1 |
+| 4 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 99.6% | 93.0% | 2 | | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94% | 1 |
+| 5 | Flash-Next UD-Q4_K_XL (5090) `medium` | 98.1% | 90.3% | 3 | | 27B EXL3 3.0 bpw (4080) `medium` | 93.1% | 92% | 2 |
+| 6 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 97.8% | 1 | | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 93.0% | 86% | 2 |
+| 7 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 97.6% | 1 | | Flash-Next UD-Q4_K_XL (5090) `medium` | 90.3% | 79% | 3 |
+| 8 | GLM EXL3 3.10 bpw (5090) `high` | 97.2% | 89.1% | 2 | | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 90.1% | 83% | 5 |
+| 9 | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 95.8% | 90.1% | 5 | | GLM EXL3 3.10 bpw (5090) `high` | 89.1% | 81% | 2 |
+| 10 | 27B EXL3 6.0 bpw (5090) `low` | 94.4% | 94.4% | 1 | | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88% | 1 |
 
-- **Flash-Next UD-Q4_K_XL is the clearest case of "good, but not every time".** In Strata its best run is 99.6% in 7.7 min (2nd), but its mean is 93.0% (6th). In llama.cpp it drops from 3rd (98.1%) to 7th (90.3%, worst run 79%).
+- **Flash-Next GSQ-RCO IQ3_S in Strata at `medium` is first both ways:** 100% in both runs (20 and 19 min). At `xhigh` (14 Oct) it scored 72.2%: it ran out of tokens on `h_p2` and got the diff wrong.
+- **GLM is the clearest case of "good, but not every time".** Three GLM settings have a run at 97–100%, but their means are 86–90%: EXL3 3.05 bpw in Maya ranges over 69–100%.
+- **Flash-Next UD-Q4_K_XL** is the same: in Strata its best run is 99.6% (4th) and its mean 93.0% (6th); in llama.cpp it drops from 98.1% to 90.3% (worst run 79%).
 - **Qwen3.8-27B EXL3 3.0 bpw on the 16 GB card is the steadiest repeated setting:** 92–94% in both runs.
-- **The top four by mean rest on one run each.** Repeating them is the most useful next test.
+- **Three of the top four by mean rest on one run each.** Repeating them is the most useful next test.
 
-All 35 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
+All 48 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
 Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
 
@@ -87,19 +89,21 @@ Summary (mean score, number of runs). All GLM runs are at `high` unless marked: 
 
 | Variant | Effort | Base | Hard | Practical | Tools |
 |---|---|---|---|---|---|
-| GSQ-RCO 3.5-bit · Maya | high | 92.2% (5) | **89.9%** (4) | 97.6% (3) | **100.0%** (2) |
-| derisked Maya-M · Maya | high | 85.1% (2) | **89.5%** (3) | **98.8%** (4) | 99.6% (4) |
-| EXL3 3.05 bpw · Maya | high | **100.0%** (1) | 81.8% (4) | – | – |
-| EXL3 3.05 bpw · ExLlamaV3 | high | **99.3%** (2) | 80.0% (3) | – | – |
+| GSQ-RCO 3.5-bit · Maya | high | 92.2% (5) | **90.1%** (5) | 97.6% (3) | **100.0%** (2) |
+| derisked Maya-M · Maya | high | 85.1% (2) | 86.5% (4) | **98.8%** (4) | 99.6% (4) |
+| EXL3 3.05 bpw · Maya | high | **100.0%** (1) | 86.0% (6) | – | – |
+| EXL3 3.10 bpw · ExLlamaV3 | high | 95.5% (1) | 89.1% (2) | – | – |
+| EXL3 3.05 bpw · ExLlamaV3 | high | 99.3% (2) | 80.0% (3) | – | – |
 | GSQ-RCO 3.5-bit · llama.cpp | high | 93.9% (1) | 82.9% (2) | – | – |
 
-- **Maya runs GLM about twice as fast on the hard suite and never hit the time limit.** At the same level (`high`):
-  - **in Maya:** 32–53 min per run on average, no time-outs in 11 runs;
-  - **in llama.cpp and ExLlamaV3:** 91–96 min, because they hit the 60-minute limit on `h_p3_line_diff` in 5 of 5 runs.
-- **Whether that also raises the score depends on the file:**
-  - **GSQ-RCO 3.5-bit:** 89.9% in Maya against 82.9% in llama.cpp;
-  - **EXL3 3.05 bpw:** 81.8% in Maya against 80.0% in ExLlamaV3, about the same. In Maya it finishes `h_p3` in about 30 minutes, but the diff was wrong in 3 of 4 runs.
-- **Best GLM on the hard suite:** GSQ-RCO 3.5-bit and GLM-5.3 Maya-M derisked, both in Maya, at about 90%.
+- **Maya runs GLM about twice as fast on the hard suite and rarely hits the time limit.** At the same level (`high`):
+  - **in Maya:** 41–50 min per run on average; the 60-minute limit on `h_p3_line_diff` was hit once in 15 runs;
+  - **in llama.cpp and ExLlamaV3:** 59–96 min, with the limit hit in 6 of 7 runs.
+- **Maya also scores a little higher:**
+  - **GSQ-RCO 3.5-bit:** 90.1% in Maya against 82.9% in llama.cpp;
+  - **EXL3 3.05 bpw:** 86.0% in Maya (6 runs, 69–100%) against 80.0% in ExLlamaV3. In Maya it finishes `h_p3`, but the diff was wrong in 4 of 6 runs.
+- **The new EXL3 3.10 bpw file (ExLlamaV3, 14 Oct)** scored 89.1% on the hard suite (81 and 97%) and 95.5% on the base suite. One of its two hard runs solved `h_p3` in 18 minutes, the only GLM run outside Maya to do so at `high`.
+- **GLM runs vary a lot.** Three GLM settings have a hard run at 97–100%, but their means are 86–90%.
 - **On the base suite GLM scores 85–100%.** The derisked file is the weakest there (85.1%).
 - **On the new practical and tool-calling suites GLM is close to perfect.** These tasks need little thinking, so its low speed (11–24 tok/s) matters less: about 2–5 minutes per suite.
 

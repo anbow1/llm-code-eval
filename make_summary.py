@@ -44,7 +44,8 @@ def describe(label, model):
         return name, prefix + quant + suffix, backend
     if "glm" in m:
         if "exl3" in m:
-            quant = "EXL3 3.05 bpw"
+            bpw = re.search(r"(\d+\.\d+)bpw", m)
+            quant = f"EXL3 {bpw.group(1) if bpw else '3.05'} bpw"
         elif bit:
             quant = f"GSQ-RCO {bit.group(1)}-bit"
         else:
