@@ -1,0 +1,1 @@
+Simple single file. Cube color e.g. 0x888888 grey on light background, or orange cube on dark blue background. Use clock delta. Set __ready after first frame.

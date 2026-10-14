@@ -1,0 +1,1 @@
+Create the file. Include flat shading normal maybe not needed. Height varying. Write shaders as template strings. Camera animated slightly? Keep static camera at angle, waves move with time.

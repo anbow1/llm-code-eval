@@ -1,0 +1,1 @@
+One InstancedMesh 100x100, reuse dummy Object3D. Compute colors once at setup. Set instanceMatrix.needsUpdate each frame. Ready flag after first render.

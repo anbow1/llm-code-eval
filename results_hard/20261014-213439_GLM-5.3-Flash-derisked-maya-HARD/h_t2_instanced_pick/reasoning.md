@@ -1,0 +1,1 @@
+Camera at z distance to fit grid: half extent ~15, need margin. FOV 60? distance = 15 / tan(fov/2) plus margin. Use fov 50, distance = 16 / tan(25°) ≈ 16/0.4663 ≈ 34.3. Add margin: use 36.

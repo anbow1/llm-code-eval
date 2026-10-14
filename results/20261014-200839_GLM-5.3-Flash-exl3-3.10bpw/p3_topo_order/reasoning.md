@@ -1,0 +1,3 @@
+Kahn's algorithm with a heap. Standard heapq solution.
+
+Note self-loop: edge (a,a) causes cycle. Kahn's with indegree works — self-loop gives indegree that never decrements for that node... actually a self-loop adds indegree to a, and when a is processed it decrements... but a can never be processed since its indegree includes its own edge. Actually the indegree from self-loop never gets removed until a is processed, so a stays with indegree ≥1 → cycle detected. Good.
