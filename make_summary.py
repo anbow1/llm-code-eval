@@ -213,6 +213,40 @@ def main():
         "knows the levels `low`, `high` and `max`; runs started with `medium` actually ran at `high` and are listed as `high`.")
 
 
+FAIL_BELOW = 90  # a task scored below this counts as failed; small partial misses (a strict-mode TS error) do not
+FAIL_KIND = {"task_timeout": "time", "max_tokens": "limit", "no_answer": "none", "max_turns": "turns"}
+
+
+def problem_tasks(rs, limit=2):
+    """Tasks a setting run 2+ times keeps failing: below 90% in at least 2 runs and in at least half of them.
+
+    Returns [(task, failed, runs, kinds)], worst first; kinds counts how the generation broke
+    (time / limit / none), the rest were wrong answers."""
+    if len(rs) < 2:
+        return []
+    out = []
+    for t in sorted({t for r in rs for t in r["tasks"]}, key=task_order):
+        done = [r["tasks"][t] for r in rs if t in r["tasks"]]
+        bad = [st for sc, st in done if sc < FAIL_BELOW]
+        if len(bad) >= 2 and 2 * len(bad) >= len(done):
+            kinds = {}
+            for st in bad:
+                k = FAIL_KIND.get(st, "wrong")
+                kinds[k] = kinds.get(k, 0) + 1
+            out.append((t, len(bad), len(done), kinds, sum(sc for sc, _ in done) / len(done)))
+    out.sort(key=lambda x: (-x[1] / x[2], x[4]))
+    return out[:limit]
+
+
+def problem_text(rs, limit=2, kinds=True):
+    """'h_p3_line_diff 4/6 (wrong 3, time 1)' for the tasks from problem_tasks, or '' if there are none."""
+    parts = []
+    for t, bad, n_, ks, _m in problem_tasks(rs, limit):
+        how = ", ".join(f"{k} {v}" for k, v in sorted(ks.items(), key=lambda kv: -kv[1]))
+        parts.append(f"{t} {bad}/{n_}" + (f" ({how})" if kinds else ""))
+    return "; ".join(parts)
+
+
 def rank_settings(runs):
     """One entry per setting (model + quant + backend + GPU + effort): its runs, mean, worst and best run."""
     groups = {}
@@ -223,6 +257,9 @@ def rank_settings(runs):
         out.append({"model": model, "quant": quant, "backend": backend, "gpu": gpu, "effort": effort, "runs": rs,
                     "mean": sum(r["overall"] for r in rs) / len(rs), "worst": min(r["overall"] for r in rs),
                     "mean_minutes": sum(r["minutes"] for r in rs) / len(rs),
+                    "mean_tokens": sum(r["tokens"] or 0 for r in rs) / len(rs),
+                    "tokens_approx": any(r["tokens_approx"] for r in rs),
+                    "problems": problem_text(rs, kinds=False),
                     # best run; on a tie the faster one
                     "best": min(rs, key=lambda r: (-r["overall"], r["minutes"]))})
     return out
@@ -248,7 +285,9 @@ def write_family_table(prefix, path, title, intro):
         if not rs:
             return "–", None
         sc = mean([r["overall"] for r in rs])
-        return f"**{sc:.1f}%** ({len(rs)}×, {mean([r['minutes'] for r in rs]):.0f} min)", sc
+        ap = "~" if any(r["tokens_approx"] for r in rs) else ""
+        return (f"**{sc:.1f}%** ({len(rs)}×, {mean([r['minutes'] for r in rs]):.0f} min, "
+                f"{ap}{mean([r['tokens'] or 0 for r in rs]) / 1000:.0f}k tok)"), sc
 
     rows = []
     for k in keys:
@@ -256,15 +295,22 @@ def write_family_table(prefix, path, title, intro):
         done = [c[1] for c in cells if c[1] is not None]
         rows.append((k, cells, mean(done), len(done)))
     rows.sort(key=lambda x: (-x[3], -(x[2] or 0)))
+    problems = {}
+    for k in keys:
+        txt = [problem_text([r for r in per_suite[su] if (r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]) == k])
+               for su in SUITES]
+        problems[k] = "; ".join(t for t in txt if t)
     lines = [title, "", intro, "",
              "## All suites", "",
-             "Mean score per suite, with the number of runs and the mean time of one run. Settings are sorted by how "
-             "many suites they were run on, then by the mean of their suite scores.", "",
-             "| # | Model | Quant | Backend | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites |",
-             "|---|---|---|---|---|" + "---|" * len(SUITES) + "---|"]
-    for i, ((model, quant, backend, gpu, effort), cells, m, nsu) in enumerate(rows, 1):
+             "Mean score per suite, with the number of runs, the mean time and the mean tokens of one run. Settings "
+             "are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** "
+             "= tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.", "",
+             "| # | Model | Quant | Backend | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites | Problem tasks |",
+             "|---|---|---|---|---|" + "---|" * len(SUITES) + "---|---|"]
+    for i, (k, cells, m, nsu) in enumerate(rows, 1):
+        model, quant, backend, gpu, effort = k
         lines.append(f"| {i} | {model} | {quant} | {backend} | {effort} | " + " | ".join(c[0] for c in cells)
-                     + f" | {m:.1f}% ({nsu} of {len(SUITES)}) |")
+                     + f" | {m:.1f}% ({nsu} of {len(SUITES)}) | {problems[k] or '–'} |")
     for suite, rs in per_suite.items():
         if not rs:
             continue
@@ -273,8 +319,8 @@ def write_family_table(prefix, path, title, intro):
             groups.setdefault((r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]), []).append(r)
         lines += ["", f"## {suite.capitalize()} suite", "",
                   "| Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) "
-                  "| Mean tokens | Avg tok/s (from time) |",
-                  "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+                  "| Mean tokens | Avg tok/s (from time) | Problem tasks |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for (model, quant, backend, gpu, effort), g in sorted(groups.items(), key=lambda kv: -mean([r["overall"] for r in kv[1]])):
             sc = [r["overall"] for r in g]
             tok = [r["tokens"] for r in g if r["tokens"]]
@@ -284,7 +330,7 @@ def write_family_table(prefix, path, title, intro):
             lines.append(f"| {model} | {quant} | {backend} | {effort} | {len(g)} | **{mean(sc):.1f}%** "
                          f"| {f'{min(sc):.0f}–{max(sc):.0f}' if len(g) > 1 else '–'} "
                          f"| {mean([r['practical'] for r in g]):.1f}% | {broken:.0f}% | {mean([r['minutes'] for r in g]):.1f} "
-                         f"| {ap}{mean(tok) / 1000:.1f}k | {sum(tok) / (gen * 60):.1f} |")
+                         f"| {ap}{mean(tok) / 1000:.1f}k | {sum(tok) / (gen * 60):.1f} | {problem_text(g) or '–'} |")
     lines += ["", "Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. "
               "Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, "
               "looped, no final answer). `~` = token count partly estimated. All other suites' tables: "
@@ -312,20 +358,22 @@ def stability_table(groups):
         broken = 100 * sum(r["broken"] for r in rs) / max(1, sum(r["n_tasks"] for r in rs))
         temps = sorted({r["temperature"] for r in rs if r["temperature"] is not None})
         rows.append((m, sd, model, quant, backend, gpu, effort, len(rs), min(scores), solid, len(ids), broken, same,
-                     "/".join(f"{t:g}" for t in temps)))
+                     "/".join(f"{t:g}" for t in temps), problem_text(rs) or "–"))
     if not rows:
         return []
     out = ["", "## Stability (settings run 2+ times)", "",
            "**Solved every run** = tasks with 100% in all runs. **Identical answers** = tasks where every run produced "
            "exactly the same code or answer; expect 0 at temperature 1.0, and close to all at temperature 0 on a "
-           "deterministic backend.", "",
+           "deterministic backend. **Problem tasks** = tasks scored below 90% in at least half of the runs (and at least twice): "
+           "failed/runs, then how (wrong = wrong answer; time, limit, none = out of time or tokens, or stopped "
+           "mid-thought).", "",
            "| Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run "
-           "| Broken | Identical answers |",
-           "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
-    for m, sd, model, quant, backend, gpu, effort, nr, worst, solid, nt, broken, same, temps in sorted(
+           "| Broken | Identical answers | Problem tasks |",
+           "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for m, sd, model, quant, backend, gpu, effort, nr, worst, solid, nt, broken, same, temps, prob in sorted(
             rows, key=lambda x: (-x[0], x[1])):
         out.append(f"| {model} | {quant} | {backend} | {gpu} | {effort} | {temps} | {nr} | **{m:.1f}%** | {sd:.1f} "
-                   f"| {worst:.1f}% | {solid}/{nt} | {broken:.0f}% | {same}/{nt} |")
+                   f"| {worst:.1f}% | {solid}/{nt} | {broken:.0f}% | {same}/{nt} | {prob} |")
     return out
 
 

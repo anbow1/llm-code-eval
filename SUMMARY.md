@@ -19,6 +19,10 @@
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
 - **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and rarely hits the time limit. Its best hard-suite means are 89–90% (GSQ-RCO 3.5-bit in Maya, and the new EXL3 3.10 bpw in ExLlamaV3), against 80–83% for the older files in llama.cpp or ExLlamaV3. GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
+- **Some settings keep failing the same task over repeated runs.** The tables now list them as "Problem tasks" / "Often fails" (below 90% in at least half the runs). Most common:
+  - `h_p3_line_diff` for GLM-5.3-Flash at `high` (time-outs outside Maya, wrong diffs in Maya) and for Qwen3.8-27B AP IQ3_S on the 4080 (3 of 3);
+  - `p2_sliding_median` for the 2–3-bit Qwen3.8-27B files and for Flash-Next UD-Q4_K_XL in Strata;
+  - `h_t3_postfx_invert` for Flash-Next UD-Q4_K_XL in llama.cpp (2 of 3).
 
 ## Hardware and settings
 

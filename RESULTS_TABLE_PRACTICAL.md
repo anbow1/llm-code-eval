@@ -15,12 +15,12 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 
 ## Stability (settings run 2+ times)
 
-**Solved every run** = tasks with 100% in all runs. **Identical answers** = tasks where every run produced exactly the same code or answer; expect 0 at temperature 1.0, and close to all at temperature 0 on a deterministic backend.
+**Solved every run** = tasks with 100% in all runs. **Identical answers** = tasks where every run produced exactly the same code or answer; expect 0 at temperature 1.0, and close to all at temperature 0 on a deterministic backend. **Problem tasks** = tasks scored below 90% in at least half of the runs (and at least twice): failed/runs, then how (wrong = wrong answer; time, limit, none = out of time or tokens, or stopped mid-thought).
 
-| Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run | Broken | Identical answers |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | 1 | 4 | **98.8%** | 1.4 | 97.6% | 5/6 | 0% | 2/6 |
-| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | 1 | 3 | **97.6%** | 0.0 | 97.6% | 5/6 | 0% | 2/6 |
+| Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run | Broken | Identical answers | Problem tasks |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GLM-5.3-Flash derisked | Maya-M | Maya | RTX 5090 32 GB | high | 1 | 4 | **98.8%** | 1.4 | 97.6% | 5/6 | 0% | 2/6 | w_refactor 2/4 (wrong 2) |
+| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | 1 | 3 | **97.6%** | 0.0 | 97.6% | 5/6 | 0% | 2/6 | w_refactor 3/3 (wrong 3) |
 
 ## Every run
 
