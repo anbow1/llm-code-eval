@@ -160,6 +160,7 @@ def hard_table(rows, best):
         minutes = g["best"]["minutes"] if best else g["mean_minutes"]
         tokens = g["best"]["tokens"] if best else g["mean_tokens"]
         approx = g["best"]["tokens_approx"] if best else g["tokens_approx"]
+        tps = g["best"]["tok_s_time"] if best else g["tok_s"]
         other = (f"{g['mean']:.1f}%" if len(g["runs"]) > 1 else "–") if best else \
             (f"{g['worst']:.0f}%" if len(g["runs"]) > 1 else "–")
         body.append(f"""<tr>
@@ -168,22 +169,24 @@ def hard_table(rows, best):
 <td>{e(g['gpu'].split()[1])}</td><td>{e(g['effort'])}</td>
 <td class="avg">{bar(score)}</td><td class="num muted">{other}</td>
 <td class="num">{minutes:.1f}</td><td class="num">{"~" if approx else ""}{tokens / 1000:.0f}k</td>
+<td class="num">{tps or 0:.0f}</td>
 <td class="num muted">{len(g['runs'])}</td>
 </tr>""")
     head = ("Best run", "Mean<small>of all runs</small>", "Time, min<small>of that run</small>",
-            "Tokens<small>of that run</small>") if best else \
-        ("Mean", "Worst<small>run</small>", "Time, min<small>mean</small>", "Tokens<small>mean</small>")
+            "Tokens<small>of that run</small>", "tok/s<small>of that run</small>") if best else \
+        ("Mean", "Worst<small>run</small>", "Time, min<small>mean</small>", "Tokens<small>mean</small>",
+         "tok/s<small>mean</small>")
     return f"""<table><thead><tr>
 <th>#</th><th>Model<small>quant · backend</small></th><th>GPU</th><th>Effort</th>
 <th>{head[0]}</th><th class="num">{head[1]}</th><th class="num">{head[2]}</th><th class="num">{head[3]}</th>
-<th class="num">Runs</th>
+<th class="num">{head[4]}</th><th class="num">Runs</th>
 </tr></thead><tbody>{''.join(body)}</tbody></table>"""
 
 
 def build_hard_html(by_best, by_mean, n_settings):
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
-.wrap {{ width:2000px; }}
+.wrap {{ width:2160px; }}
 .cols {{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }}
 h2 {{ font-size:20px; margin:0 0 4px; }}
 h2 + p {{ font-size:14px; color:var(--text2); margin:0 0 14px; }}
@@ -203,7 +206,7 @@ A setting = model + quant + backend + GPU + reasoning effort ({n_settings} so fa
 Settings with one run have the same score in both rankings, so only repeated ones can move between them.
 Ties on score are broken by time. Temperature 1.0; with 1–3 runs per setting, differences under ~5 points are noise.
 Token limit per task 65,536 (98,304 from 30 Sep), 60 minutes per task. RTX 5090 32 GB + 128 GB RAM,
-RTX 4080 16 GB + 32 GB RAM. Time and tokens per full suite, thinking included; ~ = partly estimated (ExLlamaV3
+RTX 4080 16 GB + 32 GB RAM. Time and tokens per full suite, thinking included; tok/s = all generated tokens ÷ all generation time; ~ = partly estimated (ExLlamaV3
 under-reports tokens). {PROBLEM_NOTE} Details: RESULTS_TABLE_HARD.md, SUMMARY.md.
 </div></div></body></html>"""
 
@@ -224,10 +227,10 @@ def collect_family(prefix):
             cells[su] = {"score": sum(r["overall"] for r in rs) / len(rs), "runs": len(rs),
                          "minutes": sum(r["minutes"] for r in rs) / len(rs),
                          "tokens": sum(r["tokens"] or 0 for r in rs) / len(rs),
-                         "approx": any(r["tokens_approx"] for r in rs)}
+                         "approx": any(r["tokens_approx"] for r in rs), "tok_s": ms.speed(rs)}
             b = min(rs, key=lambda r: (-r["overall"], r["minutes"]))  # best run; on a tie the faster one
             best[su] = {"score": b["overall"], "runs": len(rs), "minutes": b["minutes"],
-                        "tokens": b["tokens"] or 0, "approx": b["tokens_approx"]}
+                        "tokens": b["tokens"] or 0, "approx": b["tokens_approx"], "tok_s": b["tok_s_time"]}
             problems.append(ms.problem_text(rs, kinds=False))
         rows.append({"model": model, "quant": quant, "backend": backend, "effort": effort, "cells": cells,
                      "problems": "; ".join(p for p in problems if p),
@@ -248,7 +251,7 @@ def family_table(rows, key, mean_key, time_note):
         for su in suites:
             c = r[key].get(su)
             tds.append(f'<td>{bar(c["score"])}<div class="meta">{c["runs"]}× · {c["minutes"]:.0f} min · '
-                       f'{"~" if c["approx"] else ""}{c["tokens"] / 1000:.0f}k tok</div></td>'
+                       f'{"~" if c["approx"] else ""}{c["tokens"] / 1000:.0f}k tok · {c["tok_s"] or 0:.0f} tok/s</div></td>'
                        if c else '<td class="none">–</td>')
         body.append(f"""<tr>
 <td class="rank">{i}</td>
@@ -278,9 +281,9 @@ tr:nth-child(3) td {{ background:none; }}
 <h1>{title}</h1>
 <p class="lede">{lede} {date.today():%d %b %Y}.</p>
 <h2>By mean of all runs</h2><p class="h2note">What to expect from a setting on a typical run.</p>
-{family_table(by_mean, "cells", "mean", "mean minutes · mean tokens per run")}
+{family_table(by_mean, "cells", "mean", "mean minutes · mean tokens per run · tok/s (all tokens ÷ all generation time)")}
 <h2>By best run</h2><p class="h2note">What a setting can do on a good run: the best single run per suite.</p>
-{family_table(by_best, "best", "best_mean", "minutes · tokens of that best run")}
+{family_table(by_best, "best", "best_mean", "minutes · tokens · tok/s of that best run")}
 <div class="notes">
 Bars span 50–100%. Both rankings are sorted by the number of suites run, then by the mean, so the first rows are the
 best-tested; settings with one run per suite score the same in both. Maya, ExLlamaV3 and llama.cpp are inference engines;
@@ -302,17 +305,17 @@ def tok(x, approx):
 
 def readme_hard(by_best, by_mean):
     """Markdown version of top10_hard.jpg: both rankings, with time, tokens and the tasks a setting keeps failing."""
-    out = ["| # | By best run | Best | Mean | Time (min) | Tokens | Runs | Often fails |",
-           "|---|---|---|---|---|---|---|---|"]
+    out = ["| # | By best run | Best | Mean | Time (min) | Tokens | tok/s | Runs | Often fails |",
+           "|---|---|---|---|---|---|---|---|---|"]
     for i, g in enumerate(by_best, 1):
         b = g["best"]
         out.append(f"| {i} | {short(g)} | {b['overall']:.1f}% | {g['mean']:.1f}% | {b['minutes']:.1f} "
-                   f"| {tok(b['tokens'] or 0, b['tokens_approx'])} | {len(g['runs'])} | {g['problems'] or '–'} |")
-    out += ["", "| # | By mean of all runs | Mean | Worst | Mean time (min) | Mean tokens | Runs | Often fails |",
-            "|---|---|---|---|---|---|---|---|"]
+                   f"| {tok(b['tokens'] or 0, b['tokens_approx'])} | {b['tok_s_time'] or 0:.0f} | {len(g['runs'])} | {g['problems'] or '–'} |")
+    out += ["", "| # | By mean of all runs | Mean | Worst | Mean time (min) | Mean tokens | tok/s | Runs | Often fails |",
+            "|---|---|---|---|---|---|---|---|---|"]
     for i, g in enumerate(by_mean, 1):
         out.append(f"| {i} | {short(g)} | {g['mean']:.1f}% | {g['worst']:.0f}% | {g['mean_minutes']:.1f} "
-                   f"| {tok(g['mean_tokens'], g['tokens_approx'])} | {len(g['runs'])} | {g['problems'] or '–'} |")
+                   f"| {tok(g['mean_tokens'], g['tokens_approx'])} | {g['tok_s'] or 0:.0f} | {len(g['runs'])} | {g['problems'] or '–'} |")
     return out
 
 
@@ -325,7 +328,7 @@ def readme_family(by_mean):
         cells = []
         for su in suites:
             c = r["cells"].get(su)
-            cells.append(f"**{c['score']:.1f}%** ({c['runs']}×, {c['minutes']:.0f} min, {tok(c['tokens'], c['approx'])})"
+            cells.append(f"**{c['score']:.1f}%** ({c['runs']}×, {c['minutes']:.0f} min, {tok(c['tokens'], c['approx'])}, {c['tok_s'] or 0:.0f} tok/s)"
                          if c else "–")
         name = r["model"].replace("GLM-5.3-Flash", "").strip()
         out.append(f"| {(name + ' ') if name else ''}{r['quant']} · {r['backend']} | {r['effort']} | "

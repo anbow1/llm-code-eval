@@ -4,21 +4,21 @@ Every GLM-5.3-Flash variant that has been run, in all four suites. GLM-5.3-Flash
 
 ## All suites
 
-Mean score per suite, with the number of runs, the mean time and the mean tokens of one run. Settings are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** = tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.
+Mean score per suite, with the number of runs, the mean time and the mean tokens of one run, and the average speed (all tokens ÷ all generation time). Settings are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** = tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.
 
 | # | Model | Quant | Backend | Effort | Base | Hard | Practical | Tools | Mean of suites | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | **92.2%** (5×, 17 min, 19k tok) | **90.1%** (5×, 50 min, ~56k tok) | **97.6%** (3×, 5 min, 4k tok) | **100.0%** (2×, 3 min, 1k tok) | 95.0% (4 of 4) | t1_cube 3/5 (wrong 3); w_refactor 3/3 (wrong 3) |
-| 2 | GLM-5.3-Flash derisked | Maya-M | Maya | high | **85.1%** (2×, 18 min, 23k tok) | **86.5%** (4×, 41 min, ~58k tok) | **98.8%** (4×, 4 min, 4k tok) | **99.6%** (4×, 2 min, 1k tok) | 92.5% (4 of 4) | h_p3_line_diff 2/4 (time 1, none 1); h_t2_instanced_pick 2/4 (wrong 2); w_refactor 2/4 (wrong 2) |
-| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | **100.0%** (1×, 13 min, 14k tok) | **86.0%** (6×, 41 min, ~48k tok) | – | – | 93.0% (2 of 4) | h_p3_line_diff 4/6 (wrong 4) |
-| 4 | GLM-5.3-Flash | EXL3 3.10 bpw | ExLlamaV3 | high | **95.5%** (1×, 16 min, 13k tok) | **89.1%** (2×, 59 min, ~50k tok) | – | – | 92.3% (2 of 4) | – |
-| 5 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | **99.3%** (2×, 26 min, ~19k tok) | **80.0%** (3×, 96 min, ~61k tok) | – | – | 89.7% (2 of 4) | h_p3_line_diff 3/3 (time 3) |
-| 6 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | **93.9%** (1×, 19 min, 14k tok) | **82.9%** (2×, 91 min, ~75k tok) | – | – | 88.4% (2 of 4) | h_p3_line_diff 2/2 (time 2) |
-| 7 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | low | **86.3%** (2×, 9 min, 7k tok) | **81.1%** (1×, 9 min, 8k tok) | – | – | 83.7% (2 of 4) | – |
-| 8 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | low | **83.5%** (2×, 12 min, 9k tok) | **77.9%** (2×, 19 min, ~13k tok) | – | – | 80.7% (2 of 4) | p4_gather_limited 2/2 (wrong 2); p1_parse_duration 2/2 (wrong 2) |
-| 9 | GLM-5.3-Flash | EXL3 3.05 bpw no MTP | ExLlamaV3 | high | **90.3%** (2×, 24 min, 18k tok) | – | – | – | 90.3% (1 of 4) | – |
-| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | **87.5%** (1×, 206 min, ~159k tok) | – | – | – | 87.5% (1 of 4) | – |
-| 11 | GLM-5.3-Flash | EXL3 3.05 bpw no MTP | ExLlamaV3 | low | **85.6%** (2×, 9 min, 6k tok) | – | – | – | 85.6% (1 of 4) | p4_gather_limited 2/2 (wrong 2); p1_parse_duration 2/2 (wrong 2) |
+| 1 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | **92.2%** (5×, 17 min, 19k tok, 20 tok/s) | **90.1%** (5×, 50 min, ~56k tok, 18 tok/s) | **97.6%** (3×, 5 min, 4k tok, 13 tok/s) | **100.0%** (2×, 3 min, 1k tok, 7 tok/s) | 95.0% (4 of 4) | t1_cube 3/5 (wrong 3); w_refactor 3/3 (wrong 3) |
+| 2 | GLM-5.3-Flash derisked | Maya-M | Maya | high | **85.1%** (2×, 18 min, 23k tok, 23 tok/s) | **86.5%** (4×, 41 min, ~58k tok, 23 tok/s) | **98.8%** (4×, 4 min, 4k tok, 19 tok/s) | **99.6%** (4×, 2 min, 1k tok, 10 tok/s) | 92.5% (4 of 4) | h_p3_line_diff 2/4 (time 1, none 1); h_t2_instanced_pick 2/4 (wrong 2); w_refactor 2/4 (wrong 2) |
+| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | **100.0%** (1×, 13 min, 14k tok, 19 tok/s) | **86.0%** (6×, 41 min, ~48k tok, 20 tok/s) | – | – | 93.0% (2 of 4) | h_p3_line_diff 4/6 (wrong 4) |
+| 4 | GLM-5.3-Flash | EXL3 3.10 bpw | ExLlamaV3 | high | **95.5%** (1×, 16 min, 13k tok, 14 tok/s) | **89.1%** (2×, 59 min, ~50k tok, 14 tok/s) | – | – | 92.3% (2 of 4) | – |
+| 5 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | **99.3%** (2×, 26 min, ~19k tok, 12 tok/s) | **80.0%** (3×, 96 min, ~61k tok, 11 tok/s) | – | – | 89.7% (2 of 4) | h_p3_line_diff 3/3 (time 3) |
+| 6 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | **93.9%** (1×, 19 min, 14k tok, 12 tok/s) | **82.9%** (2×, 91 min, ~75k tok, 14 tok/s) | – | – | 88.4% (2 of 4) | h_p3_line_diff 2/2 (time 2) |
+| 7 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | low | **86.3%** (2×, 9 min, 7k tok, 14 tok/s) | **81.1%** (1×, 9 min, 8k tok, 15 tok/s) | – | – | 83.7% (2 of 4) | – |
+| 8 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | low | **83.5%** (2×, 12 min, 9k tok, 12 tok/s) | **77.9%** (2×, 19 min, ~13k tok, 12 tok/s) | – | – | 80.7% (2 of 4) | p4_gather_limited 2/2 (wrong 2); p1_parse_duration 2/2 (wrong 2) |
+| 9 | GLM-5.3-Flash | EXL3 3.05 bpw no MTP | ExLlamaV3 | high | **90.3%** (2×, 24 min, 18k tok, 14 tok/s) | – | – | – | 90.3% (1 of 4) | – |
+| 10 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | max | **87.5%** (1×, 206 min, ~159k tok, 13 tok/s) | – | – | – | 87.5% (1 of 4) | – |
+| 11 | GLM-5.3-Flash | EXL3 3.05 bpw no MTP | ExLlamaV3 | low | **85.6%** (2×, 9 min, 6k tok, 12 tok/s) | – | – | – | 85.6% (1 of 4) | p4_gather_limited 2/2 (wrong 2); p1_parse_duration 2/2 (wrong 2) |
 
 ## Base suite
 

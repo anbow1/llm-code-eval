@@ -247,6 +247,12 @@ def problem_text(rs, limit=2, kinds=True):
     return "; ".join(parts)
 
 
+def speed(rs):
+    """Average speed of a group of runs: all generated tokens / all generation time (tok/s)."""
+    gen = sum(r["gen_minutes"] for r in rs)
+    return sum(r["tokens"] or 0 for r in rs) / (gen * 60) if gen else None
+
+
 def rank_settings(runs):
     """One entry per setting (model + quant + backend + GPU + effort): its runs, mean, worst and best run."""
     groups = {}
@@ -259,6 +265,7 @@ def rank_settings(runs):
                     "mean_minutes": sum(r["minutes"] for r in rs) / len(rs),
                     "mean_tokens": sum(r["tokens"] or 0 for r in rs) / len(rs),
                     "tokens_approx": any(r["tokens_approx"] for r in rs),
+                    "tok_s": speed(rs),
                     "problems": problem_text(rs, kinds=False),
                     # best run; on a tie the faster one
                     "best": min(rs, key=lambda r: (-r["overall"], r["minutes"]))})
@@ -287,7 +294,7 @@ def write_family_table(prefix, path, title, intro):
         sc = mean([r["overall"] for r in rs])
         ap = "~" if any(r["tokens_approx"] for r in rs) else ""
         return (f"**{sc:.1f}%** ({len(rs)}×, {mean([r['minutes'] for r in rs]):.0f} min, "
-                f"{ap}{mean([r['tokens'] or 0 for r in rs]) / 1000:.0f}k tok)"), sc
+                f"{ap}{mean([r['tokens'] or 0 for r in rs]) / 1000:.0f}k tok, {speed(rs):.0f} tok/s)"), sc
 
     rows = []
     for k in keys:
@@ -302,7 +309,8 @@ def write_family_table(prefix, path, title, intro):
         problems[k] = "; ".join(t for t in txt if t)
     lines = [title, "", intro, "",
              "## All suites", "",
-             "Mean score per suite, with the number of runs, the mean time and the mean tokens of one run. Settings "
+             "Mean score per suite, with the number of runs, the mean time and the mean tokens of one run, and the "
+             "average speed (all tokens ÷ all generation time). Settings "
              "are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** "
              "= tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.", "",
              "| # | Model | Quant | Backend | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites | Problem tasks |",
