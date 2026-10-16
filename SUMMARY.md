@@ -374,7 +374,7 @@ All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and
 
 # Part 6: new RTX 4080 runs (15–16 Oct)
 
-All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite and hard suite, with time, tokens, tok/s and the tasks each setting keeps failing). New runs, all at `medium`. Base suite:
+All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite and hard suite, each ranked by best run and by mean, with time, tokens, tok/s and the tasks each setting keeps failing). New runs, all at `medium`. Base suite:
 
 | Quant | Backend | Score | Time (min) | Tokens | tok/s | Notes |
 |---|---|---|---|---|---|---|

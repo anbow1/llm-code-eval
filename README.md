@@ -38,12 +38,12 @@ RTX 5090 32 GB + 128 GB RAM:
 
 **RTX 4080 16 GB + 32 GB RAM: Qwen3.8-27B at 3 bits almost matches Q6, at about half the speed.** The best are EXL3 3.0 bpw at `low` and AP IQ3_S at `medium`. Below 3 bits (EXL3 2.2 bpw) the score drops by about 10 points. Scores are means over 2–3 runs.
 
-All 4080 settings, overall (base + hard) and per suite, with time, tokens, speed and the tasks they keep failing (`python make_top10.py` writes it too):
+All 4080 settings: overall (base + hard), base suite and hard suite, each ranked both by best run and by the mean of all runs, with time, tokens, speed and the tasks they keep failing (`python make_top10.py` writes it too):
 
 ![RTX 4080 16 GB only: overall, base suite and hard suite](rtx4080.jpg)
 
 - **GSQ-RCO IQ3_XXS MTP at `medium` is the best 4080 file, and first overall on any GPU: 99.2%** (base 100% in 8.4 min, hard 98.3% in 17.9 min, about 70 tok/s). This rests on one run per suite (15–16 Oct); repeats will show whether it holds.
-- **Next on the 4080 overall:** AP IQ3_S at `medium` 93.9%, EXL3 3.0 bpw at `medium` 91.7%, EXL3 2.2 bpw at `medium` 85.1%.
+- **Next on the 4080 overall, by mean:** AP IQ3_S at `medium` 93.9%, EXL3 3.0 bpw at `medium` 91.7%, EXL3 2.2 bpw at `medium` 85.1%. **By best run** AP IQ3_S and EXL3 3.0 bpw tie at 97.0% (100% base, 94.1% hard): both can do it, but EXL3 3.0 bpw at `medium` drops to 84% on a bad base run and AP IQ3_S fails `h_p3_line_diff` every time.
 - **EXL3 3.0 bpw is the steadiest on the hard suite:** 92–94% in 3 runs, about 10 min at 85 tok/s. EXL3 2.2 bpw scored 83.9% (first run, 16 Oct).
 - **`h_p3_line_diff` is the 4080's weak spot:** AP IQ3_S fails it in 3 of 3 runs, EXL3 3.0 bpw in 2 of 3. On the base suite the 2–3-bit files keep failing `p2_sliding_median`.
 
