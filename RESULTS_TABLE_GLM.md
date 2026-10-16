@@ -61,6 +61,6 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 | Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 2 | **100.0%** | 100–100 | 100.0% | 0% | 3.0 | 1.2k | 6.7 | – |
-| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 2.0 | 1.2k | 10.3 | – |
+| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 1.9 | 1.2k | 10.3 | – |
 
 Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, looped, no final answer). `~` = token count partly estimated. All other suites' tables: RESULTS_TABLE*.md.
