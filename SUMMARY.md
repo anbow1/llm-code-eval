@@ -389,7 +389,7 @@ Hard suite:
 | EXL3 2.2 bpw | ExLlamaV3 | 83.9% | 15.3 | 75.0k | 83 | first hard run; diff wrong (`h_p3` 17%) |
 
 - **IQ3_XXS MTP is now first overall, on any GPU: 99.2%** (base 100%, hard 98.3%). That is one run per suite; at temperature 1.0 single runs can swing by 10–20 points, so repeating both suites is the next useful test.
-- **It is much better than the abliterated IQ3_XXS without MTP** (86–88% on the base suite). It is the only 2–3-bit file on the 4080 that solved both `p2_sliding_median` and `h_p3_line_diff`.
+- **It is much better than the abliterated IQ3_XXS without MTP** (86–88% on the base suite). It solved both tasks the other 4080 files keep failing: `p2_sliding_median` and `h_p3_line_diff`.
 - **On the 4080 the hard suite again comes down to `h_p3_line_diff`.** It is solved by IQ3_XXS MTP. EXL3 3.0 bpw fails it in 2 of 3 runs and AP IQ3_S in 3 of 3.
 - **The run with IQ3_XXS MTP was saved in `results/`;** it was moved to `results_hard/`, where hard-suite runs belong.
 - **ExLlamaV3 token counts:** the new runs report 2.5–3.6 characters per token, so the counts are plausible and were not re-estimated.
