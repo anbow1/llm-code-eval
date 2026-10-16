@@ -1,4 +1,4 @@
-# Local model coding test: summary (25 Sep – 14 Oct 2026)
+# Local model coding test: summary (25 Sep – 16 Oct 2026)
 
 ## TL;DR
 
@@ -14,7 +14,7 @@
   - **Qwen3.8-Flash-Next UD-Q4_K_XL at `medium`:** 90.3% over 3 runs (79–98%) in llama.cpp and 93.0% over 2 runs (86–100%) in Strata.
   - **GLM-5.3-Flash is the slowest and the least steady.** At `high` its best runs reach 97–100%, but its means are 80–90%. In llama.cpp and ExLlamaV3 it hit the 60-minute limit on `h_p3_line_diff` in 6 of 7 runs; in the Maya engine once in 15.
 - **The Strata engine makes Flash-Next 2.2–3.7× faster than llama.cpp**, with the same file and the same memory use. IQ3_S runs at 125–141 tok/s from time against 35, UD-Q4_K_XL at 78–81 against 32–37. [Strata](https://github.com/Niko1221/Strata) v0.1.30 is an inference server built for MoE models on consumer GPUs; it manages which experts are cached on the GPU.
-- **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite EXL3 3.0 bpw scored 93.1%. Below 3 bits quality drops.
+- **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite the new GSQ-RCO IQ3_XXS MTP scored 98.3% (one run, 18 min) and EXL3 3.0 bpw 92.6% over 3 runs. Below 3 bits quality drops. All 4080 results: [rtx4080.jpg](rtx4080.jpg).
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high`.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
 - **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and rarely hits the time limit. Its best hard-suite means are 89–90% (GSQ-RCO 3.5-bit in Maya, and the new EXL3 3.10 bpw in ExLlamaV3), against 80–83% for the older files in llama.cpp or ExLlamaV3. GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
@@ -238,7 +238,7 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 | 2 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S (Strata) | 5090 | low | 1 | **97.8%** | – | 8.4 | 70.4k | 141.3 |
 | 3 | Qwen3.8-27B | UD-Q6_K_M | 5090 | medium | 1 | **97.6%** | – | 9.0 | 50.7k | 96.1 |
 | 4 | Qwen3.8-27B | EXL3 6.0 bpw | 5090 | low | 1 | **94.4%** | – | 6.5 | ~46.1k | 121.9 |
-| 5 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 2 | **93.1%** | 92–94 | 11.0 | ~54.0k | 82.9 |
+| 5 | Qwen3.8-27B | EXL3 3.0 bpw | 4080 | medium | 3 | **92.6%** | 92–94 | 10.2 | ~51.2k | 84.7 |
 | 6 | Qwen3.8-Flash-Next | UD-Q4_K_XL (Strata) | 5090 | medium | 2 | **93.0%** | 86–100 | 15.7 | 75.4k | 81.1 |
 | 7 | Qwen3.8-Flash-Next | UD-Q4_K_XL | 5090 | medium | 3 | **90.3%** | 79–98 | 18.7 | 41.1k | 37.0 |
 | 8 | Qwen3.8-27B | UD-Q6_K_M | 5090 | low | 1 | 88.5% | – | 8.1 | 47.1k | 99.3 |
@@ -260,7 +260,7 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 **Best run against mean.** [top10_hard.jpg](top10_hard.jpg) and [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) rank the settings both by their best run and by the mean of all runs. Only repeated settings can move between the two:
 - **Flash-Next UD-Q4_K_XL moves the most.** In Strata it is 2nd by best run (99.6% in 7.7 min) but 6th by mean (93.0%). In llama.cpp it is 3rd by best run (98.1%) but 7th by mean (90.3%).
 - **27B AP IQ3_S on the 4080** is 8th by best run (94.1%) and 9th by mean (87.8%).
-- **27B EXL3 3.0 bpw on the 4080 is the steadiest:** 92–94% in both runs.
+- **27B EXL3 3.0 bpw on the 4080 is the steadiest:** 92–94% in all three runs.
 
 **`h_p3_line_diff` (minimal diff, needs Myers' algorithm) decides most of the ranking.** Only 11 of 28 runs solved it fully.
 
@@ -370,6 +370,21 @@ All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and
 **Flash-Next UD-Q4_K_XL in Strata, base suite repeats (7 Oct).**
 - At `medium`: 100% in 10.3 min. Over 3 runs it now averages 97.3%.
 - At `low`: 94.6% in 6.7 min. It lost points on `p2_sliding_median`.
+
+# Part 6: new RTX 4080 runs (15–16 Oct)
+
+All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite and hard suite, with time, tokens, tok/s and the tasks each setting keeps failing). New hard-suite runs, all at `medium`:
+
+| Quant | Backend | Score | Time (min) | Tokens | tok/s | Notes |
+|---|---|---|---|---|---|---|
+| GSQ-RCO IQ3_XXS MTP | llama.cpp | **98.3%** | 17.9 | 72.4k | 68 | first hard run of this file; solved `h_p3_line_diff` |
+| EXL3 3.0 bpw | ExLlamaV3 | 91.7% | 8.7 | 45.5k | 89 | diff half right (`h_p3` 50%); now 92.6% over 3 runs |
+| EXL3 2.2 bpw | ExLlamaV3 | 83.9% | 15.3 | 75.0k | 83 | first hard run; diff wrong (`h_p3` 17%) |
+
+- **IQ3_XXS MTP is the best 4080 file on the hard suite so far**, but on one run only. Its base-suite runs so far are of the abliterated IQ3_XXS without MTP (86–88%), so a base run of this file is the next useful test.
+- **On the 4080 the hard suite again comes down to `h_p3_line_diff`.** It is solved by IQ3_XXS MTP. EXL3 3.0 bpw fails it in 2 of 3 runs and AP IQ3_S in 3 of 3.
+- **The run with IQ3_XXS MTP was saved in `results/`;** it was moved to `results_hard/`, where hard-suite runs belong.
+- **ExLlamaV3 token counts:** the new runs report 2.5–3.6 characters per token, so the counts are plausible and were not re-estimated.
 
 ## Caveats
 

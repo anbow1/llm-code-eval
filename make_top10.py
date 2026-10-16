@@ -9,6 +9,7 @@ top10.jpg       every setting (model + quant + backend + GPU + reasoning effort)
 top10_hard.jpg  hard suite only, two rankings side by side: by each setting's best run, and by the mean
                 of all its runs
 glm_flash.jpg   every GLM-5.3-Flash variant in all four suites
+rtx4080.jpg     the RTX 4080 16 GB only: overall (both suites), base suite and hard suite
 
 Needs Playwright with Chromium, like run_eval.py (set CHROMIUM_PATH to use another build).
 """
@@ -24,15 +25,17 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / "top10.jpg"
 OUT_HARD = HERE / "top10_hard.jpg"
 OUT_GLM = HERE / "glm_flash.jpg"
+OUT_4080 = HERE / "rtx4080.jpg"
 TOP = 10
 
 
-def collect():
+def collect(gpu=None, top=TOP):
     groups = defaultdict(lambda: {"base": [], "hard": []})
     for suite in ("base", "hard"):  # the image ranks by these two; the newer suites have their own tables
         folder = ms.SUITES[suite][0]
         for r in ms.load_runs(folder):
-            groups[(r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])][suite].append(r)
+            if gpu is None or r["gpu"] == gpu:
+                groups[(r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])][suite].append(r)
     rows = []
     for (model, quant, backend, gpu, effort), by in groups.items():
         if not by["base"] or not by["hard"]:
@@ -56,7 +59,7 @@ def collect():
     for r in rows:
         r["avg"] = (r["base"] + r["hard"]) / 2
     rows.sort(key=lambda r: (-r["avg"], r["min_base"] + r["min_hard"]))
-    return rows[:TOP], len(rows)
+    return rows[:top], len(rows)
 
 
 STYLE = """:root { --surface:#fcfcfb; --text:#0b0b0b; --text2:#52514e; --muted:#8a8984; --rule:#e4e3df;
@@ -106,7 +109,8 @@ PROBLEM_NOTE = ("Often fails = a task scored below 90% in at least half of a set
                 "with failed/runs.")
 
 
-def build_html(rows, n_settings):
+def build_rows_table(rows):
+    """The table of top10.jpg: average of both suites, each suite, speed, time, tokens, runs."""
     e = html.escape
     k = lambda x: f"{x / 1000:.1f}k"
     body = []
@@ -121,19 +125,23 @@ def build_html(rows, n_settings):
 <td class="num">{"~" if r["approx_base"] else ""}{k(r['tok_base'])} <span class="sep">/</span> {"~" if r["approx_hard"] else ""}{k(r['tok_hard'])}</td>
 <td class="num muted">{r['runs']}</td>
 </tr>""")
-    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
-{STYLE}</style></head><body><div class="wrap">
-<h1>Local LLM coding test: top {len(rows)} settings</h1>
-<p class="lede">Ranked by the average of the base suite (10 tasks) and the hard suite (6 tasks):
-TypeScript + Three.js in a real browser and Python with hidden tests. {date.today():%d %b %Y}.</p>
-<table><thead><tr>
+    return f"""<table><thead><tr>
 <th>#</th><th>Model<small>quant · backend</small></th><th>GPU</th><th>Effort</th>
 <th>Average<small>of both suites</small></th><th>Base suite</th><th>Hard suite</th>
 <th class="num">Speed<small>tok/s</small></th><th class="num">Time, min<small>base / hard</small></th>
 <th class="num">Tokens<small>base / hard</small></th><th class="num">Runs<small>base + hard</small></th>
 </tr></thead><tbody>
 {''.join(body)}
-</tbody></table>
+</tbody></table>"""
+
+
+def build_html(rows, n_settings):
+    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+{STYLE}</style></head><body><div class="wrap">
+<h1>Local LLM coding test: top {len(rows)} settings</h1>
+<p class="lede">Ranked by the average of the base suite (10 tasks) and the hard suite (6 tasks):
+TypeScript + Three.js in a real browser and Python with hidden tests. {date.today():%d %b %Y}.</p>
+{build_rows_table(rows)}
 <div class="notes">
 Scores, time and tokens are means over the runs of each setting; bars span 50–100%.
 Speed = all generated tokens ÷ all generation time over both suites (prompt processing included).
@@ -143,6 +151,63 @@ Token limit per task 65,536 (98,304 from 30 Sep). Temperature 1.0; with 1–3 ru
 ~5 points are noise. RTX 5090 32 GB + 128 GB RAM, RTX 4080 16 GB + 32 GB RAM.
 {PROBLEM_NOTE} Details: SUMMARY.md, RESULTS_TABLE.md, RESULTS_TABLE_HARD.md.
 </div></div></body></html>"""
+
+
+def suite_table(settings):
+    """One suite, settings ranked by mean: score, worst run, time, tokens, tok/s, runs, tasks it keeps failing."""
+    e = html.escape
+    body = []
+    for i, g in enumerate(settings, 1):
+        worst = f"{g['worst']:.0f}%" if len(g["runs"]) > 1 else "–"
+        body.append(f"""<tr>
+<td class="rank">{i}</td>
+<td><div class="model">{e(g['model'])}</div><div class="sub">{e(g['quant'])} · {e(g['backend'])}</div>{warn(g['problems'])}</td>
+<td>{e(g['effort'])}</td><td class="avg">{bar(g['mean'])}</td><td class="num muted">{worst}</td>
+<td class="num">{g['mean_minutes']:.1f}</td><td class="num">{"~" if g['tokens_approx'] else ""}{g['mean_tokens'] / 1000:.0f}k</td>
+<td class="num">{g['tok_s'] or 0:.0f}</td><td class="num muted">{len(g['runs'])}</td>
+</tr>""")
+    return f"""<table><thead><tr>
+<th>#</th><th>Model<small>quant · backend</small></th><th>Effort</th><th>Mean</th><th class="num">Worst<small>run</small></th>
+<th class="num">Time, min<small>mean</small></th><th class="num">Tokens<small>mean</small></th>
+<th class="num">tok/s<small>mean</small></th><th class="num">Runs</th>
+</tr></thead><tbody>{''.join(body)}</tbody></table>"""
+
+
+def build_gpu_html(gpu, overall, base, hard):
+    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+{STYLE}
+.wrap {{ width:2000px; }}
+.cols {{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }}
+h2 {{ font-size:21px; margin:26px 0 2px; }}
+.h2note {{ font-size:14px; color:var(--text2); margin:0 0 10px; }}
+table {{ font-size:15px; }}
+td {{ padding:10px 8px; }} th {{ padding:0 8px 10px; }}
+.score {{ min-width:100px; }}
+</style></head><body><div class="wrap">
+<h1>Local LLM coding test: {html.escape(gpu)} only</h1>
+<p class="lede">Every setting run on the {html.escape(gpu)} + 32 GB DDR5: Qwen3.8-27B at 2–3 bits, in llama.cpp and ExLlamaV3.
+{date.today():%d %b %Y}.</p>
+<h2>Overall: both suites</h2><p class="h2note">Settings run on both the base and the hard suite, ranked by the average of the two means.</p>
+{build_rows_table(overall)}
+<div class="cols">
+<div><h2>Base suite (10 tasks)</h2><p class="h2note">Every setting, ranked by its mean.</p>{suite_table(base)}</div>
+<div><h2>Hard suite (6 tasks)</h2><p class="h2note">Every setting, ranked by its mean.</p>{suite_table(hard)}</div>
+</div>
+<div class="notes">
+Scores, time, tokens and speed are means over the runs of each setting; bars span 50–100%. Time and tokens per full suite,
+thinking included; tok/s = all generated tokens ÷ all generation time; ~ = partly estimated (ExLlamaV3 under-reports tokens).
+{PROBLEM_NOTE} Temperature 1.0; with 1–3 runs per setting, differences under ~5 points are noise.
+Details: RESULTS_TABLE.md, RESULTS_TABLE_HARD.md, SUMMARY.md (Part 2).
+</div></div></body></html>"""
+
+
+def collect_gpu(gpu):
+    overall, _n = collect(gpu, top=100)
+    per = {}
+    for suite in ("base", "hard"):
+        rs = [r for r in ms.load_runs(ms.SUITES[suite][0]) if r["gpu"] == gpu]
+        per[suite] = sorted(ms.rank_settings(rs), key=lambda g: (-g["mean"], g["mean_minutes"]))
+    return overall, per["base"], per["hard"]
 
 
 def collect_hard():
@@ -359,7 +424,7 @@ def main():
                                 "GLM-5.3-Flash with different quants, engines and reasoning levels, on the base, hard, "
                                 "practical and tool-calling suites.")
         for page_html, out in ((build_html(rows, n), OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),
-                               (glm, OUT_GLM)):
+                               (glm, OUT_GLM), (build_gpu_html("RTX 4080 16 GB", *collect_gpu("RTX 4080 16 GB")), OUT_4080)):
             page.set_content(page_html)
             page.locator(".wrap").screenshot(path=str(out), type="jpeg", quality=92)
             print(f"wrote {out.name}")

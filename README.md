@@ -17,7 +17,7 @@ Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
 ![Top 10 settings by the average of both suites](top10.jpg)
 
-Top 10 settings that have results in both suites, ranked by the average of the two scores. The hard suite alone is ranked in [top10_hard.jpg](top10_hard.jpg) below. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
+Top 10 settings that have results in both suites, ranked by the average of the two scores. The hard suite alone is ranked in [top10_hard.jpg](top10_hard.jpg) below. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`, `rtx4080.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
 
 ## Base suite: results (25 Sep – 6 Oct 2026)
 
@@ -37,6 +37,15 @@ RTX 5090 32 GB + 128 GB RAM:
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | medium | 100.0% | 54.6 min | 72.1k | 22.2 |
 
 **RTX 4080 16 GB + 32 GB RAM: Qwen3.8-27B at 3 bits almost matches Q6, at about half the speed.** The best are EXL3 3.0 bpw at `low` and AP IQ3_S at `medium`. Below 3 bits (EXL3 2.2 bpw) the score drops by about 10 points. Scores are means over 2–3 runs.
+
+All 4080 settings, overall (base + hard) and per suite, with time, tokens, speed and the tasks they keep failing (`python make_top10.py` writes it too):
+
+![RTX 4080 16 GB only: overall, base suite and hard suite](rtx4080.jpg)
+
+- **Overall (both suites): AP IQ3_S at `medium` 93.9%, EXL3 3.0 bpw at `medium` 91.7%, EXL3 2.2 bpw at `medium` 85.1%.**
+- **Hard suite: the new GSQ-RCO IQ3_XXS MTP (15 Oct) scored 98.3%** in 17.9 min (one run), the best 4080 result so far. It is not in the overall ranking yet, because it has no base-suite run.
+- **EXL3 3.0 bpw is the steadiest on the hard suite:** 92–94% in 3 runs, about 10 min at 85 tok/s. EXL3 2.2 bpw scored 83.9% (first run, 16 Oct).
+- **`h_p3_line_diff` is the 4080's weak spot:** AP IQ3_S fails it in 3 of 3 runs, EXL3 3.0 bpw in 2 of 3. On the base suite the 2–3-bit files keep failing `p2_sliding_median`.
 
 | Model | Quant | Effort | Runs | Mean score | Mean time | Mean tokens | Avg tok/s (from time) |
 |---|---|---|---|---|---|---|---|
@@ -63,25 +72,25 @@ Settings with one run have the same score in both, so only repeated ones move. O
 | 2 | GLM EXL3 3.05 bpw · Maya (5090) `high` | 100.0% | 86.0% | 35.3 | 46k | 22 | 6 | h_p3_line_diff 4/6 |
 | 3 | GLM derisked Maya-M · Maya (5090) `high` | 100.0% | 86.5% | 38.8 | 54k | 23 | 4 | h_p3_line_diff 2/4; h_t2_instanced_pick 2/4 |
 | 4 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 99.6% | 93.0% | 7.7 | 40k | 90 | 2 | – |
-| 5 | Flash-Next UD-Q4_K_XL (5090) `medium` | 98.1% | 90.3% | 17.6 | 39k | 38 | 3 | h_t3_postfx_invert 2/3 |
-| 6 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 97.8% | 8.4 | 70k | 142 | 1 | – |
-| 7 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 97.6% | 9.0 | 51k | 96 | 1 | – |
-| 8 | GLM EXL3 3.10 bpw · ExLlamaV3 (5090) `high` | 97.2% | 89.1% | 39.2 | 34k | 14 | 2 | – |
-| 9 | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 95.8% | 90.1% | 71.0 | 68k | 16 | 5 | – |
-| 10 | 27B EXL3 6.0 bpw · ExLlamaV3 (5090) `low` | 94.4% | 94.4% | 6.5 | ~46k | 122 | 1 | – |
+| 5 | 27B GSQ-RCO IQ3_XXS MTP (4080) `medium` | 98.3% | 98.3% | 17.9 | 72k | 68 | 1 | – |
+| 6 | Flash-Next UD-Q4_K_XL (5090) `medium` | 98.1% | 90.3% | 17.6 | 39k | 38 | 3 | h_t3_postfx_invert 2/3 |
+| 7 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 97.8% | 8.4 | 70k | 142 | 1 | – |
+| 8 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 97.6% | 9.0 | 51k | 96 | 1 | – |
+| 9 | GLM EXL3 3.10 bpw · ExLlamaV3 (5090) `high` | 97.2% | 89.1% | 39.2 | 34k | 14 | 2 | – |
+| 10 | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 95.8% | 90.1% | 71.0 | 68k | 16 | 5 | – |
 
 | # | By mean of all runs | Mean | Worst | Mean time (min) | Mean tokens | tok/s | Runs | Often fails |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100% | 19.6 | 160k | 137 | 2 | – |
-| 2 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 98% | 8.4 | 70k | 141 | 1 | – |
-| 3 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 98% | 9.0 | 51k | 96 | 1 | – |
-| 4 | 27B EXL3 6.0 bpw · ExLlamaV3 (5090) `low` | 94.4% | 94% | 6.5 | ~46k | 122 | 1 | – |
-| 5 | 27B EXL3 3.0 bpw · ExLlamaV3 (4080) `medium` | 93.1% | 92% | 11.0 | ~54k | 83 | 2 | – |
+| 2 | 27B GSQ-RCO IQ3_XXS MTP (4080) `medium` | 98.3% | 98% | 17.9 | 72k | 69 | 1 | – |
+| 3 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `low` | 97.8% | 98% | 8.4 | 70k | 141 | 1 | – |
+| 4 | 27B UD-Q6_K_M (5090) `medium` | 97.6% | 98% | 9.0 | 51k | 96 | 1 | – |
+| 5 | 27B EXL3 6.0 bpw · ExLlamaV3 (5090) `low` | 94.4% | 94% | 6.5 | ~46k | 122 | 1 | – |
 | 6 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 93.0% | 86% | 15.7 | 75k | 81 | 2 | – |
-| 7 | Flash-Next UD-Q4_K_XL (5090) `medium` | 90.3% | 79% | 18.7 | 41k | 37 | 3 | h_t3_postfx_invert 2/3 |
-| 8 | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 90.1% | 83% | 50.5 | ~56k | 18 | 5 | – |
-| 9 | GLM EXL3 3.10 bpw · ExLlamaV3 (5090) `high` | 89.1% | 81% | 58.8 | ~50k | 14 | 2 | – |
-| 10 | 27B UD-Q6_K_M (5090) `low` | 88.5% | 88% | 8.1 | 47k | 99 | 1 | – |
+| 7 | 27B EXL3 3.0 bpw · ExLlamaV3 (4080) `medium` | 92.6% | 92% | 10.2 | ~51k | 85 | 3 | h_p3_line_diff 2/3 |
+| 8 | Flash-Next UD-Q4_K_XL (5090) `medium` | 90.3% | 79% | 18.7 | 41k | 37 | 3 | h_t3_postfx_invert 2/3 |
+| 9 | GLM GSQ-RCO 3.5-bit · Maya (5090) `high` | 90.1% | 83% | 50.5 | ~56k | 18 | 5 | – |
+| 10 | GLM EXL3 3.10 bpw · ExLlamaV3 (5090) `high` | 89.1% | 81% | 58.8 | ~50k | 14 | 2 | – |
 <!-- hard-ranking:end -->
 
 Time and tokens are per full suite, thinking included: of the best run in the first table, means in the second. tok/s = all generated tokens ÷ all generation time (prompt processing included), the real working speed. **Often fails** = a task scored below 90% in at least half of a setting's runs (and at least twice), as failed/runs; the stability tables in RESULTS_TABLE*.md also say how (wrong answer, time-out, out of tokens). These tables and the GLM table below are written by `make_top10.py`.
