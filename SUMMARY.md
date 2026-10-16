@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-- **Best overall: Qwen3.8-27B UD-Q6_K_M at `medium` (llama.cpp, RTX 5090).** Its average over both suites is 98.1%: 98.6% on the base suite and 97.6% on the hard suite. It takes 4 and 9 minutes. See [top10.jpg](top10.jpg).
+- **Best overall: Qwen3.8-27B GSQ-RCO IQ3_XXS MTP at `medium` (llama.cpp, RTX 4080 16 GB): 99.2%** over both suites (base 100% in 8.4 min, hard 98.3% in 18 min), but on one run per suite (15–16 Oct). The best repeated setting is Qwen3.8-27B UD-Q6_K_M at `medium` on the RTX 5090: 98.1% (base 98.6%, hard 97.6%), in 4 and 9 minutes. See [top10.jpg](top10.jpg).
 - **Base suite (10 tasks) is saturated.** Several settings on the RTX 5090 score 100%. The fastest are:
   - Qwen3.8-27B UD-Q6_K_M at `low`: 4.7 min;
   - Qwen3.8-27B EXL3 6.0 bpw at `low`: 5.0 min;
@@ -253,9 +253,10 @@ All runs: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md), raw data in `results_h
 | 17 | Qwen3.8-27B | EXL3 3.0 bpw qv44 | 4080 | medium | 1 | 66.7% | – | 10.9 | ~53.9k | 83.2 |
 
 **On both suites together** (the average of the two scores, [top10.jpg](top10.jpg)), the top three are:
-1. Qwen3.8-27B Q6 at `medium`: 98.1%.
-2. Qwen3.8-27B EXL3 6.0 bpw at `low`: 97.2%.
-3. Flash-Next IQ3_S in Strata at `medium`: 96.9%. Before the 3 Oct base-suite repeat it was first with 100%.
+1. Qwen3.8-27B GSQ-RCO IQ3_XXS MTP on the 4080 at `medium`: 99.2% (one run per suite, 15–16 Oct).
+2. Qwen3.8-27B Q6 at `medium`: 98.1%.
+3. Qwen3.8-27B EXL3 6.0 bpw at `low`: 97.2%.
+4. Flash-Next IQ3_S in Strata at `medium`: 96.9%. Before the 3 Oct base-suite repeat it was first with 100%.
 
 **Best run against mean.** [top10_hard.jpg](top10_hard.jpg) and [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) rank the settings both by their best run and by the mean of all runs. Only repeated settings can move between the two:
 - **Flash-Next UD-Q4_K_XL moves the most.** In Strata it is 2nd by best run (99.6% in 7.7 min) but 6th by mean (93.0%). In llama.cpp it is 3rd by best run (98.1%) but 7th by mean (90.3%).
@@ -373,7 +374,13 @@ All GLM variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md) and
 
 # Part 6: new RTX 4080 runs (15–16 Oct)
 
-All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite and hard suite, with time, tokens, tok/s and the tasks each setting keeps failing). New hard-suite runs, all at `medium`:
+All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite and hard suite, with time, tokens, tok/s and the tasks each setting keeps failing). New runs, all at `medium`. Base suite:
+
+| Quant | Backend | Score | Time (min) | Tokens | tok/s | Notes |
+|---|---|---|---|---|---|---|
+| GSQ-RCO IQ3_XXS MTP | llama.cpp | **100.0%** | 8.4 | 34.5k | 72 | all 10 tasks solved, including `p2_sliding_median` (16 Oct) |
+
+Hard suite:
 
 | Quant | Backend | Score | Time (min) | Tokens | tok/s | Notes |
 |---|---|---|---|---|---|---|
@@ -381,7 +388,8 @@ All 4080 settings in one image: [rtx4080.jpg](rtx4080.jpg) (overall, base suite 
 | EXL3 3.0 bpw | ExLlamaV3 | 91.7% | 8.7 | 45.5k | 89 | diff half right (`h_p3` 50%); now 92.6% over 3 runs |
 | EXL3 2.2 bpw | ExLlamaV3 | 83.9% | 15.3 | 75.0k | 83 | first hard run; diff wrong (`h_p3` 17%) |
 
-- **IQ3_XXS MTP is the best 4080 file on the hard suite so far**, but on one run only. Its base-suite runs so far are of the abliterated IQ3_XXS without MTP (86–88%), so a base run of this file is the next useful test.
+- **IQ3_XXS MTP is now first overall, on any GPU: 99.2%** (base 100%, hard 98.3%). That is one run per suite; at temperature 1.0 single runs can swing by 10–20 points, so repeating both suites is the next useful test.
+- **It is much better than the abliterated IQ3_XXS without MTP** (86–88% on the base suite). It is the only 2–3-bit file on the 4080 that solved both `p2_sliding_median` and `h_p3_line_diff`.
 - **On the 4080 the hard suite again comes down to `h_p3_line_diff`.** It is solved by IQ3_XXS MTP. EXL3 3.0 bpw fails it in 2 of 3 runs and AP IQ3_S in 3 of 3.
 - **The run with IQ3_XXS MTP was saved in `results/`;** it was moved to `results_hard/`, where hard-suite runs belong.
 - **ExLlamaV3 token counts:** the new runs report 2.5–3.6 characters per token, so the counts are plausible and were not re-estimated.

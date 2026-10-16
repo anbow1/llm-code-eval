@@ -42,8 +42,8 @@ All 4080 settings, overall (base + hard) and per suite, with time, tokens, speed
 
 ![RTX 4080 16 GB only: overall, base suite and hard suite](rtx4080.jpg)
 
-- **Overall (both suites): AP IQ3_S at `medium` 93.9%, EXL3 3.0 bpw at `medium` 91.7%, EXL3 2.2 bpw at `medium` 85.1%.**
-- **Hard suite: the new GSQ-RCO IQ3_XXS MTP (15 Oct) scored 98.3%** in 17.9 min (one run), the best 4080 result so far. It is not in the overall ranking yet, because it has no base-suite run.
+- **GSQ-RCO IQ3_XXS MTP at `medium` is the best 4080 file, and first overall on any GPU: 99.2%** (base 100% in 8.4 min, hard 98.3% in 17.9 min, about 70 tok/s). This rests on one run per suite (15–16 Oct); repeats will show whether it holds.
+- **Next on the 4080 overall:** AP IQ3_S at `medium` 93.9%, EXL3 3.0 bpw at `medium` 91.7%, EXL3 2.2 bpw at `medium` 85.1%.
 - **EXL3 3.0 bpw is the steadiest on the hard suite:** 92–94% in 3 runs, about 10 min at 85 tok/s. EXL3 2.2 bpw scored 83.9% (first run, 16 Oct).
 - **`h_p3_line_diff` is the 4080's weak spot:** AP IQ3_S fails it in 3 of 3 runs, EXL3 3.0 bpw in 2 of 3. On the base suite the 2–3-bit files keep failing `p2_sliding_median`.
 
@@ -61,7 +61,7 @@ All 66 base-suite runs and per-task scores: [RESULTS_TABLE.md](RESULTS_TABLE.md)
 - **by each setting's best run**: what the setting can do on a good run;
 - **by the mean of all its runs**: what to expect from it on a typical run.
 
-Settings with one run have the same score in both, so only repeated ones move. On both suites together the best setting is Qwen3.8-27B Q6 at `medium` (98.1%, see the image above). GLM-5.3-Flash in llama.cpp or ExLlamaV3 hits the 60-minute limit on `h_p3_line_diff` at `high` in 6 of 7 runs.
+Settings with one run have the same score in both, so only repeated ones move. On both suites together the best setting is now Qwen3.8-27B GSQ-RCO IQ3_XXS MTP at `medium` on the 16 GB RTX 4080 (99.2%, one run per suite), ahead of Q6 on the 5090 at `medium` (98.1%); see the image above. GLM-5.3-Flash in llama.cpp or ExLlamaV3 hits the 60-minute limit on `h_p3_line_diff` at `high` in 6 of 7 runs.
 
 ![Hard suite: top 10 by best run and by mean](top10_hard.jpg)
 
