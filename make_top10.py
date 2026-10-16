@@ -3,9 +3,8 @@
 
     python make_top10.py
 
-top10.jpg       every setting (model + quant + backend + GPU + reasoning effort) that has results in BOTH
-                suites, ranked by the average of its base-suite and hard-suite scores (each a mean over
-                that setting's runs)
+top10.jpg       top 10 settings (model + quant + backend + GPU + reasoning effort): overall (the average of
+                the base and hard suites), base suite and hard suite, each ranked by best run and by mean
 top10_hard.jpg  hard suite only, two rankings side by side: by each setting's best run, and by the mean
                 of all its runs
 glm_flash.jpg   every GLM-5.3-Flash variant in all four suites
@@ -153,7 +152,7 @@ Token limit per task 65,536 (98,304 from 30 Sep). Temperature 1.0; with 1–3 ru
 </div></div></body></html>"""
 
 
-def overall_table(rows, best):
+def overall_table(rows, best, show_gpu=False):
     """Settings run on both suites: the average of the two suites, by best runs or by means."""
     e = html.escape
     body = []
@@ -162,7 +161,7 @@ def overall_table(rows, best):
         body.append(f"""<tr>
 <td class="rank">{i}</td>
 <td><div class="model">{e(r['model'])}</div><div class="sub">{e(r['quant'])} · {e(r['backend'])}</div>{warn(r['problems'])}</td>
-<td>{e(r['effort'])}</td><td class="avg">{bar(x['avg'])}</td>
+{f"<td>{e(r['gpu'].split()[1])}</td>" if show_gpu else ""}<td>{e(r['effort'])}</td><td class="avg">{bar(x['avg'])}</td>
 <td class="num">{x['base']:.1f}% <span class="sep">/</span> {x['hard']:.1f}%</td>
 <td class="num">{x['min_base']:.1f} <span class="sep">/</span> {x['min_hard']:.1f}</td>
 <td class="num">{x['tok_base']} <span class="sep">/</span> {x['tok_hard']}</td>
@@ -170,7 +169,7 @@ def overall_table(rows, best):
 </tr>""")
     what = "of that run" if best else "mean"
     return f"""<table><thead><tr>
-<th>#</th><th>Model<small>quant · backend</small></th><th>Effort</th>
+<th>#</th><th>Model<small>quant · backend</small></th>{"<th>GPU</th>" if show_gpu else ""}<th>Effort</th>
 <th>{"Best runs" if best else "Mean"}<small>average of both suites</small></th>
 <th class="num">Base / hard<small>{"best run" if best else "mean"}</small></th>
 <th class="num">Time, min<small>base / hard, {what}</small></th><th class="num">Tokens<small>base / hard, {what}</small></th>
@@ -178,12 +177,12 @@ def overall_table(rows, best):
 </tr></thead><tbody>{''.join(body)}</tbody></table>"""
 
 
-def build_gpu_html(gpu, d):
+def build_split_html(title, lede, d, details, show_gpu=False):
     pair = lambda title, note, left, right: f"""<h2>{title}</h2><p class="h2note">{note}</p>
 <div class="cols"><div><h3>By best run</h3>{left}</div><div><h3>By mean of all runs</h3>{right}</div></div>"""
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
-.wrap {{ width:2300px; }}
+.wrap {{ width:{2440 if show_gpu else 2300}px; }}
 .cols {{ display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:start; }}
 h2 {{ font-size:23px; margin:30px 0 2px; border-top:3px solid var(--text); padding-top:14px; }}
 h3 {{ font-size:17px; margin:8px 0 8px; color:var(--text2); }}
@@ -192,32 +191,32 @@ table {{ font-size:15px; }}
 td {{ padding:9px 7px; }} th {{ padding:0 7px 10px; }}
 .score {{ min-width:96px; }}
 </style></head><body><div class="wrap">
-<h1>Local LLM coding test: {html.escape(gpu)} only</h1>
-<p class="lede">Every setting run on the {html.escape(gpu)} + 32 GB DDR5: Qwen3.8-27B at 2–3 bits, in llama.cpp and ExLlamaV3.
+<h1>{title}</h1>
+<p class="lede">{lede}
 Each part is ranked two ways: by the setting's best run (what it can do) and by the mean of all its runs (what to expect).
 {date.today():%d %b %Y}.</p>
-{pair("Overall: both suites", "Settings run on both the base and the hard suite, ranked by the average of the two suites.",
-      overall_table(d["overall_best"], True), overall_table(d["overall_mean"], False))}
-{pair("Base suite (10 tasks)", "Every setting run on the base suite.", hard_table(d["base_best"], True),
+{pair("Overall: both suites", d["note_overall"],
+      overall_table(d["overall_best"], True, show_gpu), overall_table(d["overall_mean"], False, show_gpu))}
+{pair("Base suite (10 tasks)", d["note_base"], hard_table(d["base_best"], True),
       hard_table(d["base_mean"], False))}
-{pair("Hard suite (6 tasks)", "Every setting run on the hard suite.", hard_table(d["hard_best"], True),
+{pair("Hard suite (6 tasks)", d["note_hard"], hard_table(d["hard_best"], True),
       hard_table(d["hard_mean"], False))}
 <div class="notes">
 Bars span 50–100%. Settings with one run score the same in both rankings; only repeated ones can move. Ties are broken by time.
 Time and tokens per full suite, thinking included; tok/s = all generated tokens ÷ all generation time; ~ = partly estimated
 (ExLlamaV3 under-reports tokens). {PROBLEM_NOTE} Temperature 1.0; with 1–3 runs per setting, differences under ~5 points are
-noise. Details: RESULTS_TABLE.md, RESULTS_TABLE_HARD.md, SUMMARY.md (Parts 2 and 6).
+noise. {details}
 </div></div></body></html>"""
 
 
-def collect_gpu(gpu):
-    """Overall, base and hard rankings for one GPU, each by best run and by mean."""
+def collect_split(gpu=None, top=None):
+    """Overall, base and hard rankings, each by best run and by mean; one GPU or all, all settings or the top N."""
     d, ranked = {}, {}
     for suite in ("base", "hard"):
-        ranked[suite] = ms.rank_settings([r for r in ms.load_runs(ms.SUITES[suite][0]) if r["gpu"] == gpu])
-        d[f"{suite}_best"] = sorted(ranked[suite], key=lambda g: (-g["best"]["overall"], g["best"]["minutes"]))
-        d[f"{suite}_mean"] = sorted(ranked[suite], key=lambda g: (-g["mean"], g["mean_minutes"]))
-    key = lambda g: (g["model"], g["quant"], g["backend"], g["effort"])
+        ranked[suite] = ms.rank_settings([r for r in ms.load_runs(ms.SUITES[suite][0]) if gpu is None or r["gpu"] == gpu])
+        d[f"{suite}_best"] = sorted(ranked[suite], key=lambda g: (-g["best"]["overall"], g["best"]["minutes"]))[:top]
+        d[f"{suite}_mean"] = sorted(ranked[suite], key=lambda g: (-g["mean"], g["mean_minutes"]))[:top]
+    key = lambda g: (g["model"], g["quant"], g["backend"], g["gpu"], g["effort"])
     hard = {key(g): g for g in ranked["hard"]}
     rows = []
     for b in ranked["base"]:
@@ -226,7 +225,7 @@ def collect_gpu(gpu):
             continue
         rb, rh = b["best"], h["best"]
         rows.append({
-            "model": b["model"], "quant": b["quant"], "backend": b["backend"], "effort": b["effort"],
+            "model": b["model"], "quant": b["quant"], "backend": b["backend"], "effort": b["effort"], "gpu": b["gpu"],
             "runs": f"{len(b['runs'])} + {len(h['runs'])}",
             "problems": "; ".join(t for t in (b["problems"], h["problems"]) if t),
             "best": {"avg": (rb["overall"] + rh["overall"]) / 2, "base": rb["overall"], "hard": rh["overall"],
@@ -238,8 +237,13 @@ def collect_gpu(gpu):
                      "tok_base": tok(b["mean_tokens"], b["tokens_approx"]),
                      "tok_hard": tok(h["mean_tokens"], h["tokens_approx"]),
                      "speed": ms.speed(b["runs"] + h["runs"]) or 0}})
-    d["overall_best"] = sorted(rows, key=lambda r: (-r["best"]["avg"], r["best"]["min_base"] + r["best"]["min_hard"]))
-    d["overall_mean"] = sorted(rows, key=lambda r: (-r["mean"]["avg"], r["mean"]["min_base"] + r["mean"]["min_hard"]))
+    d["overall_best"] = sorted(rows, key=lambda r: (-r["best"]["avg"], r["best"]["min_base"] + r["best"]["min_hard"]))[:top]
+    d["overall_mean"] = sorted(rows, key=lambda r: (-r["mean"]["avg"], r["mean"]["min_base"] + r["mean"]["min_hard"]))[:top]
+    what = f"top {top} of {{}} settings" if top else "every setting, {} in all"
+    d["note_overall"] = ("Settings run on both the base and the hard suite, ranked by the average of the two suites ("
+                         + what.format(len(rows)) + ").")
+    d["note_base"] = "Settings run on the base suite (" + what.format(len(ranked["base"])) + ")."
+    d["note_hard"] = "Settings run on the hard suite (" + what.format(len(ranked["hard"])) + ")."
     return d
 
 
@@ -365,28 +369,45 @@ def family_table(rows, key, mean_key, time_note):
 <p class="tnote">Under each score: runs × {time_note}.</p>"""
 
 
-def build_family_html(by_mean, by_best, title, lede):
+def build_family_html(by_mean, by_best, title, lede, prefix):
+    """All suites side by side (by best run | by mean), then each suite on its own, also by best run | by mean."""
+    pair = lambda title_, note, left, right: f"""<h2>{title_}</h2><p class="h2note">{note}</p>
+<div class="cols"><div><h3>By best run</h3>{left}</div><div><h3>By mean of all runs</h3>{right}</div></div>"""
+    suites = []
+    for suite, (folder, *_r) in ms.SUITES.items():
+        g = ms.rank_settings([r for r in ms.load_runs(folder) if r["model"].startswith(prefix)])
+        if g:
+            n_tasks = g[0]["runs"][0]["n_tasks"]
+            suites.append(pair(f"{suite.capitalize()} suite ({n_tasks} tasks)", f"Every variant run on the {suite} suite.",
+                               hard_table(sorted(g, key=lambda x: (-x["best"]["overall"], x["best"]["minutes"])), True),
+                               hard_table(sorted(g, key=lambda x: (-x["mean"], x["mean_minutes"])), False)))
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
-.wrap {{ width:1640px; }}
+.wrap {{ width:3000px; }}
+.cols {{ display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:start; }}
 .meta {{ font-size:12px; color:var(--muted); margin-top:4px; }}
 td.none {{ color:var(--muted); text-align:center; }}
-h2 {{ font-size:21px; margin:26px 0 2px; }}
-.h2note {{ font-size:14px; color:var(--text2); margin:0 0 10px; }}
+h2 {{ font-size:23px; margin:30px 0 2px; border-top:3px solid var(--text); padding-top:14px; }}
+h3 {{ font-size:17px; margin:8px 0 8px; color:var(--text2); }}
+.h2note {{ font-size:14px; color:var(--text2); margin:0 0 6px; }}
 .tnote {{ font-size:12px; color:var(--muted); margin:6px 0 0; }}
-tr:nth-child(3) td {{ background:none; }}
+table {{ font-size:15px; }}
+td {{ padding:9px 7px; }} th {{ padding:0 7px 10px; }}
+.score {{ min-width:96px; }}
 </style></head><body><div class="wrap">
 <h1>{title}</h1>
-<p class="lede">{lede} {date.today():%d %b %Y}.</p>
-<h2>By mean of all runs</h2><p class="h2note">What to expect from a setting on a typical run.</p>
-{family_table(by_mean, "cells", "mean", "mean minutes · mean tokens per run · tok/s (all tokens ÷ all generation time)")}
-<h2>By best run</h2><p class="h2note">What a setting can do on a good run: the best single run per suite.</p>
-{family_table(by_best, "best", "best_mean", "minutes · tokens · tok/s of that best run")}
+<p class="lede">{lede} Each part is ranked two ways: by the setting's best run (what it can do) and by the mean of all its
+runs (what to expect). {date.today():%d %b %Y}.</p>
+{pair("All suites", "Sorted by the number of suites run, then by the mean of the suites, so the first rows are the best-tested.",
+      family_table(by_best, "best", "best_mean", "minutes · tokens · tok/s of that best run"),
+      family_table(by_mean, "cells", "mean", "mean minutes · mean tokens · tok/s (all tokens ÷ all generation time)"))}
+{''.join(suites)}
 <div class="notes">
-Bars span 50–100%. Both rankings are sorted by the number of suites run, then by the mean, so the first rows are the
-best-tested; settings with one run per suite score the same in both. Maya, ExLlamaV3 and llama.cpp are inference engines;
-"derisked" is the model file GLM-5.3 Maya-M derisked. Runs started with "medium" ran at "high" (the GLM chat template has
-no medium) and are listed as high. {PROBLEM_NOTE} ~ = tokens partly estimated. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM. Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
+Bars span 50–100%. Settings with one run per suite score the same in both rankings. Maya, ExLlamaV3 and llama.cpp are inference
+engines; "derisked" is the model file GLM-5.3 Maya-M derisked. Runs started with "medium" ran at "high" (the GLM chat template
+has no medium) and are listed as high. Time and tokens per full suite, thinking included; tok/s = all generated tokens ÷ all
+generation time. {PROBLEM_NOTE} ~ = tokens partly estimated. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM.
+Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
 </div></div></body></html>"""
 
 
@@ -455,9 +476,18 @@ def main():
         page = browser.new_page(viewport={"width": 1960, "height": 900}, device_scale_factor=2)
         glm = build_family_html(*collect_family("GLM-5.3-Flash"), "GLM-5.3-Flash: every variant, every suite",
                                 "GLM-5.3-Flash with different quants, engines and reasoning levels, on the base, hard, "
-                                "practical and tool-calling suites.")
-        for page_html, out in ((build_html(rows, n), OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),
-                               (glm, OUT_GLM), (build_gpu_html("RTX 4080 16 GB", collect_gpu("RTX 4080 16 GB")), OUT_4080)):
+                                "practical and tool-calling suites.", "GLM-5.3-Flash")
+        top10 = build_split_html(
+            f"Local LLM coding test: top {TOP}", "Every model, quant, backend, GPU and reasoning level tested: the base "
+            "suite (10 tasks) and the hard suite (6 tasks), TypeScript + Three.js in a real browser and Python with hidden "
+            "tests. RTX 5090 32 GB + 128 GB RAM and RTX 4080 16 GB + 32 GB RAM.", collect_split(top=TOP),
+            "Details: SUMMARY.md, RESULTS_TABLE.md, RESULTS_TABLE_HARD.md; the RTX 4080 alone: rtx4080.jpg.", show_gpu=True)
+        gpu4080 = build_split_html(
+            "Local LLM coding test: RTX 4080 16 GB only", "Every setting run on the RTX 4080 16 GB + 32 GB DDR5: "
+            "Qwen3.8-27B at 2–3 bits, in llama.cpp and ExLlamaV3.", collect_split("RTX 4080 16 GB"),
+            "Details: RESULTS_TABLE.md, RESULTS_TABLE_HARD.md, SUMMARY.md (Parts 2 and 6).")
+        for page_html, out in ((top10, OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),
+                               (glm, OUT_GLM), (gpu4080, OUT_4080)):
             page.set_content(page_html)
             page.locator(".wrap").screenshot(path=str(out), type="jpeg", quality=92)
             print(f"wrote {out.name}")

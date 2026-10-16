@@ -15,9 +15,9 @@ The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3
 
 Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
-![Top 10 settings by the average of both suites](top10.jpg)
+![Top 10: overall, base suite and hard suite, by best run and by mean](top10.jpg)
 
-Top 10 settings that have results in both suites, ranked by the average of the two scores. The hard suite alone is ranked in [top10_hard.jpg](top10_hard.jpg) below. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`, `rtx4080.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
+Top 10 settings in three parts: overall (the average of the base and hard suites, settings run on both), the base suite and the hard suite. Each part is ranked two ways side by side: by the setting's best run (what it can do) and by the mean of all its runs (what to expect). The same layout is used for [rtx4080.jpg](rtx4080.jpg) and [glm_flash.jpg](glm_flash.jpg); [top10_hard.jpg](top10_hard.jpg) below repeats the hard-suite part on its own. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`, `rtx4080.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
 
 ## Base suite: results (25 Sep – 6 Oct 2026)
 
