@@ -8,9 +8,9 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 
 | # | Model | Quant | Backend | Effort | Base | Hard | Practical | Tools | Mean of suites | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | **92.2%** (5×, 17 min, 19k tok, 20 tok/s) | **90.1%** (5×, 50 min, ~56k tok, 18 tok/s) | **97.6%** (3×, 5 min, 4k tok, 13 tok/s) | **100.0%** (2×, 3 min, 1k tok, 7 tok/s) | 95.0% (4 of 4) | t1_cube 3/5 (wrong 3); w_refactor 3/3 (wrong 3) |
+| 1 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | **92.2%** (5×, 17 min, 19k tok, 20 tok/s) | **91.7%** (6×, 47 min, ~53k tok, 19 tok/s) | **97.6%** (3×, 5 min, 4k tok, 13 tok/s) | **100.0%** (2×, 3 min, 1k tok, 7 tok/s) | 95.4% (4 of 4) | t1_cube 3/5 (wrong 3); w_refactor 3/3 (wrong 3) |
 | 2 | GLM-5.3-Flash derisked | Maya-M | Maya | high | **85.1%** (2×, 18 min, 23k tok, 23 tok/s) | **86.5%** (4×, 41 min, ~58k tok, 23 tok/s) | **98.8%** (4×, 4 min, 4k tok, 19 tok/s) | **99.6%** (4×, 2 min, 1k tok, 10 tok/s) | 92.5% (4 of 4) | h_p3_line_diff 2/4 (time 1, none 1); h_t2_instanced_pick 2/4 (wrong 2); w_refactor 2/4 (wrong 2) |
-| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | **100.0%** (1×, 13 min, 14k tok, 19 tok/s) | **86.0%** (6×, 41 min, ~48k tok, 20 tok/s) | – | – | 93.0% (2 of 4) | h_p3_line_diff 4/6 (wrong 4) |
+| 3 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | **100.0%** (1×, 13 min, 14k tok, 19 tok/s) | **86.0%** (7×, 38 min, ~45k tok, 20 tok/s) | – | – | 93.0% (2 of 4) | h_p3_line_diff 5/7 (wrong 5) |
 | 4 | GLM-5.3-Flash | EXL3 3.10 bpw | ExLlamaV3 | high | **95.5%** (1×, 16 min, 13k tok, 14 tok/s) | **89.1%** (2×, 59 min, ~50k tok, 14 tok/s) | – | – | 92.3% (2 of 4) | – |
 | 5 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | **99.3%** (2×, 26 min, ~19k tok, 12 tok/s) | **80.0%** (3×, 96 min, ~61k tok, 11 tok/s) | – | – | 89.7% (2 of 4) | h_p3_line_diff 3/3 (time 3) |
 | 6 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | **93.9%** (1×, 19 min, 14k tok, 12 tok/s) | **82.9%** (2×, 91 min, ~75k tok, 14 tok/s) | – | – | 88.4% (2 of 4) | h_p3_line_diff 2/2 (time 2) |
@@ -40,10 +40,10 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 
 | Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 5 | **90.1%** | 83–96 | 73.4% | 7% | 50.5 | ~55.7k | 18.5 | – |
+| GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 6 | **91.7%** | 83–100 | 75.0% | 6% | 47.1 | ~53.1k | 18.9 | – |
 | GLM-5.3-Flash | EXL3 3.10 bpw | ExLlamaV3 | high | 2 | **89.1%** | 81–97 | 80.8% | 8% | 58.8 | ~49.9k | 14.2 | – |
 | GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **86.5%** | 72–100 | 76.0% | 8% | 41.2 | ~57.5k | 23.4 | h_p3_line_diff 2/4 (time 1, none 1); h_t2_instanced_pick 2/4 (wrong 2) |
-| GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | 6 | **86.0%** | 69–100 | 77.2% | 3% | 41.1 | ~48.2k | 19.6 | h_p3_line_diff 4/6 (wrong 4) |
+| GLM-5.3-Flash | EXL3 3.05 bpw | Maya | high | 7 | **86.0%** | 69–100 | 77.6% | 2% | 38.2 | ~45.4k | 19.9 | h_p3_line_diff 5/7 (wrong 5) |
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | llama.cpp | high | 2 | **82.9%** | 83–83 | 74.6% | 17% | 91.3 | ~74.5k | 13.6 | h_p3_line_diff 2/2 (time 2) |
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | low | 1 | **81.1%** | – | 81.1% | 0% | 8.7 | 7.9k | 15.5 | – |
 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | high | 3 | **80.0%** | 76–82 | 68.9% | 17% | 95.7 | ~61.1k | 10.7 | h_p3_line_diff 3/3 (time 3) |
@@ -61,6 +61,6 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 | Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 2 | **100.0%** | 100–100 | 100.0% | 0% | 3.0 | 1.2k | 6.7 | – |
-| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 2.0 | 1.2k | 10.3 | – |
+| GLM-5.3-Flash derisked | Maya-M | Maya | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 1.9 | 1.2k | 10.3 | – |
 
 Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, looped, no final answer). `~` = token count partly estimated. All other suites' tables: RESULTS_TABLE*.md.
