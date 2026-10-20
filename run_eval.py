@@ -180,11 +180,17 @@ def chat(args, system, prompt, timeout, messages=None, tools=None):
         ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM/DeepSeek-V4 chat templates read it here
         if args.preset == "ds4":
             ctk["thinking"] = True  # DeepSeek-V4 needs thinking on for reasoning_effort to count
+    if args.preset == "ds4" and "thinking" in ctk:
+        # the DeepSeek API form, for servers that copy it instead of passing chat_template_kwargs
+        body["thinking"] = {"type": "enabled" if ctk["thinking"] else "disabled"}
     if ctk:
         body["chat_template_kwargs"] = ctk
     if tools:
         body["tools"] = tools
         body["parallel_tool_calls"] = True
+    if getattr(args, "show_request", False):
+        shown = {k: v for k, v in body.items() if k != "messages"}
+        print("request:", json.dumps(shown, ensure_ascii=False))
     req = urllib.request.Request(
         args.base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode(),
@@ -722,7 +728,9 @@ def probe_effort(args):
                       "mentions reasoning_effort.")
     if "off" in means:
         if means["off"] > 0:
-            print("'off' still thinks: this server ignores enable_thinking=false.")
+            flag = ("thinking=false (chat_template_kwargs) and thinking.type=disabled" if args.preset == "ds4"
+                    else "enable_thinking=false")
+            print(f"'off' still thinks: this server or its chat template ignores {flag}.")
         else:
             print("'off' works: the model answered without thinking.")
     if reps < 3:
@@ -803,6 +811,8 @@ def main():
                          "thinks. Levels are compared in the order you give them, weakest first. "
                          "Default: off,low,high,max for --preset glm and ds4, off,low,medium,xhigh for qwen presets, "
                          "otherwise off,low,medium,high,xhigh")
+    ap.add_argument("--show-request", action="store_true",
+                    help="print each request's settings (everything but the messages), to check what the server gets")
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")
     ap.add_argument("--probe-question", choices=["easy", "hard"], default="easy",
                     help="easy = count the 7s from 1 to 1000; hard = digit sums (needs real thinking)")
