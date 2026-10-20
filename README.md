@@ -164,7 +164,8 @@ python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 
 Main options:
 - `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, `-strata` for runs in Strata and `-maya` for runs in Maya (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
-- `--preset qwen-think` / `qwen-instruct` / `glm`: the sampling settings recommended by the model makers
+- `--preset qwen-think` / `qwen-instruct` / `glm` / `ds4`: the sampling settings recommended by the model makers
+- `--preset ds4` (DeepSeek-V4): temperature 1.0, top_p 1.0. Its chat template switches thinking with `thinking` (not `enable_thinking`), so with this preset `--think off` sends `thinking=false` and `--reasoning-effort` sends `thinking=true` plus the level. The levels are `high` (the default) and `max`, plus `low` in the 0731 build. `max` needs a server context of at least 384K tokens. With a GGUF in llama.cpp, check that the embedded chat template passes `reasoning_effort` through (run `--probe-effort` first); some uploads ship an outdated template.
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--limits practical` / `lenient`: the time and token limits (see [Limits](#limits)). Default: practical for `--suite practical` and `--suite tools`, lenient for base and hard
 - `--max-tokens`, `--task-timeout-min`, `--budget-min`: override single limits (token limit per request, thinking included; minutes per task; minutes for the whole run, 0 = none)
@@ -172,7 +173,7 @@ Main options:
 - `--think off`: turns thinking off (`enable_thinking=false` in the Qwen/GLM chat template)
 - `--reasoning-effort low`: reasoning level (e.g. low / medium / high / xhigh), if the chat template supports it
 - `--reasoning-effort off,low,xhigh`: runs the full test once per level, each with its own report
-- `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
+- `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM and DeepSeek-V4 `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
 - `--suite hard` / `practical` / `tools`: run another suite instead of the base one (see the task sections below)
 - `--only three` / `--only python`, `--tasks t5_raycast_click`: run only some tasks
 
@@ -283,6 +284,8 @@ Examples:
 ```
 python run_eval.py --suite hard --label qwen27b-q6 --preset qwen-think --reasoning-effort low,medium
 python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort high
+python run_eval.py --label DeepSeek-V4-Flash-UD-IQ2_M --preset ds4 --probe-effort      # check the levels first
+python run_eval.py --suite hard --label DeepSeek-V4-Flash-UD-IQ2_M --preset ds4 --reasoning-effort off,high,max
 python compare.py --hard
 ```
 

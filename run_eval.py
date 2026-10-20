@@ -15,6 +15,7 @@ Example:
   python run_eval.py --model qwen3-27b --label qwen27b-Q4_K_M
   python run_eval.py --label glm-exl3-3.05 --think off      (thinking off)
   python run_eval.py --suite tools --label qwen27b-Q6 --preset qwen-think --reasoning-effort medium --repeat 2
+  python run_eval.py --suite hard --label DeepSeek-V4-Flash-UD-IQ2_M --preset ds4 --reasoning-effort off,high,max
 """
 import argparse
 import datetime as dt
@@ -143,6 +144,8 @@ PRESETS = {
     "qwen-instruct": {"temperature": 0.7, "top_p": 0.80, "top_k": 20, "min_p": 0.0,
                       "presence_penalty": 1.5, "repetition_penalty": 1.0},
     "glm": {"temperature": 1.0, "top_p": 1.0},
+    # DeepSeek-V4: thinking on by default at "high"; levels high / max (the 0731 build also has low)
+    "ds4": {"temperature": 1.0, "top_p": 1.0},
 }
 SAMPLING_KEYS = ("top_p", "top_k", "min_p", "presence_penalty", "repetition_penalty")
 
@@ -166,13 +169,17 @@ def chat(args, system, prompt, timeout, messages=None, tools=None):
         if v is not None:
             body[k] = v
     ctk = {}
+    # Qwen/GLM templates read enable_thinking; the DeepSeek-V4 template reads thinking
+    think_key = "thinking" if args.preset == "ds4" else "enable_thinking"
     if args.think == "off":
-        ctk["enable_thinking"] = False
+        ctk[think_key] = False
     elif args.think == "on":
-        ctk["enable_thinking"] = True
+        ctk[think_key] = True
     if args.reasoning_effort:
         body["reasoning_effort"] = args.reasoning_effort  # OpenAI-style field
-        ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM chat templates read it here
+        ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM/DeepSeek-V4 chat templates read it here
+        if args.preset == "ds4":
+            ctk["thinking"] = True  # DeepSeek-V4 needs thinking on for reasoning_effort to count
     if ctk:
         body["chat_template_kwargs"] = ctk
     if tools:
@@ -633,8 +640,10 @@ PROBES = {
     "hard": ("How many whole numbers from 1 to 10000 (inclusive) have digits that add up to exactly 20? "
              "Reply with just the number.", "633"),
 }
-# Levels each chat template understands (GLM-5.3: low / high, anything else = max; Qwen card: low / medium / xhigh)
-PROBE_LEVELS = {"glm": "off,low,high,max", "qwen": "off,low,medium,xhigh"}
+# Levels each chat template understands (GLM-5.3: low / high, anything else = max; Qwen card: low / medium / xhigh;
+# DeepSeek-V4: high / max, plus low in the 0731 build)
+PROBE_LEVELS = {"glm": "off,low,high,max", "qwen": "off,low,medium,xhigh", "ds4": "off,low,high,max"}
+KNOWN_LEVELS = {"glm": ("off", "low", "high", "max"), "ds4": ("off", "low", "high", "max")}
 
 
 def probe_effort(args):
@@ -643,10 +652,15 @@ def probe_effort(args):
         args.probe_effort = PROBE_LEVELS.get(args.preset.split("-")[0], "off,low,medium,high,xhigh")
     levels = [x.strip() for x in args.probe_effort.split(",") if x.strip()]
     if args.preset == "glm":
-        odd = [lv for lv in levels if lv not in ("off", "low", "high", "max")]
+        odd = [lv for lv in levels if lv not in KNOWN_LEVELS["glm"]]
         if odd:
             print(f"Note: the GLM-5.3 chat template only knows low and high; {', '.join(odd)} "
                   "will run as max.\n")
+    if args.preset == "ds4":
+        odd = [lv for lv in levels if lv not in KNOWN_LEVELS["ds4"]]
+        print("Note: DeepSeek-V4 knows high and max (low only in the 0731 build; elsewhere it may run as high). "
+              "max needs a context of at least 384K tokens on the server."
+              + (f" Unknown here: {', '.join(odd)}." if odd else "") + "\n")
     reps = max(1, args.probe_repeats)
     PROBE_PROMPT, PROBE_ANSWER = PROBES[args.probe_question]
     base_think, base_effort = args.think, args.reasoning_effort
@@ -780,13 +794,14 @@ def main():
     ap.add_argument("--repeat", type=int, default=1,
                     help="run the whole suite N times, each as its own run (for mean, spread and stability)")
     ap.add_argument("--think", choices=["default", "on", "off"], default="default",
-                    help="off sends enable_thinking=false (Qwen/GLM chat templates)")
+                    help="off sends enable_thinking=false (Qwen/GLM chat templates; thinking=false with --preset ds4)")
     ap.add_argument("--reasoning-effort", default="",
-                    help="e.g. low / medium / high / xhigh; a comma list (off,low,xhigh) runs the test once per level")
+                    help="e.g. low / medium / high / xhigh (DeepSeek-V4: high / max, low in the 0731 build); "
+                         "a comma list (off,low,xhigh) runs the test once per level")
     ap.add_argument("--probe-effort", nargs="?", const="auto", default=None,
                     help="quick check: ask one small question at each thinking level and show how much the model "
                          "thinks. Levels are compared in the order you give them, weakest first. "
-                         "Default: off,low,high,max for --preset glm, off,low,medium,xhigh for qwen presets, "
+                         "Default: off,low,high,max for --preset glm and ds4, off,low,medium,xhigh for qwen presets, "
                          "otherwise off,low,medium,high,xhigh")
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")
     ap.add_argument("--probe-question", choices=["easy", "hard"], default="easy",

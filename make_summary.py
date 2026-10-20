@@ -56,6 +56,19 @@ def describe(label, model):
             quant = "Maya-M"  # GLM-5.3 Maya-M derisked: a model file made for the Maya engine
         name = "GLM-5.3-Flash derisked" if "derisked" in m else "GLM-5.3-Flash"
         return name, quant, backend
+    if re.search(r"deepseek|ds-?4|dsv4", m):
+        # DeepSeek-V4: Flash or Pro; quant from a GGUF name, an EXL3 bpw or an N-bit label
+        name = "DeepSeek-V4-Pro" if re.search(r"[_-]pro(?![a-z0-9])", m) else "DeepSeek-V4-Flash"
+        gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
+        if "exl3" in m and bpw:
+            quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
+        elif gguf:
+            quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
+        elif bit:
+            quant = ("GSQ-RCO " if "gsq-rco" in m else "") + f"{bit.group(1)}-bit"
+        else:
+            quant = "?"
+        return name, quant, backend
     if "flash-next" in m or "qwen" in m:
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m:
