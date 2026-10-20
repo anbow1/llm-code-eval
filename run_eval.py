@@ -722,6 +722,12 @@ def probe_effort(args):
                   f"thought less than every {order[0]} try. The chat template probably turns the level into an "
                   "instruction (e.g. 'validate assumptions') that makes thinking more focused, not longer. "
                   "Compare the 'correct' counts to pick a level.")
+        elif means.get("off", 1) == 0 and min(vals) > 0:
+            print("Verdict: the server DOES read the level ('off' turns thinking off), but from " + order[0] + " to "
+                  + order[-1] + " the model thinks about as much (" + ", ".join(f"{lv} {means[lv]:.0f}" for lv in order)
+                  + " tokens). This question needs only so much thinking; higher levels may matter only on harder "
+                  "tasks. Compare the levels on the hard suite (--suite hard --reasoning-effort "
+                  + ",".join(order[-2:]) + ").")
         else:
             print("Verdict: NO clear effect. Thinking does not grow steadily from " + order[0] + " to " +
                   order[-1] + ". Two possible reasons: the server or chat template ignores reasoning_effort, "
