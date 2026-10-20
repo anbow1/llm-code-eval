@@ -165,7 +165,7 @@ python run_eval.py --base-url http://localhost:8080/v1 --label qwen-flash-iq3xxs
 Main options:
 - `--label`: short name used in the report (instead of the long model path). Put the model, quant and bpw in it, `-strata` for runs in Strata and `-maya` for runs in Maya (e.g. `qwen27b-UD-Q3_K_XL`, `qwen27b-exl3-3.0bpw`): `make_summary.py` reads them from the name of the results folder, so renaming a folder fixes a wrong label. The GPU is recorded automatically (`nvidia-smi`).
 - `--preset qwen-think` / `qwen-instruct` / `glm` / `ds4`: the sampling settings recommended by the model makers
-- `--preset ds4` (DeepSeek-V4): temperature 1.0, top_p 1.0. Its chat template switches thinking with `thinking` (not `enable_thinking`), so with this preset `--think off` sends `thinking=false` and `--reasoning-effort` sends `thinking=true` plus the level. It also sends the DeepSeek API form, `"thinking": {"type": "enabled" | "disabled"}`, for servers that read that instead. The levels are `high` (the default) and `max`, plus `low` in the 0731 build. `max` needs a server context of at least 384K tokens. With a GGUF in llama.cpp, check that the embedded chat template passes `reasoning_effort` through (run `--probe-effort` first); some uploads ship an outdated template.
+- `--preset ds4` (DeepSeek-V4 / V4.1): temperature 1.0, top_p 1.0. The level is sent the way Maya's own chat sends it: only a top-level `reasoning_effort`, `none` for thinking off (`--think off` or the level `off`), otherwise `low` / `high` / `max` (`high` is the model's default). Add `--template-kwargs` for servers such as llama.cpp that pass the level to the chat template: it also sends `chat_template_kwargs` `{thinking, reasoning_effort}`. With a GGUF, check that the embedded chat template reads `reasoning_effort` (run `--probe-effort` first); some uploads ship an outdated template.
 - `--temperature 1.0`: default 1.0; `--top-p`, `--top-k`, `--min-p`, `--presence-penalty`, `--repetition-penalty` override the preset
 - `--limits practical` / `lenient`: the time and token limits (see [Limits](#limits)). Default: practical for `--suite practical` and `--suite tools`, lenient for base and hard
 - `--max-tokens`, `--task-timeout-min`, `--budget-min`: override single limits (token limit per request, thinking included; minutes per task; minutes for the whole run, 0 = none)
@@ -285,7 +285,7 @@ Examples:
 ```
 python run_eval.py --suite hard --label qwen27b-q6 --preset qwen-think --reasoning-effort low,medium
 python run_eval.py --suite hard --label glm-exl3 --preset glm --reasoning-effort high
-python run_eval.py --label DeepSeek-V4-Flash-UD-IQ2_M --preset ds4 --probe-effort      # check the levels first
+python run_eval.py --label DeepSeek-V4.1-Flash-Maya-S --preset ds4 --probe-effort --probe-question hard   # check the levels first
 python run_eval.py --suite hard --label DeepSeek-V4-Flash-UD-IQ2_M --preset ds4 --reasoning-effort off,high,max
 python compare.py --hard
 ```

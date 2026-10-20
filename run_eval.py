@@ -144,7 +144,7 @@ PRESETS = {
     "qwen-instruct": {"temperature": 0.7, "top_p": 0.80, "top_k": 20, "min_p": 0.0,
                       "presence_penalty": 1.5, "repetition_penalty": 1.0},
     "glm": {"temperature": 1.0, "top_p": 1.0},
-    # DeepSeek-V4: thinking on by default at "high"; levels high / max (the 0731 build also has low)
+    # DeepSeek-V4: thinking on by default at "high"; levels none / low / high / max as a top-level reasoning_effort
     "ds4": {"temperature": 1.0, "top_p": 1.0},
 }
 SAMPLING_KEYS = ("top_p", "top_k", "min_p", "presence_penalty", "repetition_penalty")
@@ -169,20 +169,23 @@ def chat(args, system, prompt, timeout, messages=None, tools=None):
         if v is not None:
             body[k] = v
     ctk = {}
-    # Qwen/GLM templates read enable_thinking; the DeepSeek-V4 template reads thinking
-    think_key = "thinking" if args.preset == "ds4" else "enable_thinking"
-    if args.think == "off":
-        ctk[think_key] = False
-    elif args.think == "on":
-        ctk[think_key] = True
-    if args.reasoning_effort:
-        body["reasoning_effort"] = args.reasoning_effort  # OpenAI-style field
-        ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM/DeepSeek-V4 chat templates read it here
-        if args.preset == "ds4":
-            ctk["thinking"] = True  # DeepSeek-V4 needs thinking on for reasoning_effort to count
-    if args.preset == "ds4" and "thinking" in ctk:
-        # the DeepSeek API form, for servers that copy it instead of passing chat_template_kwargs
-        body["thinking"] = {"type": "enabled" if ctk["thinking"] else "disabled"}
+    if args.preset == "ds4":
+        # DeepSeek-V4: what Maya's own chat sends, only a top-level reasoning_effort, "none" for thinking off
+        # (anything else in the request can override it). --template-kwargs also passes the level to the chat
+        # template, for servers like llama.cpp that need it there.
+        effort = "none" if args.think == "off" else args.reasoning_effort
+        if effort:
+            body["reasoning_effort"] = effort
+            if getattr(args, "template_kwargs", False):
+                ctk = {"thinking": effort != "none"} | ({} if effort == "none" else {"reasoning_effort": effort})
+    else:
+        if args.think == "off":
+            ctk["enable_thinking"] = False
+        elif args.think == "on":
+            ctk["enable_thinking"] = True
+        if args.reasoning_effort:
+            body["reasoning_effort"] = args.reasoning_effort  # OpenAI-style field
+            ctk["reasoning_effort"] = args.reasoning_effort   # Qwen/GLM chat templates read it here
     if ctk:
         body["chat_template_kwargs"] = ctk
     if tools:
@@ -664,8 +667,8 @@ def probe_effort(args):
                   "will run as max.\n")
     if args.preset == "ds4":
         odd = [lv for lv in levels if lv not in KNOWN_LEVELS["ds4"]]
-        print("Note: DeepSeek-V4 knows high and max (low only in the 0731 build; elsewhere it may run as high). "
-              "max needs a context of at least 384K tokens on the server."
+        print("Note: DeepSeek-V4 levels are sent as a top-level reasoning_effort (off = \"none\"), like Maya's chat. "
+              "The 0731 build and V4.1 know low / high / max; older builds may run low as high."
               + (f" Unknown here: {', '.join(odd)}." if odd else "") + "\n")
     reps = max(1, args.probe_repeats)
     PROBE_PROMPT, PROBE_ANSWER = PROBES[args.probe_question]
@@ -728,8 +731,7 @@ def probe_effort(args):
                       "mentions reasoning_effort.")
     if "off" in means:
         if means["off"] > 0:
-            flag = ("thinking=false (chat_template_kwargs) and thinking.type=disabled" if args.preset == "ds4"
-                    else "enable_thinking=false")
+            flag = 'reasoning_effort="none"' if args.preset == "ds4" else "enable_thinking=false"
             print(f"'off' still thinks: this server or its chat template ignores {flag}.")
         else:
             print("'off' works: the model answered without thinking.")
@@ -802,7 +804,7 @@ def main():
     ap.add_argument("--repeat", type=int, default=1,
                     help="run the whole suite N times, each as its own run (for mean, spread and stability)")
     ap.add_argument("--think", choices=["default", "on", "off"], default="default",
-                    help="off sends enable_thinking=false (Qwen/GLM chat templates; thinking=false with --preset ds4)")
+                    help="off sends enable_thinking=false (Qwen/GLM chat templates; reasoning_effort=none with --preset ds4)")
     ap.add_argument("--reasoning-effort", default="",
                     help="e.g. low / medium / high / xhigh (DeepSeek-V4: high / max, low in the 0731 build); "
                          "a comma list (off,low,xhigh) runs the test once per level")
@@ -811,6 +813,9 @@ def main():
                          "thinks. Levels are compared in the order you give them, weakest first. "
                          "Default: off,low,high,max for --preset glm and ds4, off,low,medium,xhigh for qwen presets, "
                          "otherwise off,low,medium,high,xhigh")
+    ap.add_argument("--template-kwargs", action="store_true",
+                    help="--preset ds4: also send chat_template_kwargs {thinking, reasoning_effort}, for servers such "
+                         "as llama.cpp that pass the level to the chat template (Maya does not need it)")
     ap.add_argument("--show-request", action="store_true",
                     help="print each request's settings (everything but the messages), to check what the server gets")
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")

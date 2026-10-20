@@ -58,7 +58,8 @@ def describe(label, model):
         return name, quant, backend
     if re.search(r"deepseek|ds-?4|dsv4", m):
         # DeepSeek-V4: Flash or Pro; quant from a GGUF name, an EXL3 bpw or an N-bit label
-        name = "DeepSeek-V4-Pro" if re.search(r"[_-]pro(?![a-z0-9])", m) else "DeepSeek-V4-Flash"
+        ver = "V4.1" if re.search(r"v?4[._]1(?![0-9])", m) else "V4"
+        name = f"DeepSeek-{ver}-" + ("Pro" if re.search(r"[_-]pro(?![a-z0-9])", m) else "Flash")
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m and bpw:
             quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
@@ -66,6 +67,8 @@ def describe(label, model):
             quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
         elif bit:
             quant = ("GSQ-RCO " if "gsq-rco" in m else "") + f"{bit.group(1)}-bit"
+        elif re.search(r"maya-([sml])(?![a-z0-9])", m):
+            quant = "Maya-" + re.search(r"maya-([sml])(?![a-z0-9])", m).group(1).upper()  # a file made for Maya
         else:
             quant = "?"
         return name, quant, backend
