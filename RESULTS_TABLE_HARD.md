@@ -15,7 +15,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 3 | Qwen3.8-27B | GSQ-RCO IQ3_XXS MTP | llama.cpp | RTX 4080 16 GB | medium | 1 | **98.3%** | – | 81.7% | 0% | 17.9 | 72.4k | 68.5 | 15.4 |
 | 4 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | low | 1 | **97.8%** | – | 97.8% | 0% | 8.4 | 70.4k | 141.3 | 30.5 |
 | 5 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | medium | 1 | **97.6%** | – | 97.6% | 0% | 9.0 | 50.7k | 96.1 | 30.8 |
-| 6 | Qwen3.8-Flash-Next | ? | Strata | RTX 5090 32 GB | medium | 2 | **96.6%** | 93–100 | 96.6% | 0% | 5.7 | 45.8k | 138.7 | 30.9 |
+| 6 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB | medium | 2 | **96.6%** | 93–100 | 96.6% | 0% | 5.7 | 45.8k | 138.7 | 30.9 |
 | 7 | Qwen3.8-27B | EXL3 6.0 bpw | ExLlamaV3 | RTX 5090 32 GB | low | 1 | **94.4%** | – | 94.4% | 0% | 6.5 | ~46.1k | 121.9 | 26.9 |
 | 8 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 2 | **93.0%** | 86–100 | 84.8% | 0% | 15.7 | 75.4k | 81.1 | 31.3 |
 | 9 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 3 | **92.6%** | 92–94 | 92.6% | 0% | 10.2 | ~51.2k | 84.7 | 15.6 |
@@ -46,7 +46,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | Model | Quant | Backend | GPU | Effort | Temp. | Runs | Mean | Std dev | Worst | Solved every run | Broken | Identical answers | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 1 | 2 | **100.0%** | 0.0 | 100.0% | 6/6 | 0% | 0/6 | – |
-| Qwen3.8-Flash-Next | ? | Strata | RTX 5090 32 GB | medium | 1 | 2 | **96.6%** | 4.8 | 93.2% | 4/6 | 0% | 0/6 | – |
+| Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB | medium | 1 | 2 | **96.6%** | 4.8 | 93.2% | 4/6 | 0% | 0/6 | – |
 | Qwen3.8-Flash-Next | UD-Q4_K_XL | Strata | RTX 5090 32 GB | medium | 1 | 2 | **93.0%** | 9.3 | 86.5% | 3/6 | 0% | 0/6 | – |
 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | 1 | 3 | **92.6%** | 1.3 | 91.7% | 3/6 | 0% | 0/6 | h_p3_line_diff 2/3 (wrong 2) |
 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | 1 | 6 | **91.7%** | 5.6 | 83.3% | 1/6 | 6% | 0/6 | – |
@@ -66,7 +66,7 @@ Ranked by each setting's single best run (on a tie, the faster one). Compare wit
 
 | # | Model | Quant | Backend | GPU | Reasoning effort | Runs | Best score | Best run | Time (min) | Tokens | Avg tok/s (from time) | Mean of all runs |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Qwen3.8-Flash-Next | ? | Strata | RTX 5090 32 GB | medium | 2 | **100.0%** | 20.10 21:54 | 5.7 | 45.5k | 136.7 | 96.6% |
+| 1 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB | medium | 2 | **100.0%** | 20.10 21:54 | 5.7 | 45.5k | 136.7 | 96.6% |
 | 2 | Qwen3.8-Flash-Next | UD-Q5_K_XL | Strata | RTX 5090 32 GB | medium | 1 | **100.0%** | 20.10 22:49 | 8.0 | 46.1k | 98.7 | 100.0% |
 | 3 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | 2 | **100.0%** | 13.10 23:24 | 19.3 | 181.2k | 157.6 | 100.0% |
 | 4 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | RTX 5090 32 GB | high | 7 | **100.0%** | 14.10 20:54 | 35.3 | 46.1k | 21.9 | 86.0% |
@@ -99,7 +99,7 @@ Ranked by each setting's single best run (on a tie, the faster one). Compare wit
 
 | # | Run | Model | Quant | Backend | GPU | Reasoning effort | Score | Python | Three.js | Time (min) | Total tokens | of which thinking | Answer | Avg tok/s (from time) | tok/s (decode) | VRAM GB | RAM GB |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 20.10 21:54 | Qwen3.8-Flash-Next | ? | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 5.7 | 45.5k | 39.3k | 6.2k | **136.7** | 144 | 30.7 | 81.4 |
+| 1 | 20.10 21:54 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 5.7 | 45.5k | 39.3k | 6.2k | **136.7** | 144 | 30.7 | 81.4 |
 | 2 | 20.10 22:49 | Qwen3.8-Flash-Next | UD-Q5_K_XL | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 8.0 | 46.1k | 39.4k | 6.7k | **98.7** | 102 | 30.7 | 109.8 |
 | 3 | 13.10 23:24 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 19.3 | 181.2k | 173.0k | 8.2k | **157.6** | 184 | 30.0 | 67.7 |
 | 4 | 30.09 19:29 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | Strata | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 20.0 | 138.2k | 131.7k | 6.5k | **116.4** | 137 | 30.5 | 68.5 |
@@ -118,7 +118,7 @@ Ranked by each setting's single best run (on a tie, the faster one). Compare wit
 | 17 | 27.09 10:05 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **94.1%** | 88.1 | 100.0 | 11.4 | ~52.4k | ~45.4k | ~7.0k | **77.9** | 81 | 15.6 | 14.2 |
 | 18 | 27.09 10:54 | Qwen3.8-27B | AP IQ3_S | llama.cpp | RTX 4080 16 GB | medium | **94.1%** | 88.1 | 100.0 | 13.7 | 59.5k | 52.2k | 7.3k | **73.1** | 78 | 15.3 | 26.3 |
 | 19 | 28.09 23:08 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | **93.4%** | 90.5 | 96.3 | 22.2 | 48.9k | 41.2k | 7.7k | **37.1** | 40 | 26.4 | 92.7 |
-| 20 | 19.10 22:09 | Qwen3.8-Flash-Next | ? | Strata | RTX 5090 32 GB | medium | **93.2%** | 99.2 | 87.2 | 5.7 | 46.1k | 38.9k | 7.2k | **139.4** | 145 | 30.9 | 82.5 |
+| 20 | 19.10 22:09 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB | medium | **93.2%** | 99.2 | 87.2 | 5.7 | 46.1k | 38.9k | 7.2k | **139.4** | 145 | 30.9 | 82.5 |
 | 21 | 27.09 10:30 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **92.1%** | 84.2 | 100.0 | 10.6 | ~55.5k | ~47.0k | ~8.5k | **88.5** | 91 | 15.6 | 15.4 |
 | 22 | 16.10 11:28 | Qwen3.8-27B | EXL3 3.0 bpw | ExLlamaV3 | RTX 4080 16 GB | medium | **91.7%** | 83.3 | 100.0 | 8.7 | 45.5k | 39.4k | 6.1k | **89.2** | 96 | 14.3 | 13.6 |
 | 23 | 13.10 21:13 | GLM-5.3-Flash | EXL3 3.05 bpw | Maya | RTX 5090 32 GB | high | **91.0%** | 85.7 | 96.3 | 41.5 | 47.0k | 40.0k | 7.0k | **18.9** | 19 | 31.1 | 111.4 |
@@ -162,7 +162,7 @@ Ranked by each setting's single best run (on a tie, the faster one). Compare wit
 
 | Run | Model / effort | h_t1_physics | h_t2_instanced_pick | h_t3_postfx_invert | h_p1_interval_set | h_p2_expr_eval | h_p3_line_diff |
 |---|---|---|---|---|---|---|---|
-| 20.10 21:54 | Qwen3.8-Flash-Next ? (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 |
+| 20.10 21:54 | Qwen3.8-Flash-Next NVFP4 GPTQ (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 |
 | 20.10 22:49 | Qwen3.8-Flash-Next UD-Q5_K_XL (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 |
 | 13.10 23:24 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 |
 | 30.09 19:29 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (Strata) / medium | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -181,7 +181,7 @@ Ranked by each setting's single best run (on a tie, the faster one). Compare wit
 | 27.09 10:05 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 98 | 67 |
 | 27.09 10:54 | Qwen3.8-27B AP IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 98 | 67 |
 | 28.09 23:08 | Qwen3.8-Flash-Next UD-Q4_K_XL (llama.cpp) / medium | 100 | 100 | 89 | 71 | 100 | 100 |
-| 19.10 22:09 | Qwen3.8-Flash-Next ? (Strata) / medium | 100 | 62 | 100 | 100 | 98 | 100 |
+| 19.10 22:09 | Qwen3.8-Flash-Next NVFP4 GPTQ (Strata) / medium | 100 | 62 | 100 | 100 | 98 | 100 |
 | 27.09 10:30 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 57 | 95 | 100 |
 | 16.10 11:28 | Qwen3.8-27B EXL3 3.0 bpw (ExLlamaV3) / medium | 100 | 100 | 100 | 100 | 100 | 50 |
 | 13.10 21:13 | GLM-5.3-Flash EXL3 3.05 bpw (Maya) / high | 100 | 100 | 89 | 57 | 100 | 100 |

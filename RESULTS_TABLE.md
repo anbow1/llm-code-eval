@@ -19,7 +19,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 7 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | 1 | **100.0%** | – | 87.5% | 0% | 31.3 | 65.6k | 35.3 | 30.8 |
 | 8 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 87.5% | 0% | 35.3 | 73.3k | 35.0 | 30.8 |
 | 9 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | 1 | **100.0%** | – | 75.0% | 0% | 54.6 | 72.1k | 22.1 | 24.6 |
-| 10 | DeepSeek-V4-Flash | Maya-S | Maya | RTX 5090 32 GB | high | 1 | **100.0%** | – | 87.5% | 0% | 75.3 | 50.4k | 11.2 | 31.0 |
+| 10 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB | high | 1 | **100.0%** | – | 87.5% | 0% | 75.3 | 50.4k | 11.2 | 31.0 |
 | 11 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | 2 | **99.3%** | 99–100 | 93.1% | 0% | 25.8 | ~18.8k | 12.3 | 30.2 |
 | 12 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | 1 | **99.2%** | – | 86.7% | 0% | 29.5 | 55.4k | 31.6 | 26.8 |
 | 13 | Qwen3.8-27B | UD-Q6_K_M | llama.cpp | RTX 5090 32 GB | medium | 1 | **98.6%** | – | 98.6% | 0% | 3.9 | 22.2k | 105.9 | 29.8 |
@@ -97,7 +97,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 13 | 29.09 20:15 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | low | **100.0%** | 100.0 | 100.0 | 31.3 | 65.6k | 58.8k | 6.8k | **35.3** | 38 | 30.8 | 68.4 |
 | 14 | 29.09 20:46 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_S | llama.cpp | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 35.3 | 73.3k | 65.8k | 7.5k | **35.0** | 38 | 30.8 | 72.7 |
 | 15 | 25.09 17:37 | Qwen3.8-Flash-Next | GSQ-RCO IQ3_XXS | llama.cpp | RTX 5090 32 GB | medium | **100.0%** | 100.0 | 100.0 | 54.6 | 72.1k | 64.4k | 7.8k | **22.2** | 23 | 24.6 | 67.3 |
-| 16 | 20.10 23:16 | DeepSeek-V4-Flash | Maya-S | Maya | RTX 5090 32 GB | high | **100.0%** | 100.0 | 100.0 | 75.3 | 50.4k | 41.0k | 9.4k | **11.2** | 11 | 31.0 | 127.2 |
+| 16 | 20.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB | high | **100.0%** | 100.0 | 100.0 | 75.3 | 50.4k | 41.0k | 9.4k | **11.2** | 11 | 31.0 | 127.2 |
 | 17 | 25.09 09:26 | GLM-5.3-Flash | EXL3 3.05 bpw | ExLlamaV3 | RTX 5090 32 GB | high | **99.5%** | 99.1 | 100.0 | 20.5 | 15.0k | 7.8k | 7.2k | **12.4** | 14 | 27.0 | 117.7 |
 | 18 | 09.10 12:56 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB | high | **99.2%** | 100.0 | 98.5 | 15.0 | 13.8k | 6.7k | 7.1k | **15.7** | 17 | 30.9 | 118.4 |
 | 19 | 25.09 23:45 | Qwen3.8-Flash-Next | UD-Q4_K_XL | llama.cpp | RTX 5090 32 GB | medium | **99.2%** | 100.0 | 98.5 | 29.5 | 55.4k | 47.7k | 7.8k | **31.7** | 39 | 26.8 | 101.3 |
@@ -170,7 +170,7 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 29.09 20:15 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (llama.cpp) / low | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 29.09 20:46 | Qwen3.8-Flash-Next GSQ-RCO IQ3_S (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 25.09 17:37 | Qwen3.8-Flash-Next GSQ-RCO IQ3_XXS (llama.cpp) / medium | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
-| 20.10 23:16 | DeepSeek-V4-Flash Maya-S (Maya) / high | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| 20.10 23:16 | DeepSeek-V4.1-Flash Maya-S (Maya) / high | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 25.09 09:26 | GLM-5.3-Flash EXL3 3.05 bpw (ExLlamaV3) / high | 100 | 100 | 100 | 100 | 100 | 100 | 96 | 100 | 100 | 100 |
 | 09.10 12:56 | GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / high | 91 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
 | 25.09 23:45 | Qwen3.8-Flash-Next UD-Q4_K_XL (llama.cpp) / medium | 100 | 91 | 100 | 100 | 100 | 100 | 100 | 100 | 100 | 100 |

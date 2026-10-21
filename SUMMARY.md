@@ -1,4 +1,4 @@
-# Local model coding test: summary (25 Sep – 16 Oct 2026)
+# Local model coding test: summary (25 Sep – 21 Oct 2026)
 
 ## TL;DR
 
@@ -17,7 +17,9 @@
 - **Qwen3.8-27B works on a 16 GB card.** On the RTX 4080 the best 3-bit files almost match Q6 on the 5090 on the base suite, at about half the speed: AP IQ3_S at `medium` (100% twice, 8.2 min) and EXL3 3.0 bpw at `low` (98.5% over 3 runs, 7.3 min). On the hard suite the new GSQ-RCO IQ3_XXS MTP scored 98.3% (one run, 18 min) and EXL3 3.0 bpw 92.6% over 3 runs. Below 3 bits quality drops. All 4080 results: [rtx4080.jpg](rtx4080.jpg).
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high`.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
-- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and rarely hits the time limit. Its best hard-suite means are 89–90% (GSQ-RCO 3.5-bit in Maya, and the new EXL3 3.10 bpw in ExLlamaV3), against 80–83% for the older files in llama.cpp or ExLlamaV3. GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
+- **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and rarely hits the time limit. Its best hard-suite means are 90–92% (GSQ-RCO 3.5-bit in Maya, 6 runs, and EXL3 3.10 bpw in ExLlamaV3, 3 runs), against 80–83% for the older files in llama.cpp or ExLlamaV3. GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
+- **First DeepSeek-V4.1-Flash run (Maya, file Maya-S, 20 Oct): 100% on the base suite at `high`**, but slowly: 75 min at 11 tok/s, about 9 times longer than the fastest 100% settings. See Part 7.
+- **Flash-Next in Strata, two new files on the hard suite (19–20 Oct):** UD-Q5_K_XL 100% in 8 min (one run), and NVFP4 GPTQ 100% and 93.2% in under 6 min at about 139 tok/s.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 - **Some settings keep failing the same task over repeated runs.** The tables now list them as "Problem tasks" / "Often fails" (below 90% in at least half the runs). Most common:
   - `h_p3_line_diff` for GLM-5.3-Flash at `high` (time-outs outside Maya, wrong diffs in Maya) and for Qwen3.8-27B AP IQ3_S on the 4080 (3 of 3);
@@ -393,6 +395,32 @@ Hard suite:
 - **On the 4080 the hard suite again comes down to `h_p3_line_diff`.** It is solved by IQ3_XXS MTP. EXL3 3.0 bpw fails it in 2 of 3 runs and AP IQ3_S in 3 of 3.
 - **The run with IQ3_XXS MTP was saved in `results/`;** it was moved to `results_hard/`, where hard-suite runs belong.
 - **ExLlamaV3 token counts:** the new runs report 2.5–3.6 characters per token, so the counts are plausible and were not re-estimated.
+
+# Part 7: DeepSeek-V4.1, new Flash-Next files and GLM repeats (18–21 Oct)
+
+All on the RTX 5090.
+
+**DeepSeek-V4.1-Flash in Maya (file Maya-S), base suite at `high`: 100%.**
+- All 10 tasks solved, but it took 75 min (50k tokens at 11 tok/s from time). With the practical limits (10 min and 32k tokens per task) it would score 87.5%: `p4_gather_limited` took 19.5k tokens and too long.
+- **Reasoning levels.** `--preset ds4` sends the level as a top-level `reasoning_effort`, exactly as Maya's own chat does (`none` for thinking off). The first version sent `thinking` and `chat_template_kwargs`, which Maya ignores, so every level ran at the default. Fixed on 20 Oct; the probe then showed `off` really turns thinking off (0 tokens, 1 of 3 answers right), while `low`, `high` and `max` think about as much on the probe question (340, 454 and 457 tokens). Whether `max` helps should show on the hard suite.
+- The run folder was renamed from `DeepSeek-V4-Flash-…` to `DeepSeek-V4.1-Flash-…`: Maya's chat names the model `deepseek-v4.1-flash`.
+
+**Qwen3.8-Flash-Next in Strata, hard suite at `medium`:**
+
+| Quant | Runs | Mean | Runs' scores | Time (min) | Tokens | tok/s |
+|---|---|---|---|---|---|---|
+| UD-Q5_K_XL | 1 | **100.0%** | 100 | 8.0 | 46.1k | 99 |
+| NVFP4 GPTQ | 2 | **96.6%** | 93.2, 100 | 5.7 | 45.8k | 139 |
+
+- NVFP4 GPTQ is the fastest setting on the hard suite so far that also scores 100%. Its weaker run lost points on `h_t2_instanced_pick` (62%).
+- With GSQ-RCO IQ3_S (100% twice), three Flash-Next files in Strata now reach 100% on the hard suite in 6–20 minutes.
+
+**GLM-5.3-Flash at `high`, four more hard-suite runs (18–19 Oct):**
+- GSQ-RCO 3.5-bit in Maya: 99.6% in 30 min. Mean now 91.7% over 6 runs.
+- EXL3 3.05 bpw in Maya: 85.8%, diff wrong again (5 of 7 runs). Mean 86.0% over 7.
+- EXL3 3.10 bpw in Maya (first run): 88.5%, diff wrong.
+- EXL3 3.10 bpw in ExLlamaV3: 90.6%, `h_p3` solved in 29 min; `h_t2_instanced_pick` 46%. Mean now 89.6% over 3.
+- Over all GLM hard runs at `high`: in Maya `h_p3_line_diff` was solved in 8 of 18 runs, wrong in 7, abandoned in 2, timed out once. In llama.cpp and ExLlamaV3 it was solved in 2 of 8 (both EXL3 3.10 bpw) and timed out in 6.
 
 ## Caveats
 

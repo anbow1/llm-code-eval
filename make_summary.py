@@ -76,6 +76,8 @@ def describe(label, model):
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         if "exl3" in m:
             quant = "EXL3 5.05 bpw"
+        elif "nvfp4" in m:
+            quant = "NVFP4" + (" GPTQ" if "gptq" in m else "")  # 4-bit NVIDIA float format
         elif gguf:
             quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
         else:
