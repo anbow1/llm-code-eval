@@ -17,7 +17,7 @@ Full write-up for both: [SUMMARY.md](SUMMARY.md).
 
 ![Top 10: overall, base suite and hard suite, by best run and by mean](top10.jpg)
 
-Top 10 settings in three parts: overall (the average of the base and hard suites, settings run on both), the base suite and the hard suite. Each part is ranked two ways side by side: by the setting's best run (what it can do) and by the mean of all its runs (what to expect). The same layout is used for [rtx4080.jpg](rtx4080.jpg) and [glm_flash.jpg](glm_flash.jpg); [top10_hard.jpg](top10_hard.jpg) below repeats the hard-suite part on its own. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`, `rtx4080.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
+Top 10 settings in three parts: overall (the average of the base and hard suites, settings run on both), the base suite and the hard suite. Each part is ranked two ways side by side: by the setting's best run (what it can do) and by the mean of all its runs (what to expect). The same layout is used for [rtx4080.jpg](rtx4080.jpg) and [glm_flash.jpg](glm_flash.jpg); [top10_hard.jpg](top10_hard.jpg) below repeats the hard-suite part on its own. Regenerate the images (`top10.jpg`, `top10_hard.jpg`, `glm_flash.jpg`, `deepseek.jpg`, `rtx4080.jpg`, `tasks_base.jpg`, `tasks_hard.jpg`) with `python make_top10.py` after new runs; it needs Playwright with Chromium, like `run_eval.py`.
 
 ## Base suite: results (25 Sep – 6 Oct 2026)
 
@@ -104,6 +104,26 @@ Time and tokens are per full suite, thinking included: of the best run in the fi
 All 58 hard-suite runs and per-task scores: [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md).
 
 Avg tok/s (from time) = all generated tokens ÷ total generation time. `~` = estimated from the text length: ExLlamaV3 (TabbyAPI) under-reports tokens on long answers, see `fix_token_counts.py`.
+
+## Per task: fewest tokens and shortest time
+
+For every task, the top 5 settings that solved it (100%) with the fewest tokens and in the shortest time. Only solved runs count, so a fast wrong answer does not win; tokens and time are means over the solved runs.
+
+![Base suite: top 5 per task by tokens and by time](tasks_base.jpg)
+
+![Hard suite: top 5 per task by tokens and by time](tasks_hard.jpg)
+
+- **Fewest tokens: GLM-5.3-Flash, mostly.** It solves many tasks in 1–5k tokens, often at `low`, but at 11–24 tok/s that still takes minutes.
+- **Shortest time: Flash-Next in Strata and Qwen3.8-27B in VRAM.** NVFP4 GPTQ, GSQ-RCO IQ3_S and UD-Q5_K_XL in Strata solve most hard tasks in under a minute, at 100–160 tok/s, even though they think more.
+- **`h_p3_line_diff` (minimal diff) is the expensive one:** the cheapest solutions take 10–16k tokens; the fastest take 2–3 minutes (NVFP4 GPTQ in Strata, Qwen3.8-27B EXL3 6.0 bpw).
+
+## DeepSeek-V4: all variants
+
+DeepSeek-V4 / V4.1 has its own table, [RESULTS_TABLE_DEEPSEEK.md](RESULTS_TABLE_DEEPSEEK.md), and its own image in the same layout as GLM (run with `--preset ds4`, see [Running](#running)):
+
+![DeepSeek-V4: every variant, every suite](deepseek.jpg)
+
+- **DeepSeek-V4.1-Flash in Maya (model file Maya-S), base suite at `high`: 100%** (one run, 20 Oct), but in 75 min at 11 tok/s. The hard suite and the other levels have not been run yet.
 
 ## GLM-5.3-Flash: all variants
 

@@ -179,6 +179,9 @@ def load_runs(folder):
             "tok_s": S.get("tok_per_s"), "vram_gb": R.get("vram_peak_gb"), "ram_gb": R.get("ram_peak_gb"),
             "disk_read_gb": R.get("disk_read_gb"),
             "tasks": {r["id"]: (round(r["score"] * 100), r["status"]) for r in d["results"]},
+            # per task: tokens, generation seconds, tokens estimated? (for the per-task speed rankings)
+            "task_stats": {r["id"]: (r.get("tokens") or 0, r.get("gen_seconds") or 0, bool(r.get("tokens_approx")))
+                           for r in d["results"]},
             "tools": round(d["tools"], 1) if d.get("tools") is not None else None,
             "n_tasks": len(d["results"]),
             "broken": sum(is_broken(r) for r in d["results"]),
@@ -229,6 +232,11 @@ def main():
         "Every GLM-5.3-Flash variant that has been run, in all four suites. GLM-5.3-Flash is a large MoE model; on "
         "the RTX 5090 + 128 GB RAM most experts sit in system RAM, so it runs at 11–24 tok/s. The chat template "
         "knows the levels `low`, `high` and `max`; runs started with `medium` actually ran at `high` and are listed as `high`.")
+    write_family_table(
+        "DeepSeek", "RESULTS_TABLE_DEEPSEEK.md", "# Results table: DeepSeek-V4",
+        "Every DeepSeek-V4 / V4.1 variant that has been run, in all four suites (`--preset ds4`). DeepSeek-V4-Flash is a "
+        "large MoE model; on the RTX 5090 + 128 GB RAM most experts sit in system RAM. Its levels are `none` (thinking "
+        "off), `low`, `high` (the default) and `max`, sent as a top-level `reasoning_effort`.")
 
 
 FAIL_BELOW = 90  # a task scored below this counts as failed; small partial misses (a strict-mode TS error) do not

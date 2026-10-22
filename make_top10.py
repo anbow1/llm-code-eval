@@ -8,6 +8,9 @@ top10.jpg       top 10 settings (model + quant + backend + GPU + reasoning effor
 top10_hard.jpg  hard suite only, two rankings side by side: by each setting's best run, and by the mean
                 of all its runs
 glm_flash.jpg   every GLM-5.3-Flash variant in all four suites
+deepseek.jpg    every DeepSeek-V4 variant in all four suites
+tasks_base.jpg  per task of the base suite: the top 5 settings by fewest tokens and by shortest time (solved runs only)
+tasks_hard.jpg  the same for the hard suite
 rtx4080.jpg     the RTX 4080 16 GB only: overall (both suites), base suite and hard suite
 
 Needs Playwright with Chromium, like run_eval.py (set CHROMIUM_PATH to use another build).
@@ -24,6 +27,9 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / "top10.jpg"
 OUT_HARD = HERE / "top10_hard.jpg"
 OUT_GLM = HERE / "glm_flash.jpg"
+OUT_DS = HERE / "deepseek.jpg"
+OUT_TASKS = {"base": HERE / "tasks_base.jpg", "hard": HERE / "tasks_hard.jpg"}
+TASK_TOP = 5
 OUT_4080 = HERE / "rtx4080.jpg"
 TOP = 10
 
@@ -369,7 +375,7 @@ def family_table(rows, key, mean_key, time_note):
 <p class="tnote">Under each score: runs × {time_note}.</p>"""
 
 
-def build_family_html(by_mean, by_best, title, lede, prefix):
+def build_family_html(by_mean, by_best, title, lede, prefix, notes, details):
     """All suites side by side (by best run | by mean), then each suite on its own, also by best run | by mean."""
     pair = lambda title_, note, left, right: f"""<h2>{title_}</h2><p class="h2note">{note}</p>
 <div class="cols"><div><h3>By best run</h3>{left}</div><div><h3>By mean of all runs</h3>{right}</div></div>"""
@@ -403,11 +409,84 @@ runs (what to expect). {date.today():%d %b %Y}.</p>
       family_table(by_mean, "cells", "mean", "mean minutes · mean tokens · tok/s (all tokens ÷ all generation time)"))}
 {''.join(suites)}
 <div class="notes">
-Bars span 50–100%. Settings with one run per suite score the same in both rankings. Maya, ExLlamaV3 and llama.cpp are inference
-engines; "derisked" is the model file GLM-5.3 Maya-M derisked. Runs started with "medium" ran at "high" (the GLM chat template
-has no medium) and are listed as high. Time and tokens per full suite, thinking included; tok/s = all generated tokens ÷ all
-generation time. {PROBLEM_NOTE} ~ = tokens partly estimated. Temperature 1.0, RTX 5090 32 GB + 128 GB RAM.
-Details: RESULTS_TABLE_GLM.md, SUMMARY.md.
+Bars span 50–100%. Settings with one run per suite score the same in both rankings. {notes} Time and tokens per full suite,
+thinking included; tok/s = all generated tokens ÷ all generation time. {PROBLEM_NOTE} ~ = tokens partly estimated.
+Temperature 1.0, RTX 5090 32 GB + 128 GB RAM. Details: {details}.
+</div></div></body></html>"""
+
+
+def collect_tasks(suite):
+    """Per task: every setting that solved it (100%) at least once, with its mean tokens and minutes over the solved
+    runs, ranked by fewest tokens and by shortest time."""
+    settings = ms.rank_settings(ms.load_runs(ms.SUITES[suite][0]))
+    tasks = sorted({t for g in settings for r in g["runs"] for t in r["tasks"]}, key=ms.task_order)
+    out = {}
+    for t in tasks:
+        rows = []
+        for g in settings:
+            done = [r for r in g["runs"] if t in r["tasks"]]
+            ok = [r for r in done if r["tasks"][t][0] == 100]
+            if not ok:
+                continue
+            rows.append({**{k: g[k] for k in ("model", "quant", "backend", "gpu", "effort")},
+                         "tokens": sum(r["task_stats"][t][0] for r in ok) / len(ok),
+                         "minutes": sum(r["task_stats"][t][1] for r in ok) / len(ok) / 60,
+                         "approx": any(r["task_stats"][t][2] for r in ok), "solved": f"{len(ok)}/{len(done)}"})
+        out[t] = {"tokens": sorted(rows, key=lambda x: (x["tokens"], x["minutes"]))[:TASK_TOP],
+                  "time": sorted(rows, key=lambda x: (x["minutes"], x["tokens"]))[:TASK_TOP],
+                  "n": len(rows), "settings": len([g for g in settings if any(t in r["tasks"] for r in g["runs"])])}
+    return out
+
+
+def task_table(rows, by):
+    e = html.escape
+    body = []
+    for i, r in enumerate(rows, 1):
+        tok_ = f'{"~" if r["approx"] else ""}{r["tokens"] / 1000:.1f}k'
+        mins = f'{r["minutes"]:.1f}'
+        body.append(f"""<tr><td class="rank">{i}</td>
+<td><div class="model">{e(r['model'])}</div><div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(r['gpu'].split()[1])} · {e(r['effort'])}</div></td>
+<td class="num">{f"<b>{tok_}</b>" if by == "tokens" else tok_}</td><td class="num">{f"<b>{mins}</b>" if by == "time" else mins}</td>
+<td class="num muted">{r['solved']}</td></tr>""")
+    return f"""<table><thead><tr><th>#</th><th>Model<small>quant · backend · GPU · effort</small></th>
+<th class="num">Tokens<small>mean</small></th><th class="num">Time, min<small>mean</small></th>
+<th class="num">Solved<small>runs</small></th></tr></thead><tbody>{''.join(body)}</tbody></table>"""
+
+
+def build_tasks_html(suite, data):
+    blocks = []
+    for t, d in data.items():
+        blocks.append(f"""<div class="task"><h2>{html.escape(t)}</h2>
+<p class="h2note">Solved (100%) by {d['n']} of {d['settings']} settings.</p>
+<div class="cols"><div><h3>Fewest tokens</h3>{task_table(d['tokens'], 'tokens')}</div>
+<div><h3>Shortest time</h3>{task_table(d['time'], 'time')}</div></div></div>""")
+    n_tasks = len(data)
+    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+{STYLE}
+.wrap {{ width:2600px; }}
+.grid {{ display:grid; grid-template-columns:1fr 1fr; gap:26px 44px; }}
+.cols {{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }}
+.task {{ border-top:3px solid var(--text); padding-top:10px; }}
+h2 {{ font-size:21px; margin:0 0 2px; font-family:ui-monospace,"DejaVu Sans Mono",monospace; }}
+h3 {{ font-size:15px; margin:6px 0 6px; color:var(--text2); }}
+.h2note {{ font-size:13px; color:var(--text2); margin:0 0 4px; }}
+table {{ font-size:13px; }}
+td {{ padding:6px 5px; }} th {{ padding:0 5px 8px; font-size:11px; }}
+.rank {{ font-size:15px; width:22px; }}
+.sub {{ font-size:12px; }}
+tr:nth-child(-n+3) td {{ background:none; }}
+tr:first-child td {{ background:#f4f7fc; }}
+</style></head><body><div class="wrap">
+<h1>Local LLM coding test: {suite} suite, top {TASK_TOP} per task by tokens and by time</h1>
+<p class="lede">For each of the {n_tasks} tasks, the settings that solved it (100%) with the fewest tokens and in the shortest
+time. Only solved runs count, so a fast wrong answer does not win. {date.today():%d %b %Y}.</p>
+<div class="grid">{''.join(blocks)}</div>
+<div class="notes">
+A setting = model + quant + backend + GPU + reasoning effort. Tokens and time are means over the setting's solved runs of
+that task, thinking included; time = generation time of the task (prompt processing included). Solved = runs with 100% /
+runs of that task. ~ = tokens partly estimated (ExLlamaV3 under-reports them). Temperature 1.0. Few tokens and a short time
+mean the setting solved the task without long thinking; speed in tok/s decides how the two rankings differ.
+Details: RESULTS_TABLE{"_HARD" if suite == "hard" else ""}.md.
 </div></div></body></html>"""
 
 
@@ -476,7 +555,20 @@ def main():
         page = browser.new_page(viewport={"width": 1960, "height": 900}, device_scale_factor=2)
         glm = build_family_html(*collect_family("GLM-5.3-Flash"), "GLM-5.3-Flash: every variant, every suite",
                                 "GLM-5.3-Flash with different quants, engines and reasoning levels, on the base, hard, "
-                                "practical and tool-calling suites.", "GLM-5.3-Flash")
+                                "practical and tool-calling suites.", "GLM-5.3-Flash",
+                                'Maya, ExLlamaV3 and llama.cpp are inference engines; "derisked" is the model file GLM-5.3 '
+                                'Maya-M derisked. Runs started with "medium" ran at "high" (the GLM chat template has no '
+                                'medium) and are listed as high.', "RESULTS_TABLE_GLM.md, SUMMARY.md")
+        pages = [(glm, OUT_GLM)]
+        if collect_family("DeepSeek")[0]:
+            pages.append((build_family_html(
+                *collect_family("DeepSeek"), "DeepSeek-V4: every variant, every suite",
+                "DeepSeek-V4 / V4.1 with different files, engines and reasoning levels (--preset ds4).", "DeepSeek",
+                'Maya is an inference engine; "Maya-S" is a model file made for it. Levels: none (thinking off), low, '
+                'high (the default) and max, sent as a top-level reasoning_effort.',
+                "RESULTS_TABLE_DEEPSEEK.md, SUMMARY.md"), OUT_DS))
+        for suite in ("base", "hard"):
+            pages.append((build_tasks_html(suite, collect_tasks(suite)), OUT_TASKS[suite]))
         top10 = build_split_html(
             f"Local LLM coding test: top {TOP}", "Every model, quant, backend, GPU and reasoning level tested: the base "
             "suite (10 tasks) and the hard suite (6 tasks), TypeScript + Three.js in a real browser and Python with hidden "
@@ -487,7 +579,7 @@ def main():
             "Qwen3.8-27B at 2–3 bits, in llama.cpp and ExLlamaV3.", collect_split("RTX 4080 16 GB"),
             "Details: RESULTS_TABLE.md, RESULTS_TABLE_HARD.md, SUMMARY.md (Parts 2 and 6).")
         for page_html, out in ((top10, OUT), (build_hard_html(by_best, by_mean, n_hard), OUT_HARD),
-                               (glm, OUT_GLM), (gpu4080, OUT_4080)):
+                               (gpu4080, OUT_4080), *pages):
             page.set_content(page_html)
             page.locator(".wrap").screenshot(path=str(out), type="jpeg", quality=92)
             print(f"wrote {out.name}")
