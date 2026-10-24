@@ -167,7 +167,7 @@ def overall_table(rows, best, show_gpu=False):
         body.append(f"""<tr>
 <td class="rank">{i}</td>
 <td><div class="model">{e(r['model'])}</div><div class="sub">{e(r['quant'])} · {e(r['backend'])}</div>{warn(r['problems'])}</td>
-{f"<td>{e(r['gpu'].split()[1])}</td>" if show_gpu else ""}<td>{e(r['effort'])}</td><td class="avg">{bar(x['avg'])}</td>
+{f"<td>{e(ms.gpu_short(r['gpu']))}</td>" if show_gpu else ""}<td>{e(r['effort'])}</td><td class="avg">{bar(x['avg'])}</td>
 <td class="num">{x['base']:.1f}% <span class="sep">/</span> {x['hard']:.1f}%</td>
 <td class="num">{x['min_base']:.1f} <span class="sep">/</span> {x['min_hard']:.1f}</td>
 <td class="num">{x['tok_base']} <span class="sep">/</span> {x['tok_hard']}</td>
@@ -274,7 +274,7 @@ def hard_table(rows, best):
         body.append(f"""<tr>
 <td class="rank">{i}</td>
 <td><div class="model">{e(g['model'])}</div><div class="sub">{e(g['quant'])} · {e(g['backend'])}</div>{warn(g['problems'])}</td>
-<td>{e(g['gpu'].split()[1])}</td><td>{e(g['effort'])}</td>
+<td>{e(ms.gpu_short(g['gpu']))}</td><td>{e(g['effort'])}</td>
 <td class="avg">{bar(score)}</td><td class="num muted">{other}</td>
 <td class="num">{minutes:.1f}</td><td class="num">{"~" if approx else ""}{tokens / 1000:.0f}k</td>
 <td class="num">{tps or 0:.0f}</td>
@@ -325,9 +325,9 @@ def collect_family(prefix):
     for suite, (folder, *_r) in ms.SUITES.items():
         for r in ms.load_runs(folder):
             if r["model"].startswith(prefix):
-                by[(r["model"], r["quant"], r["backend"], r["effort"])][suite].append(r)
+                by[(r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])][suite].append(r)
     rows = []
-    for (model, quant, backend, effort), suites in by.items():
+    for (model, quant, backend, gpu, effort), suites in by.items():
         cells = {}
         best = {}
         problems = []
@@ -340,7 +340,7 @@ def collect_family(prefix):
             best[su] = {"score": b["overall"], "runs": len(rs), "minutes": b["minutes"],
                         "tokens": b["tokens"] or 0, "approx": b["tokens_approx"], "tok_s": b["tok_s_time"]}
             problems.append(ms.problem_text(rs, kinds=False))
-        rows.append({"model": model, "quant": quant, "backend": backend, "effort": effort, "cells": cells,
+        rows.append({"model": model, "quant": quant, "backend": backend, "gpu": gpu, "effort": effort, "cells": cells,
                      "problems": "; ".join(p for p in problems if p),
                      "best": best, "n": len(cells),
                      "mean": sum(c["score"] for c in cells.values()) / len(cells),
@@ -363,7 +363,7 @@ def family_table(rows, key, mean_key, time_note):
                        if c else '<td class="none">–</td>')
         body.append(f"""<tr>
 <td class="rank">{i}</td>
-<td><div class="model">{e(r['quant'])} · {e(r['backend'])}</div><div class="sub">{e(r['model'])}</div>{warn(r['problems']) if key == "cells" else ""}</td>
+<td><div class="model">{e(r['quant'])} · {e(r['backend'])}</div><div class="sub">{e(r['model'])} · {e(ms.ram_of(r['gpu']))} RAM</div>{warn(r['problems']) if key == "cells" else ""}</td>
 <td>{e(r['effort'])}</td>{''.join(tds)}
 <td class="avg">{bar(r[mean_key])}<div class="meta">{r['n']} of {len(suites)} suites</div></td>
 </tr>""")
@@ -375,7 +375,56 @@ def family_table(rows, key, mean_key, time_note):
 <p class="tnote">Under each score: runs × {time_note}.</p>"""
 
 
-def build_family_html(by_mean, by_best, title, lede, prefix, notes, details):
+def task_matrix(prefix, suite):
+    """Every setting of one family on one suite: per task the mean score, tokens and minutes over its runs."""
+    settings = ms.rank_settings([r for r in ms.load_runs(ms.SUITES[suite][0]) if r["model"].startswith(prefix)])
+    if not settings:
+        return ""
+    settings.sort(key=lambda g: (-g["mean"], g["mean_minutes"]))
+    tasks = sorted({t for g in settings for r in g["runs"] for t in r["tasks"]}, key=ms.task_order)
+    e = html.escape
+    # per task the lowest token count and time among the settings, to mark the best cell in each column
+    stats = {}
+    for g in settings:
+        for t in tasks:
+            rs = [r for r in g["runs"] if t in r["tasks"]]
+            if rs:
+                stats[(id(g), t)] = (sum(r["tasks"][t][0] for r in rs) / len(rs),
+                                     sum(r["task_stats"][t][0] for r in rs) / len(rs),
+                                     sum(r["task_stats"][t][1] for r in rs) / len(rs) / 60)
+    low_tok = {t: min((v[1] for (gid, tt), v in stats.items() if tt == t), default=0) for t in tasks}
+    low_min = {t: min((v[2] for (gid, tt), v in stats.items() if tt == t), default=0) for t in tasks}
+    body = []
+    for g in settings:
+        cells = []
+        for t in tasks:
+            v = stats.get((id(g), t))
+            if not v:
+                cells.append('<td class="none">–</td>')
+                continue
+            sc, tk, mn = v
+            cls = "ok" if sc >= 99.5 else "part" if sc >= FAIL else "bad"
+            tk_s = f"{tk / 1000:.1f}k"
+            mn_s = f"{mn:.1f} min"
+            cells.append(f'<td class="cell"><span class="sc {cls}">{sc:.0f}%</span>'
+                         f'<div>{"<b>" + tk_s + "</b>" if abs(tk - low_tok[t]) < 1 else tk_s} tok</div>'
+                         f'<div>{"<b>" + mn_s + "</b>" if abs(mn - low_min[t]) < 0.05 else mn_s}</div></td>')
+        body.append(f"""<tr><td><div class="model">{e(g['quant'])} · {e(g['backend'])}</div>
+<div class="sub">{e(g['model'])} · {e(ms.ram_of(g['gpu']))} RAM · {e(g['effort'])} · {len(g['runs'])}×</div></td>
+{''.join(cells)}<td class="cell tot"><span class="sc">{g['mean']:.1f}%</span><div>{g['mean_tokens'] / 1000:.0f}k tok</div>
+<div>{g['mean_minutes']:.0f} min · {g['tok_s'] or 0:.0f} tok/s</div></td></tr>""")
+    head = "".join(f"<th>{e(t)}</th>" for t in tasks)
+    return f"""<h2>{suite.capitalize()} suite: per task</h2><p class="h2note">Mean over each setting's runs: score, tokens
+(thinking included) and generation time per task. Bold = fewest tokens / shortest time in that column. Last column: the whole
+suite.</p>
+<table class="matrix"><thead><tr><th>Variant<small>quant · engine</small></th>{head}<th>Suite<small>score · tokens · time</small></th></tr></thead>
+<tbody>{''.join(body)}</tbody></table>"""
+
+
+FAIL = ms.FAIL_BELOW
+
+
+def build_family_html(by_mean, by_best, title, lede, prefix, notes, details, extra=""):
     """All suites side by side (by best run | by mean), then each suite on its own, also by best run | by mean."""
     pair = lambda title_, note, left, right: f"""<h2>{title_}</h2><p class="h2note">{note}</p>
 <div class="cols"><div><h3>By best run</h3>{left}</div><div><h3>By mean of all runs</h3>{right}</div></div>"""
@@ -400,6 +449,12 @@ h3 {{ font-size:17px; margin:8px 0 8px; color:var(--text2); }}
 table {{ font-size:15px; }}
 td {{ padding:9px 7px; }} th {{ padding:0 7px 10px; }}
 .score {{ min-width:96px; }}
+table.matrix {{ font-size:14px; }}
+table.matrix td.cell {{ font-variant-numeric:tabular-nums; color:var(--text2); line-height:1.35; }}
+table.matrix td.tot {{ border-left:2px solid var(--rule); }}
+.sc {{ font-weight:700; color:var(--text); font-size:15px; }}
+.sc.part {{ color:#a3480f; }} .sc.bad {{ color:#b42318; }}
+table.matrix b {{ color:#1c5cab; }}
 </style></head><body><div class="wrap">
 <h1>{title}</h1>
 <p class="lede">{lede} Each part is ranked two ways: by the setting's best run (what it can do) and by the mean of all its
@@ -408,10 +463,11 @@ runs (what to expect). {date.today():%d %b %Y}.</p>
       family_table(by_best, "best", "best_mean", "minutes · tokens · tok/s of that best run"),
       family_table(by_mean, "cells", "mean", "mean minutes · mean tokens · tok/s (all tokens ÷ all generation time)"))}
 {''.join(suites)}
+{extra}
 <div class="notes">
 Bars span 50–100%. Settings with one run per suite score the same in both rankings. {notes} Time and tokens per full suite,
 thinking included; tok/s = all generated tokens ÷ all generation time. {PROBLEM_NOTE} ~ = tokens partly estimated.
-Temperature 1.0, RTX 5090 32 GB + 128 GB RAM. Details: {details}.
+Temperature 1.0, RTX 5090 32 GB + 128 GB RAM (192 GB from 23 Oct). Details: {details}.
 </div></div></body></html>"""
 
 
@@ -445,7 +501,7 @@ def task_table(rows, by):
         tok_ = f'{"~" if r["approx"] else ""}{r["tokens"] / 1000:.1f}k'
         mins = f'{r["minutes"]:.1f}'
         body.append(f"""<tr><td class="rank">{i}</td>
-<td><div class="model">{e(r['model'])}</div><div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(r['gpu'].split()[1])} · {e(r['effort'])}</div></td>
+<td><div class="model">{e(r['model'])}</div><div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(ms.gpu_short(r['gpu']))} · {e(r['effort'])}</div></td>
 <td class="num">{f"<b>{tok_}</b>" if by == "tokens" else tok_}</td><td class="num">{f"<b>{mins}</b>" if by == "time" else mins}</td>
 <td class="num muted">{r['solved']}</td></tr>""")
     return f"""<table><thead><tr><th>#</th><th>Model<small>quant · backend · GPU · effort</small></th>
@@ -494,7 +550,7 @@ def short(g):
     """'Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium`' for the README tables."""
     model = g["model"].replace("Qwen3.8-", "").replace("GLM-5.3-Flash", "GLM").replace("27B", "27B")
     eng = "" if g["backend"] == "llama.cpp" and not model.startswith("GLM") else f" · {g['backend']}"
-    return f"{model} {g['quant']}{eng} ({g['gpu'].split()[1]}) `{g['effort']}`"
+    return f"{model} {g['quant']}{eng} ({ms.gpu_short(g['gpu'])}) `{g['effort']}`"
 
 
 def tok(x, approx):
@@ -529,7 +585,8 @@ def readme_family(by_mean):
             cells.append(f"**{c['score']:.1f}%** ({c['runs']}×, {c['minutes']:.0f} min, {tok(c['tokens'], c['approx'])}, {c['tok_s'] or 0:.0f} tok/s)"
                          if c else "–")
         name = r["model"].replace("GLM-5.3-Flash", "").strip()
-        out.append(f"| {(name + ' ') if name else ''}{r['quant']} · {r['backend']} | {r['effort']} | "
+        ram = " (192 GB RAM)" if "192 GB" in r["gpu"] else ""
+        out.append(f"| {(name + ' ') if name else ''}{r['quant']} · {r['backend']}{ram} | {r['effort']} | "
                    + " | ".join(cells) + f" | {r['problems'] or '–'} |")
     return out
 
@@ -565,8 +622,10 @@ def main():
                 *collect_family("DeepSeek"), "DeepSeek-V4: every variant, every suite",
                 "DeepSeek-V4 / V4.1 with different files, engines and reasoning levels (--preset ds4).", "DeepSeek",
                 'Maya is an inference engine; "Maya-S" is a model file made for it. Levels: none (thinking off), low, '
-                'high (the default) and max, sent as a top-level reasoning_effort.',
-                "RESULTS_TABLE_DEEPSEEK.md, SUMMARY.md"), OUT_DS))
+                'high (the default) and max, sent as a top-level reasoning_effort. RAM: the RTX 5090 PC had 128 GB until '
+                '23 Oct and 192 GB after; with more experts in RAM the large MoE models run faster.',
+                "RESULTS_TABLE_DEEPSEEK.md, SUMMARY.md",
+                task_matrix("DeepSeek", "base") + task_matrix("DeepSeek", "hard")), OUT_DS))
         for suite in ("base", "hard"):
             pages.append((build_tasks_html(suite, collect_tasks(suite)), OUT_TASKS[suite]))
         top10 = build_split_html(

@@ -1,4 +1,4 @@
-# Local model coding test: summary (25 Sep – 21 Oct 2026)
+# Local model coding test: summary (25 Sep – 24 Oct 2026)
 
 ## TL;DR
 
@@ -18,7 +18,7 @@
 - **The reasoning level matters more than the choice of model.** Qwen does best at `low`/`medium`; `xhigh` overthinks code. On the base suite `low` is enough, but on the hard suite Q6 did 9 points better at `medium`. GLM needs `high`.
 - **ExLlamaV3 (TabbyAPI) under-reports tokens** on long answers. The counts were re-estimated from the saved text (marked `~`), and `run_eval.py` now corrects them by itself. ExLlamaV3 runs have also stopped mid-thought 3 times on the hard suite; see Part 3.
 - **GLM-5.3-Flash has its own table** ([RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md)). In the Maya engine it runs about twice as fast on the hard suite and rarely hits the time limit. Its best hard-suite means are 90–92% (GSQ-RCO 3.5-bit in Maya, 6 runs, and EXL3 3.10 bpw in ExLlamaV3, 3 runs), against 80–83% for the older files in llama.cpp or ExLlamaV3. GLM scores 97–100% on the new practical and tool-calling suites. See Part 5.
-- **First DeepSeek-V4.1-Flash run (Maya, file Maya-S, 20 Oct): 100% on the base suite at `high`**, but slowly: 75 min at 11 tok/s, about 9 times longer than the fastest 100% settings. DeepSeek now has its own table and image, like GLM: [RESULTS_TABLE_DEEPSEEK.md](RESULTS_TABLE_DEEPSEEK.md), [deepseek.jpg](deepseek.jpg). See Part 7.
+- **DeepSeek-V4.1-Flash scored 100% in all 5 runs** (base suite once, hard suite 4 times at `low` and `high`). With 192 GB RAM it runs at 24–26 tok/s, twice as fast as with 128 GB, but the hard suite still takes 69–88 min. See Part 8. DeepSeek now has its own table and image, like GLM: [RESULTS_TABLE_DEEPSEEK.md](RESULTS_TABLE_DEEPSEEK.md), [deepseek.jpg](deepseek.jpg). See Part 7.
 - **Per task, fewest tokens vs shortest time** ([tasks_base.jpg](tasks_base.jpg), [tasks_hard.jpg](tasks_hard.jpg)): GLM-5.3-Flash solves tasks with the fewest tokens, but Flash-Next in Strata and Qwen3.8-27B in VRAM solve them fastest, because they run 5–10 times faster.
 - **Flash-Next in Strata, two new files on the hard suite (19–20 Oct):** UD-Q5_K_XL 100% in 8 min (one run), and NVFP4 GPTQ 100% and 93.2% in under 6 min at about 139 tok/s.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
@@ -29,7 +29,7 @@
 
 ## Hardware and settings
 
-- **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows. All runs from 25 Sep and 28 Sep – 6 Oct.
+- **PC A:** RTX 5090 32 GB VRAM + 128 GB DDR5 RAM, Windows; 192 GB RAM from the evening of 23 Oct (the tables mark those runs "+ 192 GB RAM"). All runs from 25 Sep and 28 Sep – 6 Oct.
 - **PC B:** RTX 4080 16 GB VRAM + 32 GB DDR5 RAM, Windows. All Qwen3.8-27B 2–3-bit runs from 26–27 Sep.
 - Backends: llama.cpp (`llama-server --jinja`), ExLlamaV3 (TabbyAPI), [Strata](https://github.com/Niko1221/Strata) v0.1.30 (an inference server for MoE models; Qwen3.8-Flash-Next from 30 Sep) and Maya (another inference engine; GLM-5.3-Flash from 9 Oct).
 - Base suite, 10 tasks: 6 × TypeScript + Three.js, checked in a real browser (`tsc --strict` compile, rendering, animation, clicking, window resize), and 4 × Python with hidden correctness and performance tests. Hard suite: 6 tasks (`--suite hard`, see the README).
@@ -422,6 +422,29 @@ All on the RTX 5090.
 - EXL3 3.10 bpw in Maya (first run): 88.5%, diff wrong.
 - EXL3 3.10 bpw in ExLlamaV3: 90.6%, `h_p3` solved in 29 min; `h_t2_instanced_pick` 46%. Mean now 89.6% over 3.
 - Over all GLM hard runs at `high`: in Maya `h_p3_line_diff` was solved in 8 of 18 runs, wrong in 7, abandoned in 2, timed out once. In llama.cpp and ExLlamaV3 it was solved in 2 of 8 (both EXL3 3.10 bpw) and timed out in 6.
+
+# Part 8: DeepSeek-V4.1 on the hard suite, 192 GB RAM, GLM repeats (21–24 Oct)
+
+PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables ("+ 192 GB RAM", RAM column in the GLM and DeepSeek tables): the large MoE models keep more experts in RAM and run faster. Two GLM runs from 22–23 Oct (EXL3 3.10 bpw in ExLlamaV3, GSQ-RCO in Maya) used at most 114 GB and are counted as 128 GB runs. An interrupted DeepSeek run from 20 Oct (2 tasks) was removed.
+
+**DeepSeek-V4.1-Flash (build 1017), hard suite. Every run scored 100%:**
+
+| File · engine | RAM | Level | Runs | Time (min) | Tokens | tok/s |
+|---|---|---|---|---|---|---|
+| Maya-S · Maya | 128 GB | low | 1 | 123.1 | 84k | 11 |
+| Maya-S · Maya | 192 GB | high | 2 | 87.5, 77.7 | 120k | 24 |
+| GSQ-RCO IQ2_XS · Strata | 192 GB | high | 1 | 69.0 | 109k | 26 |
+
+- **192 GB RAM doubled the speed** (11 → 24–26 tok/s). The same file in the same engine on 128 GB ran the base suite at 11 tok/s too.
+- **`low` against `high`:** `low` used fewer tokens on every hard task (84k in all against about 120k), but on 128 GB it still took the longest. A `low` run on 192 GB would separate the two effects.
+- **GSQ-RCO IQ2_XS in Strata** is the fastest DeepSeek setting: 69 min.
+- **Per task** (bottom of [deepseek.jpg](deepseek.jpg)): `h_t2_instanced_pick` is the cheapest (3–10k tokens, 4–8 min); `h_p3_line_diff` and `h_p1_interval_set` the most expensive (20–33k tokens, 12–35 min). DeepSeek solved `h_p3` in all 4 runs.
+- **With the practical limits** (10 min and 32k tokens per task) the hard runs would score 33–50%.
+
+**GLM-5.3-Flash at `high`, hard suite:**
+- EXL3 3.10 bpw in ExLlamaV3: 98.1% in 35 min (22 Oct); mean now 91.7% over 4 runs, the best GLM mean.
+- GSQ-RCO 3.5-bit in Maya: 85.7%, diff wrong (17%); mean 90.8% over 7.
+- New file EXL3 4.05 bpw in Maya (192 GB): 92.9% in 25.5 min, `h_p3` solved in 11 min, `h_p1_interval_set` 57%.
 
 ## Caveats
 

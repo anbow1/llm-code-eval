@@ -86,6 +86,28 @@ def describe(label, model):
     return label, "?", backend
 
 
+RAM_192_FROM = "20261023-2100"  # PC A got 192 GB RAM (128 GB before); runs from this time on use it
+
+
+def gpu_short(gpu):
+    """'5090' or '5090 +192G' for narrow table columns."""
+    return gpu.split()[1] + (" +192G" if "192 GB" in gpu else "")
+
+
+def hw_of(resources, model, quant, run):
+    """GPU, plus '+ 192 GB RAM' for the RTX 5090 runs after the RAM upgrade: the large MoE models run faster with
+    more experts in RAM, so these runs are kept apart from the 128 GB ones."""
+    gpu = gpu_of(resources, model, quant)
+    if gpu.startswith("RTX 5090") and (run >= RAM_192_FROM or (resources.get("ram_peak_gb") or 0) > 130):
+        gpu += " + 192 GB RAM"
+    return gpu
+
+
+def ram_of(gpu):
+    """System RAM of the PC a run was made on: '192 GB' / '128 GB' (RTX 5090 PC) or '32 GB' (RTX 4080 PC)."""
+    return "192 GB" if "192 GB" in gpu else "128 GB" if gpu.startswith("RTX 5090") else "32 GB"
+
+
 def gpu_of(resources, model, quant):
     """GPU the run was made on. Newer runs record it. Of the older ones, the 2-3-bit Qwen3.8-27B
     runs were made on a second PC (RTX 4080 16 GB + 32 GB RAM), everything else on the RTX 5090 32 GB."""
@@ -162,7 +184,7 @@ def load_runs(folder):
             effort += f", temp {s['temperature']:g}"
         runs.append({
             "run": f.parent.name, "suite": s.get("suite", "base"), "model": name, "quant": quant, "backend": backend,
-            "gpu": gpu_of(R, name, quant),
+            "gpu": hw_of(R, name, quant, f.parent.name),
             "effort": effort,
             "temperature": s.get("temperature"),
             "overall": round(d["overall"], 1),
@@ -339,11 +361,11 @@ def write_family_table(prefix, path, title, intro):
              "average speed (all tokens ÷ all generation time). Settings "
              "are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** "
              "= tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.", "",
-             "| # | Model | Quant | Backend | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites | Problem tasks |",
-             "|---|---|---|---|---|" + "---|" * len(SUITES) + "---|---|"]
+             "| # | Model | Quant | Backend | RAM | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites | Problem tasks |",
+             "|---|---|---|---|---|---|" + "---|" * len(SUITES) + "---|---|"]
     for i, (k, cells, m, nsu) in enumerate(rows, 1):
         model, quant, backend, gpu, effort = k
-        lines.append(f"| {i} | {model} | {quant} | {backend} | {effort} | " + " | ".join(c[0] for c in cells)
+        lines.append(f"| {i} | {model} | {quant} | {backend} | {ram_of(gpu)} | {effort} | " + " | ".join(c[0] for c in cells)
                      + f" | {m:.1f}% ({nsu} of {len(SUITES)}) | {problems[k] or '–'} |")
     for suite, rs in per_suite.items():
         if not rs:
@@ -352,16 +374,16 @@ def write_family_table(prefix, path, title, intro):
         for r in rs:
             groups.setdefault((r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]), []).append(r)
         lines += ["", f"## {suite.capitalize()} suite", "",
-                  "| Model | Quant | Backend | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) "
-                  "| Mean tokens | Avg tok/s (from time) | Problem tasks |",
-                  "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+                  "| Model | Quant | Backend | RAM | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken "
+                  "| Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for (model, quant, backend, gpu, effort), g in sorted(groups.items(), key=lambda kv: -mean([r["overall"] for r in kv[1]])):
             sc = [r["overall"] for r in g]
             tok = [r["tokens"] for r in g if r["tokens"]]
             gen = sum(r["gen_minutes"] for r in g)
             broken = 100 * sum(r["broken"] for r in g) / max(1, sum(r["n_tasks"] for r in g))
             ap = "~" if any(r["tokens_approx"] for r in g) else ""
-            lines.append(f"| {model} | {quant} | {backend} | {effort} | {len(g)} | **{mean(sc):.1f}%** "
+            lines.append(f"| {model} | {quant} | {backend} | {ram_of(gpu)} | {effort} | {len(g)} | **{mean(sc):.1f}%** "
                          f"| {f'{min(sc):.0f}–{max(sc):.0f}' if len(g) > 1 else '–'} "
                          f"| {mean([r['practical'] for r in g]):.1f}% | {broken:.0f}% | {mean([r['minutes'] for r in g]):.1f} "
                          f"| {ap}{mean(tok) / 1000:.1f}k | {sum(tok) / (gen * 60):.1f} | {problem_text(g) or '–'} |")
