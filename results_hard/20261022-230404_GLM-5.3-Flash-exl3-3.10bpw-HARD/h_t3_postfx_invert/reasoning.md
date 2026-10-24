@@ -1,0 +1,21 @@
+The key: RenderPass renders to linear target. If we invert in linear space, then output pass converts linear->sRGB, result won't be exact inverse of sRGB values. Correct approach: convert to sRGB in the shader, invert, and... Actually OutputPass does tone mapping + color space conversion. If we invert in shader before OutputPass, inversion happens in linear space. Screen without effect shows sRGB encoded. Exact inverse of displayed sRGB color: we need final framebuffer value = 1 - srgb_display. 
+
+Option: In the custom shader pass, convert linear to sRGB first, then invert. Then OutputPass would convert again (double conversion) — wrong. Alternative: do inversion AFTER output conversion. Order: RenderPass, OutputPass, ShaderPass that inverts (operating in sRGB space, and renderToScreen last). But ShaderPass after OutputPass — OutputPass converts to sRGB, then our shader inverts the sRGB values. That gives exact inverse. The last pass renders to screen. That works.
+
+But wait — OutputPass expects to be last? It just does conversion in shader; having a pass after it is fine. The composer's buffers: ShaderPass after OutputPass gets sRGB values, inverts them, renders to screen with renderToScreen. Need composer to handle renderToScreen automatically (composer sets renderToScreen on last pass automatically... Actually EffectComposer sets renderToScreen on the last pass only if pass.renderToScreen... In modern three, composer.render() sets renderToScreen automatically? EffectComposer does `this.renderToScreen = ...`? Let me recall: EffectComposer.render iterates passes; `pass.renderToScreen = (this.renderToScreen && this.isLastEnabledPass(i));` Yes, modern EffectComposer handles it automatically.
+
+Alternatively, custom shader that does sRGB conversion itself and no OutputPass — but requirement says use OutputPass. So order: RenderPass, OutputPass, InvertPass. Hmm but requirement mentions "a custom ShaderPass ... and an OutputPass" — order not strictly specified. But maybe they expect OutputPass last. Alternative: invert shader operating in linear space but with sRGB->linear aware inversion? Exact inverse in sRGB space: displayed = encode(linear). We want displayed' = 1 - displayed = 1 - encode(l). Need output linear l' such that encode(l') = 1 - encode(l), i.e., l' = decode(1 - encode(l)). So shader: sample linear color, encode to sRGB (approx via pow 1/2.2 or exact), invert, decode back to linear, then OutputPass encodes. Using exact sRGB piecewise functions. That's more complex; simpler is putting invert pass after OutputPass. Both satisfy "exact inverse". I'll do: RenderPass -> ShaderPass(invert in sRGB) -> OutputPass? No — that would invert linear values.
+
+Simplest robust: RenderPass, OutputPass, ShaderPass invert. Write GLSL: gl_FragColor = vec4(1.0 - texture2D(tDiffuse, vUv).rgb, 1.0); Actually ShaderPass shader needs vertex shader too.
+
+But caution: OutputPass applies tone mapping? OutputPass applies renderer.toneMapping conversion — default NoToneMapping, fine.
+
+Also composer render targets: default uses HalfFloatType; OutputPass outputs sRGB values in linear working buffer, then ShaderPass reads and inverts, then final pass renders to screen — but wait, when rendering to screen directly with ShaderPass, does renderer apply output color space conversion? The renderer's outputColorSpace conversion happens in materials' fragment shaders via `#include <colorspace_fragment>` — ShaderPass's custom shader doesn't include that chunk unless we add it. So final output goes to screen raw. Good — values are already sRGB-encoded from OutputPass, inversion of sRGB values, output raw. 
+
+Also renderer.outputColorSpace default SRGBColorSpace. Since our final pass shader lacks colorspace_fragment, no double conversion. 
+
+ShaderPass import from 'three/addons/postprocessing/ShaderPass.js'. OutputPass from 'three/addons/postprocessing/OutputPass.js'.
+
+Shader uniforms: tDiffuse. Use THREE.ShaderPass with object containing uniforms, vertexShader, fragmentShader.
+
+Write code.
