@@ -456,7 +456,7 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 
 # Part 9: scene suite and Maya's thinking limit (26 Oct)
 
-**Scene suite, s1_ocean_island** (one large Three.js task: ocean with waves in a shader, a boat that floats on them, an island with swaying palms, sky, shadows, fog). The first seven runs had a 30-minute limit; from 27 Oct the limit is 60 minutes, because the large models were cut off while still working. All runs on the RTX 5090 + 192 GB RAM:
+**Scene suite, s1_ocean_island** (one large Three.js task: ocean with waves in a shader, a boat that floats on them, an island with swaying palms, sky, shadows, fog). Six runs had a 30-minute limit and two had 180 minutes (the same runs as above, labelled `180 min` in the table when they took longer than 30 min). From 27 Oct the limit is 60 minutes, because the large models were cut off while still working. A run that hit the 30-minute limit without a scene (GLM EXL3 4.10 bpw, 0%) was removed as unfinished. All runs on the RTX 5090 + 192 GB RAM:
 
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
@@ -468,7 +468,6 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
 | DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The checks were too lenient for this task.** They test what can be measured (the boat follows `heightAt`, leaves sway, shadows, fog, camera), and almost every model gets that right; the pictures are what differ. Two checks were added (`water_visible`, `island_lit`) and the saved answers graded again (`regrade.py` now also rebuilds Three.js answers): the scene without water fell to 87%, the dark GLM islands to 96%. Making the checks stable in the slow software renderer also needed the boat to be sampled inside `renderer.render`. The by-eye rating (1–10, [ratings_scene.json](ratings_scene.json)) now stands next to the score.
 - **By eye:** DeepSeek-V4.1 made the best scenes (7–7.5: the most complete islands, sand, rocks, palms, shore foam); GLM-5.3 the best water and sky but almost black islands (5–6); Qwen3.8-Flash-Next NVFP4 is 20–30 times faster but its scene is the simplest (4).

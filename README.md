@@ -368,7 +368,6 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
 | DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.
 - **Two more DeepSeek-V4.1 runs on a different file (EXL2 2.9 bpw, Maya, 26 Oct, both at 100%):** `low` finished in 28.0 min (6.5 by eye), `high` in 30.2 min (7.5 by eye). Their thinking stopped at 32.8k tokens again (32,781 and 32,796), so `low` and `high` used almost the same number of tokens (40.1k and 41.6k): with the cap, the level barely changes this task.
@@ -395,7 +394,7 @@ One larger Three.js task where the picture matters, for telling the strongest se
 - **light and camera:** shadow map and a shadow-casting sun, fog plus tone mapping, the camera where it should be;
 - **the picture:** a sky gradient at the top, water that is on screen (the bottom quarter is not a flat background) and moves, a lit island (not a near-black silhouette where it lands on screen), a rich image (not a few flat colors).
 
-**Without the time limit.** A slow model may not finish in 30 min (the run then ends with `task_timeout`). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; if the task then takes longer than 30 min, the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs; a run that still finishes within 30 min counts as a normal run.
+**Without the time limit.** A slow model may not finish in the time limit (the run then ends with `task_timeout`; such a run without a scene is removed, not kept in the table). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; if the task then takes longer than 30 min, the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs; a run that still finishes within 30 min counts as a normal run.
 
 **How it looks is not in the score.** Every run saves:
 - `screenshot.png`, `screenshot_2.png` and `screenshot_3.png` (about 1, 3 and 6 s after start);

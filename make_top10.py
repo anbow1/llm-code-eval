@@ -581,6 +581,7 @@ def build_scene_gallery():
     cards = []
     eye = ms.scene_ratings()
     runs.sort(key=lambda r: (-(eye.get(r["run"], {}).get("overall", -1)), -r["overall"]))  # best by eye first
+    runs = [r for r in runs if scene_shot(folder / r["run"])]  # only runs that produced a scene
     for r in runs:
         d = json.loads((folder / r["run"] / "summary.json").read_text(encoding="utf-8"))
         res = next((x for x in d["results"] if x["id"] == "s1_ocean_island"), {})
@@ -608,7 +609,7 @@ def build_scene_gallery():
 </style></head><body><div class="wrap">
 <h1>Local LLM coding test: scene suite gallery</h1>
 <p class="lede">s1_ocean_island: a boat rocking on an ocean next to a tropical island, one TypeScript + Three.js file
-(30 min limit). Same camera in every run, picture taken about 5 s after start. Best by eye first. {date.today():%d %b %Y}.</p>
+(60 min limit). Same camera in every run, picture taken about 5 s after start. Best by eye first. {date.today():%d %b %Y}.</p>
 <div class="grid">{''.join(cards)}</div>
 <div class="notes">
 The score counts 23 automatic checks (the boat floats on the waves the shader draws, leaves sway, shadows, fog, tone mapping,
