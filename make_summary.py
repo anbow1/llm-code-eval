@@ -189,8 +189,11 @@ def load_runs(folder):
             effort = "high"
         if s.get("temperature") not in (None, 1.0):  # keep e.g. temperature-0 repeats apart from the usual runs
             effort += f", temp {s['temperature']:g}"
-        if s.get("suite") == "scene" and s.get("task_timeout_min") not in (None, 30, 30.0):
-            effort += f", {s['task_timeout_min']:g} min"  # a scene run with another time limit is another setting
+        if s.get("suite") == "scene" and (s.get("task_timeout_min") or 30) > 30 \
+                and max((r.get("gen_seconds") or 0) for r in d["results"]) > 30 * 60:
+            # a longer limit makes another setting only if the run used it: one that finished within the usual
+            # 30 minutes is a run of the same setting
+            effort += f", {s['task_timeout_min']:g} min"
         runs.append({
             "run": f.parent.name, "suite": s.get("suite", "base"), "model": name, "quant": quant, "backend": backend,
             "gpu": hw_of(R, name, quant, f.parent.name),

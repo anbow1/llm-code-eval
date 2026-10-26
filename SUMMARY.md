@@ -455,11 +455,11 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The checks were too lenient for this task.** They test what can be measured (the boat follows `heightAt`, leaves sway, shadows, fog, camera), and almost every model gets that right; the pictures are what differ. Two checks were added (`water_visible`, `island_lit`) and the saved answers graded again (`regrade.py` now also rebuilds Three.js answers): the scene without water fell to 87%, the dark GLM islands to 96%. Making the checks stable in the slow software renderer also needed the boat to be sampled inside `renderer.render`. The by-eye rating (1–10, [ratings_scene.json](ratings_scene.json)) now stands next to the score.
@@ -469,7 +469,7 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 **Maya stops thinking at about 32.8k tokens.**
 - In Maya, every task that thought long since 12 Oct ended at 32,776–32,836 thinking tokens (15 tasks: 10 hard-suite `h_p3_line_diff` runs of GLM and all 5 DeepSeek and GLM scene runs), and the answer came right after. Only two runs on 11 Oct thought longer (37k and 45k).
 - llama.cpp, ExLlamaV3 and Strata with Qwen think up to the 98,304-token limit. DeepSeek in Strata also stopped at 32.8k on the scene task, so the limit may come from the DeepSeek chat template or from both engines; it is worth checking the engines' thinking-budget settings.
-- **This changes the reading of Part 5.** GLM in Maya never timed out on `h_p3_line_diff` and ran about twice as fast partly because its thinking was cut at 32.8k; the wrong diffs in Maya (7 of 18) fit that too. The 180-minute scene runs changed nothing for the same reason (29 and 40 min).
+- **This changes the reading of Part 5.** GLM in Maya never timed out on `h_p3_line_diff` and ran about twice as fast partly because its thinking was cut at 32.8k; the wrong diffs in Maya (7 of 18) fit that too. For the same reason a longer limit barely helps on the scene task: DeepSeek in Maya finished within 30 min both times (28 and 29 min; one was started with a 180-minute limit, so both count as the same setting, mean 93.5%); only GLM EXL3 4.10 bpw used more (40 min).
 
 ## Caveats
 
