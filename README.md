@@ -370,6 +370,8 @@ One larger Three.js task where the picture matters, for telling the strongest se
 - **light and camera:** shadow map and a shadow-casting sun, fog plus tone mapping, the camera where it should be;
 - **the picture:** a sky gradient at the top, water that moves at the bottom, a rich image (not a few flat colors).
 
+**Without the time limit.** A slow model may not finish in 30 min (the run then ends with `task_timeout`). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs.
+
 **How it looks is not in the score.** Every run saves:
 - `screenshot.png`, `screenshot_2.png` and `screenshot_3.png` (about 1, 3 and 6 s after start);
 - **`scene.html`: the finished scene in one file** (the bundle with Three.js inlined, about 0.6 MB). Open it by double-click in any browser to watch it on a real GPU.
