@@ -73,7 +73,7 @@ Settings with one run have the same score in both, so only repeated ones move. O
 | 3 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100.0% | 19.3 | 181k | 158 | 2 | – |
 | 4 | GLM EXL3 3.05 bpw · Maya (5090) `high` | 100.0% | 86.0% | 35.3 | 46k | 22 | 7 | h_p3_line_diff 5/7 |
 | 5 | GLM derisked Maya-M · Maya (5090) `high` | 100.0% | 86.5% | 38.8 | 54k | 23 | 4 | h_p3_line_diff 2/4; h_t2_instanced_pick 2/4 |
-| 6 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata (5090 +192G) `high` | 100.0% | 100.0% | 69.0 | 109k | 26 | 1 | – |
+| 6 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata (5090 +192G) `high` | 100.0% | 100.0% | 53.7 | 83k | 26 | 2 | – |
 | 7 | DeepSeek-V4.1-Flash Maya-S · Maya (5090 +192G) `high` | 100.0% | 100.0% | 77.7 | 109k | 24 | 2 | – |
 | 8 | DeepSeek-V4.1-Flash Maya-S · Maya (5090) `low` | 100.0% | 100.0% | 123.1 | 84k | 11 | 1 | – |
 | 9 | Flash-Next UD-Q4_K_XL · Strata (5090) `medium` | 99.6% | 93.0% | 7.7 | 40k | 90 | 2 | – |
@@ -83,7 +83,7 @@ Settings with one run have the same score in both, so only repeated ones move. O
 |---|---|---|---|---|---|---|---|---|
 | 1 | Flash-Next UD-Q5_K_XL · Strata (5090) `medium` | 100.0% | 100% | 8.0 | 46k | 99 | 1 | – |
 | 2 | Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium` | 100.0% | 100% | 19.6 | 160k | 137 | 2 | – |
-| 3 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata (5090 +192G) `high` | 100.0% | 100% | 69.0 | 109k | 26 | 1 | – |
+| 3 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata (5090 +192G) `high` | 100.0% | 100% | 61.4 | 96k | 26 | 2 | – |
 | 4 | DeepSeek-V4.1-Flash Maya-S · Maya (5090 +192G) `high` | 100.0% | 100% | 82.6 | 120k | 24 | 2 | – |
 | 5 | DeepSeek-V4.1-Flash Maya-S · Maya (5090) `low` | 100.0% | 100% | 123.1 | 84k | 11 | 1 | – |
 | 6 | 27B GSQ-RCO IQ3_XXS MTP (4080) `medium` | 98.3% | 98% | 17.9 | 72k | 69 | 1 | – |
@@ -350,6 +350,26 @@ The model gets OpenAI-style `tools` for a fake shop backend; `run_eval.py` execu
 | t_agent_fix | coding agent: `list_files`, `read_file`, `write_file`, `run_tests` on a small repo with 2 bugs; the tests must pass, also hidden ones, the test file must stay unchanged, at most 12 tool calls |
 
 Every tool task also checks that the calls are well-formed (valid JSON, not written as text) and that a final answer came. The server must support tool calls: llama.cpp needs `--jinja` and a chat template with tools; TabbyAPI has its own tool-call support; for other servers check their docs. A model or server that cannot call tools scores close to 0 here, which is the point.
+
+## Scene suite: results (26 Oct 2026)
+
+![Scene suite gallery: every run, same camera](scene_gallery.jpg)
+
+All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](RESULTS_TABLE_SCENE.md); every run's finished scene is `results_scene/<run>/s1_ocean_island/scene.html`.
+
+| Model · quant · engine | Effort | Score | Time | Tokens (thinking) | Picture, by eye |
+|---|---|---|---|---|---|
+| Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **1.2 min** | 8.4k (1.6k) | crude: a flat sand cone, blocky water |
+| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | 24.3 min | 39.5k (32.8k) | good: green island, sun glint, foam ring |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 100% | 27.8 min | 40.0k (32.8k) | good water, island nearly black (lighting) |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | 29.4 min | 41.8k (32.8k) | good: island with sand and rocks, palms, shore foam |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 100% | 40.5 min | 40.7k (32.8k) | best water and sky, island dark |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high | 90% | 28.2 min | 43.4k (32.8k) | no water: the ocean shader did not compile (`vec2.z`) |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | 30 min (limit) | 30.9k, no answer | – |
+
+- **The score does not separate the good scenes yet:** six of seven runs score 90–100%, while the pictures differ a lot. A scene without water still scored 90%. The checks need a "water is on screen" test and more weight on the picture; until then compare the gallery.
+- **Qwen3.8-Flash-Next NVFP4 in Strata did it in 1.2 min**, 20–30 times faster than the others, but its picture is the weakest of the finished ones.
+- **Thinking stopped at about 32.8k tokens in every DeepSeek and GLM run** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9: Maya (and Strata with DeepSeek) cut thinking there, so the 180-minute limit changed nothing: those runs took 29 and 40 min.
 
 ## Scene suite: task
 
