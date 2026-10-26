@@ -1,1 +1,0 @@
-Write a simple TypeScript Three.js scene. Ensure strict typing, ready flag after first frame.

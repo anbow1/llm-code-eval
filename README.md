@@ -6,7 +6,7 @@ The repository has five test suites, kept apart everywhere:
 |---|---|---|---|---|---|
 | Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) | 1 large graphics task: boat on an ocean next to an island ([tasks_scene.py](tasks_scene.py)) |
 | Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` | `--suite scene` |
-| Default limits | lenient (comparable with older runs) | lenient | practical | practical | 30 min, 98,304 tokens |
+| Default limits | lenient (comparable with older runs) | lenient | practical | practical | 60 min, 98,304 tokens |
 | Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` |
 | Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | RESULTS_TABLE_SCENE.md, scene_gallery.jpg (after the first run) |
 | Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg |
@@ -204,6 +204,7 @@ Main options:
 - `--reasoning-effort low`: reasoning level (e.g. low / medium / high / xhigh), if the chat template supports it
 - `--reasoning-effort off,low,xhigh`: runs the full test once per level, each with its own report
 - `CHROMIUM_PATH=/path/to/chrome` (environment variable): use this Chromium build instead of Playwright's own; `make_top10.py` reads it too
+- `--max-completion-tokens N`: also sends `max_completion_tokens` (the newer name for the same budget), to test whether a server reads it for the thinking limit (see Part 9 of SUMMARY.md)
 - `--show-request`: print each request's settings (everything but the messages), to see exactly which thinking and effort fields the server gets.
 - `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM and DeepSeek-V4 `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
 - `--suite hard` / `practical` / `tools`: run another suite instead of the base one (see the task sections below)
@@ -256,7 +257,7 @@ The limits decide what counts as a useful answer. A local model that thinks for 
 |---|---|---|---|---|
 | **practical** | 10 min (tool tasks: 5 min for all turns) | 32,768 | base 30 min, hard 30 min, practical 30 min, tools 15 min | `practical`, `tools` |
 | lenient | 60 min | 98,304 | none | `base`, `hard` (so new runs stay comparable with the old ones) |
-| scene suite | 30 min | 98,304 | 60 min | `scene` (one large task; 30 min of work is the most that is still worth waiting for) |
+| scene suite | 60 min | 98,304 | 65 min | `scene` (one large task; the 30-min runs were cut off while still working) |
 
 The whole battery (all four suites) then takes at most about 1 h 45 min; a usable setup finishes it in 30–45 minutes. The tables also show **Score @10 min/32k** for every setting: the score with the practical limits applied after the fact to runs made with the lenient ones (later tasks count as 0). Dense Qwen3.8-27B keeps its score; Flash-Next in llama.cpp and GLM lose 8–25 points.
 

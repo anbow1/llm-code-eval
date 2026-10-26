@@ -47,11 +47,11 @@ SUITES = {  # module, results folder, run-name suffix
 # --limits. practical: what is still useful in daily work. 95% of the fully solved tasks so far took under
 # 10 minutes and under 19k tokens; above 32k tokens only about half were solved. lenient: the old defaults.
 LIMITS = {
-    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 30}, "default_timeout_min": 10,
-                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 60}},
-    # scene: one large task; 30 min of work is the most that is still worth waiting for
-    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 30}, "default_timeout_min": 60,
-                "budget_min": {"scene": 60}},
+    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 60}, "default_timeout_min": 10,
+                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 65}},
+    # scene: one large task, 60 min (30 min was too short for the large models: they were cut off while still working)
+    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 60}, "default_timeout_min": 60,
+                "budget_min": {"scene": 65}},
 }
 
 HERE = Path(__file__).resolve().parent
@@ -168,6 +168,9 @@ def chat(args, system, prompt, timeout, messages=None, tools=None):
         "stream": True,
         "stream_options": {"include_usage": True},
     }
+    if getattr(args, "max_completion_tokens", None):
+        # the newer OpenAI name for the same budget; some servers read this one (see README, thinking limit)
+        body["max_completion_tokens"] = args.max_completion_tokens
     for k in SAMPLING_KEYS:
         v = getattr(args, k)
         if v is not None:
@@ -843,6 +846,9 @@ def main():
     ap.add_argument("--template-kwargs", action="store_true",
                     help="--preset ds4: also send chat_template_kwargs {thinking, reasoning_effort}, for servers such "
                          "as llama.cpp that pass the level to the chat template (Maya does not need it)")
+    ap.add_argument("--max-completion-tokens", type=int, default=None,
+                    help="also send max_completion_tokens (same budget as --max-tokens); for testing whether a server "
+                         "reads this field for the thinking limit")
     ap.add_argument("--show-request", action="store_true",
                     help="print each request's settings (everything but the messages), to check what the server gets")
     ap.add_argument("--probe-repeats", type=int, default=3, help="tries per level for --probe-effort (default 3)")
@@ -861,7 +867,7 @@ def main():
     if args.temperature is None:
         args.temperature = 1.0
     if args.limits == "auto":
-        args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"  # scene: lenient, 30 min
+        args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"  # scene: lenient, 60 min
     L = LIMITS[args.limits]
     if args.max_tokens is None:
         args.max_tokens = L["max_tokens"]

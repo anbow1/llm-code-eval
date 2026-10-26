@@ -142,7 +142,7 @@ SUITES = {
               "7 tasks against a fake shop backend: pick the right tool, fill the arguments, chain calls, parallel "
               "calls, recover from an error, answer without a tool, and a small coding agent that fixes a repo."),
     "scene": ("results_scene", "RESULTS_TABLE_SCENE.md", "# Results table: scene suite (--suite scene)",
-              "1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 30 min). The "
+              "1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 60 min). The "
               "checks test what can be measured (the boat floats on the waves the shader draws, swaying leaves, "
               "shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html."),
 }
@@ -195,7 +195,7 @@ def load_runs(folder):
         if s.get("suite") == "scene" and (s.get("task_timeout_min") or 30) > 30 \
                 and max((r.get("gen_seconds") or 0) for r in d["results"]) > 30 * 60:
             # a longer limit makes another setting only if the run used it: one that finished within the usual
-            # 30 minutes is a run of the same setting
+            # 30 minutes is a run of the same setting (scene limit is 60 min since 27 Oct)
             effort += f", {s['task_timeout_min']:g} min"
         runs.append({
             "run": f.parent.name, "suite": s.get("suite", "base"), "model": name, "quant": quant, "backend": backend,

@@ -22,7 +22,13 @@
 - **Per task, fewest tokens vs shortest time** ([tasks_base.jpg](tasks_base.jpg), [tasks_hard.jpg](tasks_hard.jpg)): GLM-5.3-Flash solves tasks with the fewest tokens, but Flash-Next in Strata and Qwen3.8-27B in VRAM solve them fastest, because they run 5–10 times faster.
 - **Flash-Next in Strata, two new files on the hard suite (19–20 Oct):** UD-Q5_K_XL 100% in 8 min (one run), and NVFP4 GPTQ 100% and 93.2% in under 6 min at about 139 tok/s.
 - **New scene suite (26 Oct): one large graphics task**, a boat on an ocean next to an island. Most runs score 96–100% (two more DeepSeek runs on a new EXL2 2.9 bpw file also scored 100%), so each run also gets a by-eye rating (1–10) on the gallery ([scene_gallery.jpg](scene_gallery.jpg)). DeepSeek-V4.1 made the best scenes (7–7.5), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 finished in 1.2 min with the simplest picture (4). See Part 9.
-- **Maya stops thinking at about 32.8k tokens.** Since 12 Oct every long-thinking task in Maya ended at 32,776–32,836 thinking tokens, then the answer followed; DeepSeek in Strata does the same. This explains much of what looked like Maya's advantage on the hard suite (no time-outs, faster runs) and its wrong diffs. See Part 9.
+- **Maya's thinking limit: a soft budget near 32.8k tokens, not a hard cap.**
+- Most runs since 12 Oct stop at 32,776–32,836 thinking tokens. A few overshoot: 34,837 and 35,263 (14 Oct), and 45,150 and 36,855 (11 Oct, before the change).
+- It does not follow the `max_tokens` we send: the runs above were all sent 98,304, the same as the runs that thought to 98,304 on llama.cpp and ExLlamaV3. So raising our limit to 64k does not change it.
+- What we have tried: nothing on our side moves it. Maya's chat UI shows "Max tokens: empty = until done", so the limit is not in the visible settings.
+- **Test (27 Oct, to run on the RTX 5090):** `--max-completion-tokens` sends the newer field `max_completion_tokens` as well. One hard task with a 65,536 budget: `python run_eval.py --suite hard --tasks h_p3_line_diff --label TEST-maya-cap --preset ds4 --reasoning-effort high --max-tokens 65536 --max-completion-tokens 65536 --show-request`. If the thinking goes past 32.8k, the server reads that field and it becomes the default for `ds4`. If it stops at about 32.8k again, the budget is set in Maya's server configuration, and only a Maya setting (not the chat UI) can change it. Delete the `TEST-` folder afterwards: a one-task run is not a setting for the tables.
+
+**Maya stops thinking at about 32.8k tokens (earlier summary).** Since 12 Oct almost every long-thinking task in Maya ended at 32,776–32,836 thinking tokens (a few overshot to 35k), then the answer followed; DeepSeek in Strata does the same. This explains much of what looked like Maya's advantage on the hard suite (no time-outs, faster runs) and its wrong diffs. See Part 9.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 - **Some settings keep failing the same task over repeated runs.** The tables now list them as "Problem tasks" / "Often fails" (below 90% in at least half the runs). Most common:
   - `h_p3_line_diff` for GLM-5.3-Flash at `high` (time-outs outside Maya, wrong diffs in Maya) and for Qwen3.8-27B AP IQ3_S on the 4080 (3 of 3);
@@ -450,7 +456,7 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 
 # Part 9: scene suite and Maya's thinking limit (26 Oct)
 
-**Scene suite, s1_ocean_island** (one large Three.js task: ocean with waves in a shader, a boat that floats on them, an island with swaying palms, sky, shadows, fog; 30 min). All runs on the RTX 5090 + 192 GB RAM:
+**Scene suite, s1_ocean_island** (one large Three.js task: ocean with waves in a shader, a boat that floats on them, an island with swaying palms, sky, shadows, fog). The first seven runs had a 30-minute limit; from 27 Oct the limit is 60 minutes, because the large models were cut off while still working. All runs on the RTX 5090 + 192 GB RAM:
 
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|

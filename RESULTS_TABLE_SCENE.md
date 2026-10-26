@@ -1,6 +1,6 @@
 # Results table: scene suite (--suite scene)
 
-1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 30 min). The checks test what can be measured (the boat floats on the waves the shader draws, swaying leaves, shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html.
+1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 60 min). The checks test what can be measured (the boat floats on the waves the shader draws, swaying leaves, shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html.
 
 Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says which). All runs: temperature 1.0, sampling preset recommended by the model maker, 30-minute and 98,304-token limit for the task. Settings that were run more than once are averaged under "Mean per setting"; every single run is listed under "Every run".
 
