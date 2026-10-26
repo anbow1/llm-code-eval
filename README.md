@@ -364,7 +364,7 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
-| DeepSeek-V4.1-Flash Maya-S · Maya (2nd run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.

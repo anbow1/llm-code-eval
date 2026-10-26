@@ -459,7 +459,7 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
-| DeepSeek-V4.1-Flash Maya-S · Maya (2nd run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The checks were too lenient for this task.** They test what can be measured (the boat follows `heightAt`, leaves sway, shadows, fog, camera), and almost every model gets that right; the pictures are what differ. Two checks were added (`water_visible`, `island_lit`) and the saved answers graded again (`regrade.py` now also rebuilds Three.js answers): the scene without water fell to 87%, the dark GLM islands to 96%. Making the checks stable in the slow software renderer also needed the boat to be sampled inside `renderer.render`. The by-eye rating (1–10, [ratings_scene.json](ratings_scene.json)) now stands next to the score.
