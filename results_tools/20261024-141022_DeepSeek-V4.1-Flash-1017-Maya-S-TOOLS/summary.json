@@ -1,0 +1,258 @@
+{
+  "name": "DeepSeek-V4.1-Flash-1017-Maya-S-TOOLS",
+  "model": "local",
+  "python": null,
+  "three": null,
+  "tools": 100.0,
+  "overall": 100.0,
+  "summary": {
+    "python": null,
+    "three": null,
+    "tools": 100.0,
+    "overall": 100.0,
+    "answered_score": 100.0,
+    "tasks_total": 7,
+    "tasks_answered": 7,
+    "hit_max_tokens": 0,
+    "timeouts": 0,
+    "broken": 0,
+    "not_run": 0,
+    "tokens_total": 2001,
+    "reasoning_tokens_total": 811,
+    "tok_per_s": 22.4,
+    "ttft_avg_s": 9.4,
+    "gen_minutes": 4.0
+  },
+  "resources": {
+    "gpu": "RTX 5090 32 GB",
+    "vram_peak_gb": 31.1,
+    "ram_peak_gb": 172.0,
+    "ram_at_start_gb": 171.2,
+    "disk_read_gb": 0.5,
+    "note": null
+  },
+  "settings": {
+    "preset": "ds4",
+    "max_tokens": 32768,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "top_k": null,
+    "min_p": null,
+    "presence_penalty": null,
+    "repetition_penalty": null,
+    "think": "default",
+    "reasoning_effort": "high",
+    "task_timeout_min": 5,
+    "budget_min": 15,
+    "limits": "practical",
+    "suite": "tools"
+  },
+  "minutes": 4.0,
+  "results": [
+    {
+      "id": "t_select",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "used_get_shipping_status": true,
+        "no_write_tools": true,
+        "at_most_2_calls": true,
+        "answer_has_status": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 1 in 2 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 23.7,
+      "ttft_s": 9.7,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 125,
+      "reasoning_tokens": 80,
+      "answer_tokens": 45,
+      "tokens_approx": false,
+      "tok_per_s": 13.8
+    },
+    {
+      "id": "t_args",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "exactly_one_ticket": true,
+        "priority_urgent": true,
+        "due_date_2026_10_16": true,
+        "customer_id_int_314": true,
+        "tags_mobile_payments": true,
+        "short_relevant_title": true,
+        "no_other_writes": true,
+        "answer_has_ticket_id": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 1 in 2 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 32.8,
+      "ttft_s": 9.5,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 280,
+      "reasoning_tokens": 207,
+      "answer_tokens": 73,
+      "tokens_approx": false,
+      "tok_per_s": 15.8
+    },
+    {
+      "id": "t_chain",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "looked_up_customer_207": true,
+        "exactly_one_refund": true,
+        "refunded_latest_order": true,
+        "full_amount": true,
+        "reason_damaged": true,
+        "answer_has_refund_id": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 5 in 5 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 57.9,
+      "ttft_s": 9.4,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 487,
+      "reasoning_tokens": 281,
+      "answer_tokens": 206,
+      "tokens_approx": false,
+      "tok_per_s": 17.8
+    },
+    {
+      "id": "t_parallel",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "fetched_all_three": true,
+        "parallel_calls": true,
+        "at_most_3_model_turns": true,
+        "no_write_tools": true,
+        "answer_covers_all": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 3 in 2 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 23.9,
+      "ttft_s": 9.5,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 188,
+      "reasoning_tokens": 0,
+      "answer_tokens": 188,
+      "tokens_approx": false,
+      "tok_per_s": 19.6
+    },
+    {
+      "id": "t_error",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "retried_after_503": true,
+        "at_most_4_rate_calls": true,
+        "correct_amount_1067_50": true,
+        "says_order_not_found": true,
+        "no_invented_status": true,
+        "no_write_tools": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 3 in 3 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 33.2,
+      "ttft_s": 9.8,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 309,
+      "reasoning_tokens": 99,
+      "answer_tokens": 210,
+      "tokens_approx": false,
+      "tok_per_s": 20.2
+    },
+    {
+      "id": "t_no_tool",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "no_tool_calls": true,
+        "correct_391": true,
+        "short_answer": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 0 in 1 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 9.6,
+      "ttft_s": 9.5,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 3,
+      "reasoning_tokens": 0,
+      "answer_tokens": 3,
+      "tokens_approx": false,
+      "tok_per_s": 48.6
+    },
+    {
+      "id": "t_agent_fix",
+      "kind": "tools",
+      "score": 1.0,
+      "checks": {
+        "tool_calls_well_formed": true,
+        "arguments_match_schema": true,
+        "visible_tests_pass": true,
+        "hidden_tests_pass": true,
+        "tests_not_modified": true,
+        "ran_tests_after_last_edit": true,
+        "at_most_12_tool_calls": true,
+        "gave_final_answer": true
+      },
+      "notes": [
+        "tool calls: 5 in 5 model turns"
+      ],
+      "status": "ok",
+      "finish": "stop",
+      "gen_seconds": 60.6,
+      "ttft_s": 8.2,
+      "think_seconds": 0.0,
+      "prompt_tokens": null,
+      "tokens": 609,
+      "reasoning_tokens": 144,
+      "answer_tokens": 465,
+      "tokens_approx": false,
+      "tok_per_s": 20.8
+    }
+  ]
+}

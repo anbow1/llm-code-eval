@@ -1,0 +1,25 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_1519825a05ad4a668b4523ab",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1003\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1003\"}",
+    "result": "{\"order_id\": \"A-1003\", \"status\": \"waiting for pickup in parcel locker KRA-12\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "Order A-1003 is currently waiting for pickup in parcel locker KRA-12.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_0a213d029a4d4ed889ddb359",
+        "name": "get_exchange_rate",
+        "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}"
+      },
+      {
+        "id": "call_8343e65e88c24731ba704876",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-9999\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_exchange_rate",
+    "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}",
+    "result": "{\"error\": \"503 Service Unavailable: rate service temporarily down, try again\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-9999\"}",
+    "result": "{\"error\": \"order A-9999 not found\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_4164f3c3aa264ac4be435a6b",
+        "name": "get_exchange_rate",
+        "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_exchange_rate",
+    "arguments": "{\"base\":\"EUR\",\"quote\":\"PLN\"}",
+    "result": "{\"base\": \"EUR\", \"quote\": \"PLN\", \"rate\": 4.27}"
+  },
+  {
+    "turn": 3,
+    "assistant": "Here's what I found:\n\n- **250 EUR = 1,067.50 PLN** at today's rate (1 EUR = 4.27 PLN). The rate service was briefly unavailable on my first try, but it worked on retry.\n- **Order A-9999 does not exist** in our system — the order number couldn't be found. Could you double-check the number (the format is A-####)? If you have the customer name or email, I can look up their orders for you.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

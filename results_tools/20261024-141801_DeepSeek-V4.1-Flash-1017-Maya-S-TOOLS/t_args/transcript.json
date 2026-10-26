@@ -1,0 +1,25 @@
+[
+  {
+    "turn": 1,
+    "assistant": "I'll open that ticket now.",
+    "tool_calls": [
+      {
+        "id": "call_0ebb15096ff3480fa12923ac",
+        "name": "create_ticket",
+        "arguments": "{\"title\":\"iOS checkout crash on card payment\",\"priority\":\"urgent\",\"customer_id\":314,\"due_date\":\"2026-10-16\",\"tags\":[\"mobile\", \"payments\"]}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "create_ticket",
+    "arguments": "{\"title\":\"iOS checkout crash on card payment\",\"priority\":\"urgent\",\"customer_id\":314,\"due_date\":\"2026-10-16\",\"tags\":[\"mobile\", \"payments\"]}",
+    "result": "{\"ticket_id\": \"T-5521\", \"status\": \"open\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "Ticket **T-5521** is open — urgent, due 2026-10-16, tagged mobile and payments.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

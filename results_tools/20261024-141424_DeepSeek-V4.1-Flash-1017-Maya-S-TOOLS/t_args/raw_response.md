@@ -1,0 +1,1 @@
+Ticket T-5521 is open: urgent, due 2026-10-16, tagged mobile and payments.

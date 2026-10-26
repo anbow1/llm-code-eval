@@ -1,0 +1,2 @@
+--- turn 1 ---
+We need need create ticket. Customer 314 maybe should verify customer exists? Task explicitly customer 314. Create ticket title short, urgent, due 2026-10-16, tags mobile payments. Need ticket number response. Tool doesn't specify output. Call create_ticket.

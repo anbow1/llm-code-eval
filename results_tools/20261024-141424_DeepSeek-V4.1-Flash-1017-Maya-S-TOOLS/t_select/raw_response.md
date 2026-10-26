@@ -1,0 +1,1 @@
+Order A-1003 is currently waiting for pickup in parcel locker KRA-12. You can collect it there whenever it's convenient.

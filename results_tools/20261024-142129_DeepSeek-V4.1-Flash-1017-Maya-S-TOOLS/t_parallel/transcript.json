@@ -1,0 +1,45 @@
+[
+  {
+    "turn": 1,
+    "assistant": "I'll check the shipping status for all three orders.",
+    "tool_calls": [
+      {
+        "id": "call_5bf0fd070fce487c9369e77d",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1001\"}"
+      },
+      {
+        "id": "call_f43ce76829a7476db2d74f93",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1002\"}"
+      },
+      {
+        "id": "call_8d9334396c704f229f313ada",
+        "name": "get_shipping_status",
+        "arguments": "{\"order_id\":\"A-1003\"}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1001\"}",
+    "result": "{\"order_id\": \"A-1001\", \"status\": \"delivered on 2026-08-16\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1002\"}",
+    "result": "{\"order_id\": \"A-1002\", \"status\": \"in transit, at the Warsaw sorting hub\"}"
+  },
+  {
+    "tool": "get_shipping_status",
+    "arguments": "{\"order_id\":\"A-1003\"}",
+    "result": "{\"order_id\": \"A-1003\", \"status\": \"waiting for pickup in parcel locker KRA-12\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "Here are the shipping statuses:\n\n- **A-1001** — Delivered on 2026-08-16.\n- **A-1002** — In transit, currently at the Warsaw sorting hub.\n- **A-1003** — Waiting for pickup in parcel locker KRA-12.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]

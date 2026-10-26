@@ -8,9 +8,9 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 
 | # | Model | Quant | Backend | RAM | Effort | Base | Hard | Practical | Tools | Mean of suites | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | DeepSeek-V4.1-Flash | Maya-S | Maya | 128 GB | high | **100.0%** (1×, 75 min, 50k tok, 11 tok/s) | – | – | – | 100.0% (1 of 4) | – |
-| 2 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | 192 GB | high | – | **100.0%** (1×, 69 min, 109k tok, 26 tok/s) | – | – | 100.0% (1 of 4) | – |
-| 3 | DeepSeek-V4.1-Flash | Maya-S | Maya | 192 GB | high | – | **100.0%** (2×, 83 min, 120k tok, 24 tok/s) | – | – | 100.0% (1 of 4) | – |
+| 1 | DeepSeek-V4.1-Flash | Maya-S | Maya | 192 GB | high | – | **100.0%** (2×, 83 min, 120k tok, 24 tok/s) | – | **99.6%** (4×, 4 min, 2k tok, 8 tok/s) | 99.8% (2 of 4) | – |
+| 2 | DeepSeek-V4.1-Flash | Maya-S | Maya | 128 GB | high | **100.0%** (1×, 75 min, 50k tok, 11 tok/s) | – | – | – | 100.0% (1 of 4) | – |
+| 3 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | 192 GB | high | – | **100.0%** (2×, 61 min, 96k tok, 26 tok/s) | – | – | 100.0% (1 of 4) | – |
 | 4 | DeepSeek-V4.1-Flash | Maya-S | Maya | 128 GB | low | – | **100.0%** (1×, 123 min, 84k tok, 11 tok/s) | – | – | 100.0% (1 of 4) | – |
 
 ## Base suite
@@ -23,8 +23,14 @@ Mean score per suite, with the number of runs, the mean time and the mean tokens
 
 | Model | Quant | Backend | RAM | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | 192 GB | high | 1 | **100.0%** | – | 50.0% | 0% | 69.0 | 109.3k | 26.5 | – |
+| DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | 192 GB | high | 2 | **100.0%** | 100–100 | 66.7% | 0% | 61.4 | 96.3k | 26.2 | – |
 | DeepSeek-V4.1-Flash | Maya-S | Maya | 192 GB | high | 2 | **100.0%** | 100–100 | 33.3% | 0% | 82.6 | 120.2k | 24.3 | – |
 | DeepSeek-V4.1-Flash | Maya-S | Maya | 128 GB | low | 1 | **100.0%** | – | 16.7% | 0% | 123.1 | 84.2k | 11.4 | – |
+
+## Tools suite
+
+| Model | Quant | Backend | RAM | Effort | Runs | Mean | Min–max | Score @10 min/32k | Broken | Mean time (min) | Mean tokens | Avg tok/s (from time) | Problem tasks |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash | Maya-S | Maya | 192 GB | high | 4 | **99.6%** | 98–100 | 99.6% | 0% | 3.6 | 1.8k | 8.5 | – |
 
 Score @10 min/32k = the score if every task had to finish within 10 minutes and 32,768 tokens. Broken = share of tasks where generation itself failed (out of tokens or time, stopped mid-thought, looped, no final answer). `~` = token count partly estimated. All other suites' tables: RESULTS_TABLE*.md.

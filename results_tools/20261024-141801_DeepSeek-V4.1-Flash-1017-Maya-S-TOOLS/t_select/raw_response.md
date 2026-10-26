@@ -1,0 +1,1 @@
+Your order A-1003 is waiting for pickup in parcel locker KRA-12.

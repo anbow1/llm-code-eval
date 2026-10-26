@@ -1,0 +1,25 @@
+[
+  {
+    "turn": 1,
+    "assistant": "",
+    "tool_calls": [
+      {
+        "id": "call_f5aad553748b44e4bce6c61d",
+        "name": "create_ticket",
+        "arguments": "{\"title\":\"iOS card checkout crash\",\"priority\":\"urgent\",\"due_date\":\"2026-10-16\",\"customer_id\":314,\"tags\":[\"mobile\", \"payments\"]}"
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "tool": "create_ticket",
+    "arguments": "{\"title\":\"iOS card checkout crash\",\"priority\":\"urgent\",\"due_date\":\"2026-10-16\",\"customer_id\":314,\"tags\":[\"mobile\", \"payments\"]}",
+    "result": "{\"ticket_id\": \"T-5521\", \"status\": \"open\"}"
+  },
+  {
+    "turn": 2,
+    "assistant": "Ticket T-5521 is open: urgent, due 2026-10-16, tagged mobile and payments.",
+    "tool_calls": [],
+    "finish": "stop"
+  }
+]
