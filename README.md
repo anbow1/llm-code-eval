@@ -360,17 +360,17 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| DeepSeek-V4.1-Flash Maya-S · Maya (2nd run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
 - **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.
 - **DeepSeek-V4.1 made the best scenes** (7–7.5 by eye), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 the fastest and simplest (4).
 - **Qwen3.8-Flash-Next NVFP4 in Strata did it in 1.2 min**, 20–30 times faster than the others, but its picture is the weakest of the finished ones.
-- **Thinking stopped at about 32.8k tokens in every DeepSeek and GLM run** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9: Maya (and Strata with DeepSeek) cut thinking there, so the 180-minute limit changed nothing: those runs took 29 and 40 min.
+- **Thinking stopped at about 32.8k tokens in every DeepSeek and GLM run** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9: Maya (and Strata with DeepSeek) cut thinking there, so a longer limit barely helps: DeepSeek started with a 180-minute limit still finished in 29 min (it counts as a second run of the same setting, mean 93.5%), GLM-5.3 EXL3 4.10 bpw used 40 min.
 
 ## Scene suite: task
 
@@ -391,7 +391,7 @@ One larger Three.js task where the picture matters, for telling the strongest se
 - **light and camera:** shadow map and a shadow-casting sun, fog plus tone mapping, the camera where it should be;
 - **the picture:** a sky gradient at the top, water that is on screen (the bottom quarter is not a flat background) and moves, a lit island (not a near-black silhouette where it lands on screen), a rich image (not a few flat colors).
 
-**Without the time limit.** A slow model may not finish in 30 min (the run then ends with `task_timeout`). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs.
+**Without the time limit.** A slow model may not finish in 30 min (the run then ends with `task_timeout`). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; if the task then takes longer than 30 min, the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs; a run that still finishes within 30 min counts as a normal run.
 
 **How it looks is not in the score.** Every run saves:
 - `screenshot.png`, `screenshot_2.png` and `screenshot_3.png` (about 1, 3 and 6 s after start);
