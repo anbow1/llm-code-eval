@@ -138,7 +138,14 @@ SUITES = {
     "tools": ("results_tools", "RESULTS_TABLE_TOOLS.md", "# Results table: tool-calling suite (--suite tools)",
               "7 tasks against a fake shop backend: pick the right tool, fill the arguments, chain calls, parallel "
               "calls, recover from an error, answer without a tool, and a small coding agent that fixes a repo."),
+    "scene": ("results_scene", "RESULTS_TABLE_SCENE.md", "# Results table: scene suite (--suite scene)",
+              "1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 30 min). The "
+              "checks test what can be measured (the boat floats on the waves the shader draws, swaying leaves, "
+              "shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html."),
 }
+# the suites the family tables (GLM, DeepSeek) and their mean cover; the scene suite has its own table and gallery
+FAMILY_SUITES = {k: v for k, v in SUITES.items() if k != "scene"}
+N_TASKS = {"base": 10, "hard": 6, "practical": 6, "tools": 7, "scene": 1}
 # "practical" limits, applied after the fact to runs made with the older, lenient ones
 PRACTICAL_SECONDS, PRACTICAL_TOKENS = 600, 32768
 BROKEN_STATUS = ("max_tokens", "task_timeout", "no_answer", "max_turns")
@@ -233,8 +240,9 @@ def main():
 
         lines = [title, "", note, "",
                  "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says "
-                 "which). All runs: temperature 1.0, sampling preset recommended by the model maker, 60-minute and "
-                 "65,536-token limit per task (98,304 tokens in the runs from 30 Sep). Settings that were run more than once "
+                 "which). All runs: temperature 1.0, sampling preset recommended by the model maker, "
+                 + ("30-minute and 98,304-token limit for the task." if folder == "results_scene" else
+                    "60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep).") + " Settings that were run more than once "
                  "are averaged under \"Mean per setting\"" + (", and ranked by their best run under \"Best run per "
                  "setting\"" if folder == "results_hard" else "") + "; every single run is listed under \"Every run\".", ""]
         lines += section(runs, best_table=folder == "results_hard")
@@ -324,7 +332,7 @@ def write_family_table(prefix, path, title, intro):
     """One file for one model family (e.g. GLM-5.3-Flash): every variant in every suite, side by side."""
     mean = lambda xs: sum(xs) / len(xs) if xs else None
     per_suite = {}
-    for suite, (folder, *_r) in SUITES.items():
+    for suite, (folder, *_r) in FAMILY_SUITES.items():
         per_suite[suite] = [r for r in load_runs(folder) if r["model"].startswith(prefix)]
     keys = []
     for rs in per_suite.values():
@@ -346,14 +354,14 @@ def write_family_table(prefix, path, title, intro):
 
     rows = []
     for k in keys:
-        cells = [cell(su, k) for su in SUITES]
+        cells = [cell(su, k) for su in FAMILY_SUITES]
         done = [c[1] for c in cells if c[1] is not None]
         rows.append((k, cells, mean(done), len(done)))
     rows.sort(key=lambda x: (-x[3], -(x[2] or 0)))
     problems = {}
     for k in keys:
         txt = [problem_text([r for r in per_suite[su] if (r["model"], r["quant"], r["backend"], r["gpu"], r["effort"]) == k])
-               for su in SUITES]
+               for su in FAMILY_SUITES]
         problems[k] = "; ".join(t for t in txt if t)
     lines = [title, "", intro, "",
              "## All suites", "",
@@ -361,12 +369,12 @@ def write_family_table(prefix, path, title, intro):
              "average speed (all tokens ÷ all generation time). Settings "
              "are sorted by how many suites they were run on, then by the mean of their suite scores. **Problem tasks** "
              "= tasks a setting scored below 90% on in at least half of its runs (and at least twice), in any suite.", "",
-             "| # | Model | Quant | Backend | RAM | Effort | " + " | ".join(s_.capitalize() for s_ in SUITES) + " | Mean of suites | Problem tasks |",
-             "|---|---|---|---|---|---|" + "---|" * len(SUITES) + "---|---|"]
+             "| # | Model | Quant | Backend | RAM | Effort | " + " | ".join(s_.capitalize() for s_ in FAMILY_SUITES) + " | Mean of suites | Problem tasks |",
+             "|---|---|---|---|---|---|" + "---|" * len(FAMILY_SUITES) + "---|---|"]
     for i, (k, cells, m, nsu) in enumerate(rows, 1):
         model, quant, backend, gpu, effort = k
         lines.append(f"| {i} | {model} | {quant} | {backend} | {ram_of(gpu)} | {effort} | " + " | ".join(c[0] for c in cells)
-                     + f" | {m:.1f}% ({nsu} of {len(SUITES)}) | {problems[k] or '–'} |")
+                     + f" | {m:.1f}% ({nsu} of {len(FAMILY_SUITES)}) | {problems[k] or '–'} |")
     for suite, rs in per_suite.items():
         if not rs:
             continue

@@ -1,15 +1,15 @@
 # llm-code-eval — a quick coding test for local LLMs
 
-The repository has four test suites, kept apart everywhere:
+The repository has five test suites, kept apart everywhere:
 
-| | Base | Hard | Practical | Tools |
-|---|---|---|---|---|
-| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) |
-| Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` |
-| Default limits | lenient (comparable with older runs) | lenient | practical | practical |
-| Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` |
-| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) |
-| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` |
+| | Base | Hard | Practical | Tools | Scene |
+|---|---|---|---|---|---|
+| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) | 1 large graphics task: boat on an ocean next to an island ([tasks_scene.py](tasks_scene.py)) |
+| Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` | `--suite scene` |
+| Default limits | lenient (comparable with older runs) | lenient | practical | practical | 30 min, 98,304 tokens |
+| Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | RESULTS_TABLE_SCENE.md, scene_gallery.jpg (after the first run) |
+| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg |
 
 The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3-Flash has been run on them. All GLM-5.3-Flash variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md).
 
@@ -203,6 +203,7 @@ Main options:
 - `--think off`: turns thinking off (`enable_thinking=false` in the Qwen/GLM chat template)
 - `--reasoning-effort low`: reasoning level (e.g. low / medium / high / xhigh), if the chat template supports it
 - `--reasoning-effort off,low,xhigh`: runs the full test once per level, each with its own report
+- `CHROMIUM_PATH=/path/to/chrome` (environment variable): use this Chromium build instead of Playwright's own; `make_top10.py` reads it too
 - `--show-request`: print each request's settings (everything but the messages), to see exactly which thinking and effort fields the server gets.
 - `--probe-effort`: quick probe. It asks one short question at each level (levels follow the preset: GLM and DeepSeek-V4 `off,low,high,max`, Qwen `off,low,medium,xhigh`; or give your own, weakest first) and shows how long the model thinks and whether the server honours the level. 3 tries per level by default (`--probe-repeats`); `--probe-question hard` uses a harder question where the level matters more.
 - `--suite hard` / `practical` / `tools`: run another suite instead of the base one (see the task sections below)
@@ -255,6 +256,7 @@ The limits decide what counts as a useful answer. A local model that thinks for 
 |---|---|---|---|---|
 | **practical** | 10 min (tool tasks: 5 min for all turns) | 32,768 | base 30 min, hard 30 min, practical 30 min, tools 15 min | `practical`, `tools` |
 | lenient | 60 min | 98,304 | none | `base`, `hard` (so new runs stay comparable with the old ones) |
+| scene suite | 30 min | 98,304 | 60 min | `scene` (one large task; 30 min of work is the most that is still worth waiting for) |
 
 The whole battery (all four suites) then takes at most about 1 h 45 min; a usable setup finishes it in 30–45 minutes. The tables also show **Score @10 min/32k** for every setting: the score with the practical limits applied after the fact to runs made with the lenient ones (later tasks count as 0). Dense Qwen3.8-27B keeps its score; Flash-Next in llama.cpp and GLM lose 8–25 points.
 
@@ -349,9 +351,36 @@ The model gets OpenAI-style `tools` for a fake shop backend; `run_eval.py` execu
 
 Every tool task also checks that the calls are well-formed (valid JSON, not written as text) and that a final answer came. The server must support tool calls: llama.cpp needs `--jinja` and a chat template with tools; TabbyAPI has its own tool-call support; for other servers check their docs. A model or server that cannot call tools scores close to 0 here, which is the point.
 
+## Scene suite: task
+
+One larger Three.js task where the picture matters, for telling the strongest settings apart now that several of them score 100% on the hard suite. Run it with `--suite scene` (30 min and 98,304 tokens for the task). The browser window is 1280 x 720.
+
+**s1_ocean_island:** a boat rocking on an ocean next to a tropical island, built from scratch (no textures or models):
+- an ocean of at least 3 waves in a vertex shader, with Fresnel, a sun highlight and foam as a plus;
+- a boat (at least 3 meshes) whose height and tilt follow the same waves;
+- a procedural island with sand and grass and at least 5 palm trees whose leaves (one InstancedMesh) sway in the wind;
+- a sky with a sun, a shadow-casting sun light, fog and filmic tone mapping;
+- a fixed camera at (35, 12, 35) looking at (0, 2, 0), so every run is shot from the same place.
+
+**What the score checks (21 checks):** the usual strict TypeScript, loads, renders, resize and no console errors, plus:
+- **the waves:** `__ocean.heightAt(x, z, t)` and `__ocean.time()` exist, the waves move and are big enough to see;
+- **the boat really floats on them:** over 3 s its height follows `heightAt` at its position with a constant offset (to within a fifth of how far it moves), it tilts, it has at least 3 meshes and casts shadows. A boat on its own sine wave, or a `heightAt` that does not match the shader, fails;
+- **the palms:** at least 30 leaf instances whose matrices change over time;
+- **the island:** 4–20 units high, at least 20 units across, centered, receives shadows;
+- **light and camera:** shadow map and a shadow-casting sun, fog plus tone mapping, the camera where it should be;
+- **the picture:** a sky gradient at the top, water that moves at the bottom, a rich image (not a few flat colors).
+
+**How it looks is not in the score.** Every run saves:
+- `screenshot.png`, `screenshot_2.png` and `screenshot_3.png` (about 1, 3 and 6 s after start);
+- **`scene.html`: the finished scene in one file** (the bundle with Three.js inlined, about 0.6 MB). Open it by double-click in any browser to watch it on a real GPU.
+
+`python make_top10.py` builds **scene_gallery.jpg** from all scene runs: the same view side by side, with the score, time, tokens and failed checks under each picture. The pictures come from Chromium's software renderer, so they can look slightly worse than `scene.html` on a GPU.
+
+The checks were tested with a reference solution ([reference/s1_ocean_island.ts](reference/s1_ocean_island.ts), 21 of 21) and with broken versions of it: a boat on its own sine wave, leaves that do not move, and a `heightAt` that does not match the shader each lose the right checks.
+
 ## Output
 
-Each run is saved to `results/<date>_<name>/` (base suite), `results_hard/<date>_<name>-HARD/`, `results_practical/<date>_<name>-PRACTICAL/` or `results_tools/<date>_<name>-TOOLS/`:
+Each run is saved to `results/<date>_<name>/` (base suite), `results_hard/<date>_<name>-HARD/`, `results_practical/<date>_<name>-PRACTICAL/`, `results_tools/<date>_<name>-TOOLS/` or `results_scene/<date>_<name>-SCENE/`:
 - `report.md`: what passed, what failed and why
 - `summary.json`: numbers for comparisons
 - one folder per task with the model's full answer, its code, its thinking and `screenshot.png`; tool tasks also have `transcript.json` (every call and result) and, for the agent task, the repository it edited

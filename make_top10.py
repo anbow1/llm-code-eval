@@ -11,11 +11,13 @@ glm_flash.jpg   every GLM-5.3-Flash variant in all four suites
 deepseek.jpg    every DeepSeek-V4 variant in all four suites
 tasks_base.jpg  per task of the base suite: the top 5 settings by fewest tokens and by shortest time (solved runs only)
 tasks_hard.jpg  the same for the hard suite
+scene_gallery.jpg  the scene suite: the last screenshot of every run side by side, best score first
 rtx4080.jpg     the RTX 4080 16 GB only: overall (both suites), base suite and hard suite
 
 Needs Playwright with Chromium, like run_eval.py (set CHROMIUM_PATH to use another build).
 """
 import html
+import io
 import os
 from collections import defaultdict
 from datetime import date
@@ -28,6 +30,7 @@ OUT = HERE / "top10.jpg"
 OUT_HARD = HERE / "top10_hard.jpg"
 OUT_GLM = HERE / "glm_flash.jpg"
 OUT_DS = HERE / "deepseek.jpg"
+OUT_SCENE = HERE / "scene_gallery.jpg"
 OUT_TASKS = {"base": HERE / "tasks_base.jpg", "hard": HERE / "tasks_hard.jpg"}
 TASK_TOP = 5
 OUT_4080 = HERE / "rtx4080.jpg"
@@ -322,7 +325,7 @@ under-reports tokens). {PROBLEM_NOTE} Details: RESULTS_TABLE_HARD.md, SUMMARY.md
 def collect_family(prefix):
     """Every setting of one model family, with its mean per suite."""
     by = defaultdict(lambda: defaultdict(list))
-    for suite, (folder, *_r) in ms.SUITES.items():
+    for suite, (folder, *_r) in ms.FAMILY_SUITES.items():
         for r in ms.load_runs(folder):
             if r["model"].startswith(prefix):
                 by[(r["model"], r["quant"], r["backend"], r["gpu"], r["effort"])][suite].append(r)
@@ -352,7 +355,7 @@ def collect_family(prefix):
 
 def family_table(rows, key, mean_key, time_note):
     e = html.escape
-    suites = list(ms.SUITES)
+    suites = list(ms.FAMILY_SUITES)
     body = []
     for i, r in enumerate(rows, 1):
         tds = []
@@ -369,8 +372,7 @@ def family_table(rows, key, mean_key, time_note):
 </tr>""")
     return f"""<table><thead><tr>
 <th>#</th><th>Variant<small>quant · engine</small></th><th>Effort</th>
-<th>Base<small>10 tasks</small></th><th>Hard<small>6 tasks</small></th><th>Practical<small>6 tasks</small></th>
-<th>Tools<small>7 tasks</small></th><th>Mean<small>of the suites run</small></th>
+{''.join(f"<th>{su.capitalize()}<small>{ms.N_TASKS[su]} tasks</small></th>" for su in suites)}<th>Mean<small>of the suites run</small></th>
 </tr></thead><tbody>{''.join(body)}</tbody></table>
 <p class="tnote">Under each score: runs × {time_note}.</p>"""
 
@@ -429,7 +431,7 @@ def build_family_html(by_mean, by_best, title, lede, prefix, notes, details, ext
     pair = lambda title_, note, left, right: f"""<h2>{title_}</h2><p class="h2note">{note}</p>
 <div class="cols"><div><h3>By best run</h3>{left}</div><div><h3>By mean of all runs</h3>{right}</div></div>"""
     suites = []
-    for suite, (folder, *_r) in ms.SUITES.items():
+    for suite, (folder, *_r) in ms.FAMILY_SUITES.items():
         g = ms.rank_settings([r for r in ms.load_runs(folder) if r["model"].startswith(prefix)])
         if g:
             n_tasks = g[0]["runs"][0]["n_tasks"]
@@ -546,6 +548,64 @@ Details: RESULTS_TABLE{"_HARD" if suite == "hard" else ""}.md.
 </div></div></body></html>"""
 
 
+def scene_shot(run_dir):
+    """The run's last gallery screenshot as a small JPEG data URI (or None)."""
+    import base64
+    from PIL import Image
+    shots = sorted((run_dir / "s1_ocean_island").glob("screenshot*.png"))
+    if not shots:
+        return None
+    img = Image.open(shots[-1]).convert("RGB")
+    img.thumbnail((720, 405))
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=85)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def build_scene_gallery():
+    """Every scene-suite run: its picture, setting, score, time, tokens and the checks it failed."""
+    import json
+    folder = HERE / ms.SUITES["scene"][0]
+    runs = ms.load_runs(ms.SUITES["scene"][0])
+    if not runs:
+        return None
+    e = html.escape
+    cards = []
+    for r in runs:  # load_runs sorts by score, then time
+        d = json.loads((folder / r["run"] / "summary.json").read_text(encoding="utf-8"))
+        res = next((x for x in d["results"] if x["id"] == "s1_ocean_island"), {})
+        failed = [k for k, v in (res.get("checks") or {}).items() if not v]
+        src = scene_shot(folder / r["run"])
+        img = f'<img src="{src}">' if src else '<div class="noimg">no picture</div>'
+        cards.append(f"""<div class="card">{img}
+<div class="cap"><div class="model">{e(r['model'])} <span class="sc">{r['overall']:.0f}%</span></div>
+<div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(ms.gpu_short(r['gpu']))} · {e(r['effort'])} · {ms.when(r['run'])}</div>
+<div class="sub">{r['minutes']:.1f} min · {"~" if r['tokens_approx'] else ""}{(r['tokens'] or 0) / 1000:.1f}k tokens · {r['tok_s_time'] or 0:.0f} tok/s</div>
+{f'<div class="warn">failed: {e(", ".join(failed))}</div>' if failed else '<div class="okc">all checks passed</div>'}
+</div></div>""")
+    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+{STYLE}
+.wrap {{ width:2280px; }}
+.grid {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; }}
+.card {{ border:1px solid var(--rule); border-radius:8px; overflow:hidden; background:#fff; }}
+.card img {{ width:100%; display:block; }}
+.noimg {{ height:405px; display:flex; align-items:center; justify-content:center; color:var(--muted); background:var(--track); }}
+.cap {{ padding:10px 12px 12px; }}
+.sc {{ float:right; font-weight:700; }}
+.okc {{ font-size:13px; color:#1c7a3a; margin-top:3px; }}
+</style></head><body><div class="wrap">
+<h1>Local LLM coding test: scene suite gallery</h1>
+<p class="lede">s1_ocean_island: a boat rocking on an ocean next to a tropical island, one TypeScript + Three.js file
+(30 min limit). Same camera in every run, picture taken about 5 s after start. Best score first. {date.today():%d %b %Y}.</p>
+<div class="grid">{''.join(cards)}</div>
+<div class="notes">
+The score counts automatic checks (the boat floats on the waves the shader draws, leaves sway, shadows, fog, tone mapping,
+sky gradient, fixed camera, strict TypeScript, no console errors). How good the picture looks is not in the score: compare
+it here, or open the run's s1_ocean_island/scene.html, a single file that runs in any browser (on a real GPU; these pictures
+come from a software renderer). Details: RESULTS_TABLE_SCENE.md.
+</div></div></body></html>"""
+
+
 def short(g):
     """'Flash-Next GSQ-RCO IQ3_S · Strata (5090) `medium`' for the README tables."""
     model = g["model"].replace("Qwen3.8-", "").replace("GLM-5.3-Flash", "GLM").replace("27B", "27B")
@@ -575,7 +635,7 @@ def readme_hard(by_best, by_mean):
 
 def readme_family(by_mean):
     """Markdown version of the 'by mean' table in glm_flash.jpg."""
-    suites = list(ms.SUITES)
+    suites = list(ms.FAMILY_SUITES)
     out = ["| Variant | Effort | " + " | ".join(su.capitalize() for su in suites) + " | Often fails |",
            "|---|---|" + "---|" * len(suites) + "---|"]
     for r in by_mean:
@@ -628,6 +688,9 @@ def main():
                 task_matrix("DeepSeek", "base") + task_matrix("DeepSeek", "hard")), OUT_DS))
         for suite in ("base", "hard"):
             pages.append((build_tasks_html(suite, collect_tasks(suite)), OUT_TASKS[suite]))
+        gallery = build_scene_gallery()
+        if gallery:
+            pages.append((gallery, OUT_SCENE))
         top10 = build_split_html(
             f"Local LLM coding test: top {TOP}", "Every model, quant, backend, GPU and reasoning level tested: the base "
             "suite (10 tasks) and the hard suite (6 tasks), TypeScript + Three.js in a real browser and Python with hidden "

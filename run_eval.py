@@ -35,19 +35,23 @@ import tasks as T
 import tasks_hard as TH
 import tasks_practical as TP
 import tasks_tools as TT
+import tasks_scene as TSC
 
 SUITES = {  # module, results folder, run-name suffix
     "base": (T, "results", ""),
     "hard": (TH, "results_hard", "-HARD"),
     "practical": (TP, "results_practical", "-PRACTICAL"),
     "tools": (TT, "results_tools", "-TOOLS"),
+    "scene": (TSC, "results_scene", "-SCENE"),
 }
 # --limits. practical: what is still useful in daily work. 95% of the fully solved tasks so far took under
 # 10 minutes and under 19k tokens; above 32k tokens only about half were solved. lenient: the old defaults.
 LIMITS = {
-    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5}, "default_timeout_min": 10,
-                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15}},
-    "lenient": {"max_tokens": 98304, "task_timeout_min": {}, "default_timeout_min": 60, "budget_min": {}},
+    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 30}, "default_timeout_min": 10,
+                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 60}},
+    # scene: one large task; 30 min of work is the most that is still worth waiting for
+    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 30}, "default_timeout_min": 60,
+                "budget_min": {"scene": 60}},
 }
 
 HERE = Path(__file__).resolve().parent
@@ -128,9 +132,9 @@ PACKAGE_JSON = {
 }
 
 BUILD_JS = """
-const [,, entry, outfile] = process.argv;
+const [,, entry, outfile, minify] = process.argv;
 require('esbuild').build({ entryPoints: [entry], bundle: true, format: 'iife',
-  outfile, logLevel: 'silent', target: 'es2020' })
+  outfile, logLevel: 'silent', target: 'es2020', minify: minify === 'minify' })
   .then(() => process.exit(0))
   .catch(e => { console.error(String(e.message || e).slice(0, 2000)); process.exit(1); });
 """
@@ -527,8 +531,8 @@ def tsc(src):
     return p.returncode == 0, errs
 
 
-def bundle(src, out_js):
-    p = subprocess.run(["node", "build.cjs", str(src), str(out_js)], cwd=TS_ENV,
+def bundle(src, out_js, minify=False):
+    p = subprocess.run(["node", "build.cjs", str(src), str(out_js)] + (["minify"] if minify else []), cwd=TS_ENV,
                        capture_output=True, text=True, timeout=120)
     return p.returncode == 0, p.stderr.strip()
 
@@ -595,7 +599,8 @@ def run_three_task(task, code, workdir, browser):
                     'overflow:hidden}</style></head><body><script src="bundle.js"></script>'
                     '</body></html>', encoding="utf-8")
 
-    page = browser.new_page(viewport={"width": 800, "height": 600})
+    vw, vh = task.get("viewport", (800, 600))
+    page = browser.new_page(viewport={"width": vw, "height": vh})
     errors = []
     page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
     page.on("console", lambda m: errors.append(f"console.error: {m.text}")
@@ -617,7 +622,7 @@ def run_three_task(task, code, workdir, browser):
         shot1 = page.screenshot()
         (workdir / "screenshot.png").write_bytes(shot1)
         ctx.img_changed = img_diff(shot0, shot1)
-        ctx.shot = shot1
+        ctx.shot0, ctx.shot = shot0, shot1
 
         res["loads"] = ready and bool(ctx.s0)
         res["renders"] = distinct_colors(shot1) > 4
@@ -629,6 +634,11 @@ def run_three_task(task, code, workdir, browser):
             except Exception as e:
                 notes.append(f"check crashed: {type(e).__name__}: {e}")
         res.update(specific or {})
+        prev = 0
+        for i, at in enumerate(task.get("gallery", []), 2):  # later moments of the scene, for the gallery
+            page.wait_for_timeout(at - prev)
+            prev = at
+            (workdir / f"screenshot_{i}.png").write_bytes(page.screenshot())
 
         page.set_viewport_size({"width": 500, "height": 400})
         page.wait_for_timeout(400)
@@ -638,6 +648,17 @@ def run_three_task(task, code, workdir, browser):
         notes += errors[:5]
     finally:
         page.close()
+    if task.get("standalone"):
+        # one self-contained file with the bundle inlined: opens by double-click, no server needed
+        tmp = workdir / "scene.min.js"
+        ok, _e = bundle(src, tmp, minify=True)
+        if ok:
+            js = tmp.read_text(encoding="utf-8").replace("</script", "<\\/script")
+            (workdir / "scene.html").write_text(
+                '<!doctype html><html><head><meta charset="utf-8"><title>' + task["id"] + '</title><style>html,body'
+                '{margin:0;overflow:hidden;background:#000}</style></head><body><script>' + js + '</script></body></html>',
+                encoding="utf-8")
+            tmp.unlink()
     return res, notes
 
 
@@ -829,7 +850,7 @@ def main():
                     help="easy = count the 7s from 1 to 1000; hard = digit sums (needs real thinking)")
     ap.add_argument("--suite", choices=list(SUITES), default="base",
                     help="base = 10 original tasks, hard = 6 harder tasks, practical = 6 everyday tasks, "
-                         "tools = 7 tool-calling tasks")
+                         "tools = 7 tool-calling tasks, scene = 1 large graphics task (ocean, boat, island)")
     ap.add_argument("--only", choices=["python", "three"], default=None)
     ap.add_argument("--tasks", default="", help="comma list of task ids, e.g. t5_raycast_click,p1_parse_duration")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
@@ -840,7 +861,7 @@ def main():
     if args.temperature is None:
         args.temperature = 1.0
     if args.limits == "auto":
-        args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"
+        args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"  # scene: lenient, 30 min
     L = LIMITS[args.limits]
     if args.max_tokens is None:
         args.max_tokens = L["max_tokens"]
@@ -888,6 +909,7 @@ def main():
         pw = sync_playwright().start()
         browser = pw.chromium.launch(
             headless=not args.headed,
+            executable_path=os.environ.get("CHROMIUM_PATH") or None,  # a specific Chromium build, if needed
             args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
 
     mon = ResourceMonitor().start()
