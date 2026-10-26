@@ -68,3 +68,10 @@ ERROR: 0:150: 'z' : vector field selection out of range
   99:       float k = 0.299199;
   100:       float om = 1.713227;
 
+## Re-graded 2026-10-26
+
+A test was fixed after this run; the saved answers were graded again: s1_ocean_island 90% -> 83%. New overall: 82.6%.
+
+## Re-graded 2026-10-26
+
+A test was fixed after this run; the saved answers were graded again: s1_ocean_island 83% -> 87%. New overall: 87.0%.

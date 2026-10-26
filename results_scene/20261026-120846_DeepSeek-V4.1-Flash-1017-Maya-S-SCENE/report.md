@@ -41,3 +41,11 @@
 - PASS picture_rich
 - PASS resize
 - PASS no_console_errors
+
+## Re-graded 2026-10-26
+
+A test was fixed after this run; the saved answers were graded again: s1_ocean_island 100% -> 96%. New overall: 95.7%.
+
+## Re-graded 2026-10-26
+
+A test was fixed after this run; the saved answers were graded again: s1_ocean_island 96% -> 100%. New overall: 100.0%.

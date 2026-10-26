@@ -357,17 +357,18 @@ Every tool task also checks that the calls are well-formed (valid JSON, not writ
 
 All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](RESULTS_TABLE_SCENE.md); every run's finished scene is `results_scene/<run>/s1_ocean_island/scene.html`.
 
-| Model · quant · engine | Effort | Score | Time | Tokens (thinking) | Picture, by eye |
-|---|---|---|---|---|---|
-| Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **1.2 min** | 8.4k (1.6k) | crude: a flat sand cone, blocky water |
-| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | 24.3 min | 39.5k (32.8k) | good: green island, sun glint, foam ring |
-| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 100% | 27.8 min | 40.0k (32.8k) | good water, island nearly black (lighting) |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | 29.4 min | 41.8k (32.8k) | good: island with sand and rocks, palms, shore foam |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 100% | 40.5 min | 40.7k (32.8k) | best water and sky, island dark |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high | 90% | 28.2 min | 43.4k (32.8k) | no water: the ocean shader did not compile (`vec2.z`) |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | 30 min (limit) | 30.9k, no answer | – |
+| Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
+|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
+| Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
-- **The score does not separate the good scenes yet:** six of seven runs score 90–100%, while the pictures differ a lot. A scene without water still scored 90%. The checks need a "water is on screen" test and more weight on the picture; until then compare the gallery.
+- **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.
+- **DeepSeek-V4.1 made the best scenes** (7–7.5 by eye), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 the fastest and simplest (4).
 - **Qwen3.8-Flash-Next NVFP4 in Strata did it in 1.2 min**, 20–30 times faster than the others, but its picture is the weakest of the finished ones.
 - **Thinking stopped at about 32.8k tokens in every DeepSeek and GLM run** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9: Maya (and Strata with DeepSeek) cut thinking there, so the 180-minute limit changed nothing: those runs took 29 and 40 min.
 
@@ -382,13 +383,13 @@ One larger Three.js task where the picture matters, for telling the strongest se
 - a sky with a sun, a shadow-casting sun light, fog and filmic tone mapping;
 - a fixed camera at (35, 12, 35) looking at (0, 2, 0), so every run is shot from the same place.
 
-**What the score checks (21 checks):** the usual strict TypeScript, loads, renders, resize and no console errors, plus:
+**What the score checks (23 checks):** the usual strict TypeScript, loads, renders, resize and no console errors, plus:
 - **the waves:** `__ocean.heightAt(x, z, t)` and `__ocean.time()` exist, the waves move and are big enough to see;
 - **the boat really floats on them:** over 3 s its height follows `heightAt` at its position with a constant offset (to within a fifth of how far it moves), it tilts, it has at least 3 meshes and casts shadows. A boat on its own sine wave, or a `heightAt` that does not match the shader, fails;
 - **the palms:** at least 30 leaf instances whose matrices change over time;
 - **the island:** 4–20 units high, at least 20 units across, centered, receives shadows;
 - **light and camera:** shadow map and a shadow-casting sun, fog plus tone mapping, the camera where it should be;
-- **the picture:** a sky gradient at the top, water that moves at the bottom, a rich image (not a few flat colors).
+- **the picture:** a sky gradient at the top, water that is on screen (the bottom quarter is not a flat background) and moves, a lit island (not a near-black silhouette where it lands on screen), a rich image (not a few flat colors).
 
 **Without the time limit.** A slow model may not finish in 30 min (the run then ends with `task_timeout`). To see what it makes given time, run it again with `--task-timeout-min 180 --budget-min 0`; the tables list that run as a separate setting (effort shown as e.g. `high, 180 min`), so it does not mix with the 30-minute runs.
 
@@ -398,7 +399,9 @@ One larger Three.js task where the picture matters, for telling the strongest se
 
 `python make_top10.py` builds **scene_gallery.jpg** from all scene runs: the same view side by side, with the score, time, tokens and failed checks under each picture. The pictures come from Chromium's software renderer, so they can look slightly worse than `scene.html` on a GPU.
 
-The checks were tested with a reference solution ([reference/s1_ocean_island.ts](reference/s1_ocean_island.ts), 21 of 21) and with broken versions of it: a boat on its own sine wave, leaves that do not move, and a `heightAt` that does not match the shader each lose the right checks.
+The boat is sampled inside `renderer.render`, so its position and `__ocean.time()` belong to the same frame even when the software renderer runs at 1 frame per second; motion checks wait long enough for a frame. `python regrade.py --suite scene --tasks s1_ocean_island` builds and checks the saved `main.ts` files again after a change to the checks.
+
+The checks were tested with a reference solution ([reference/s1_ocean_island.ts](reference/s1_ocean_island.ts), 23 of 23) and with broken versions of it: a boat on its own sine wave, leaves that do not move, and a `heightAt` that does not match the shader each lose the right checks.
 
 ## Output
 

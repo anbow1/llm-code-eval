@@ -21,7 +21,7 @@ camera.lookAt(0, 2, 0);
 const sky = new Sky();
 sky.scale.setScalar(1000);
 scene.add(sky);
-const sunDir = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(70), THREE.MathUtils.degToRad(200));
+const sunDir = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(60), THREE.MathUtils.degToRad(70));
 const su = sky.material.uniforms;
 su['turbidity'].value = 6; su['rayleigh'].value = 1.5; su['mieCoefficient'].value = 0.005; su['mieDirectionalG'].value = 0.8;
 su['sunPosition'].value.copy(sunDir);
@@ -32,7 +32,7 @@ sun.shadow.mapSize.set(2048, 2048);
 const sc = sun.shadow.camera;
 sc.left = -40; sc.right = 40; sc.top = 40; sc.bottom = -40; sc.near = 1; sc.far = 200;
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xbcd7ff, 0x3a5a3a, 0.6));
+scene.add(new THREE.HemisphereLight(0xbcd7ff, 0x6a7a5a, 1.2));
 
 // waves: same function in GLSL and TS
 const WAVES: [number, number, number, number, number][] = [

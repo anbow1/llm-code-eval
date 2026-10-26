@@ -73,10 +73,14 @@
         "sky_gradient": true,
         "water_animates": true,
         "picture_rich": true,
+        "water_visible": true,
+        "island_lit": true,
         "resize": true,
         "no_console_errors": true
       },
-      "notes": [],
+      "notes": [
+        "re-graded 2026-10-26 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 55.2,

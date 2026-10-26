@@ -2,15 +2,15 @@
   "name": "DeepSeek-V4.1-Flash-1017-Maya-S-SCENE",
   "model": "local",
   "python": null,
-  "three": 90.47619047619048,
+  "three": 86.95652173913044,
   "tools": null,
-  "overall": 90.47619047619048,
+  "overall": 86.95652173913044,
   "summary": {
     "python": null,
-    "three": 90.47619047619048,
+    "three": 86.95652173913044,
     "tools": null,
-    "overall": 90.47619047619048,
-    "answered_score": 90.47619047619048,
+    "overall": 86.95652173913044,
+    "answered_score": 86.95652173913044,
     "tasks_total": 1,
     "tasks_answered": 1,
     "hit_max_tokens": 0,
@@ -52,7 +52,7 @@
     {
       "id": "s1_ocean_island",
       "kind": "three",
-      "score": 0.9047619047619048,
+      "score": 0.8695652173913043,
       "checks": {
         "compiles_strict": true,
         "loads": true,
@@ -73,11 +73,15 @@
         "sky_gradient": true,
         "water_animates": false,
         "picture_rich": true,
+        "water_visible": false,
+        "island_lit": true,
         "resize": true,
         "no_console_errors": false
       },
       "notes": [
-        "console.error: THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false\n\nMaterial Name: \nMaterial Type: ShaderMaterial\n\nProgram Info Log: Vertex shader is not compiled.\nVERTEX\n\nERROR: 0:94: 'z' : vector field selection out of range\nERROR: 0:108: 'z' : vector field selection out of range\nERROR: 0:122: 'z' : vector field selection out of range\nERROR: 0:136: 'z' : vector field selection out of range\nERROR: 0:150: 'z' : vector field selection out of range\n\n  89:       float a = 0.400000;\n  90:       float c = cos(f);\n  91:       float s = sin(f);\n  92:       h += a * s;\n  93:       disp.x += 0.4200 * a * d.x * c;\n> 94:       disp.z += 0.4200 * a * d.y * c;\n  95:       grad.x += a * k * d.x * c;\n  96:       grad.y += a * k * d.y * c;\n  97:     }\n  98:     {\n  99:       float k = 0.299199;\n  100:       float om = 1.713227;\n"
+        "console.error: THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false\n\nMaterial Name: \nMaterial Type: ShaderMaterial\n\nProgram Info Log: Vertex shader is not compiled.\n\u0000\nVERTEX\n\nERROR: 0:94: 'z' : vector field selection out of range\nERROR: 0:108: 'z' : vector field selection out of range\nERROR: 0:122: 'z' : vector field selection out of range\nERROR: 0:136: 'z' : vector field selection out of range\nERROR: 0:150: 'z' : vector field selection out of range\n\u0000\n\n  89:       float a = 0.400000;\n  90:       float c = cos(f);\n  91:       float s = sin(f);\n  92:       h += a * s;\n  93:       disp.x += 0.4200 * a * d.x * c;\n> 94:       disp.z += 0.4200 * a * d.y * c;\n  95:       grad.x += a * k * d.x * c;\n  96:       grad.y += a * k * d.y * c;\n  97:     }\n  98:     {\n  99:       float k = 0.299199;\n  100:       float om = 1.713227;\n",
+        "console.error: THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false\n\nMaterial Name: \nMaterial Type: ShaderMaterial\n\nProgram Info Log: Vertex shader is not compiled.\n\u0000\nVERTEX\n\nERROR: 0:94: 'z' : vector field selection out of range\nERROR: 0:108: 'z' : vector field selection out of range\nERROR: 0:122: 'z' : vector field selection out of range\nERROR: 0:136: 'z' : vector field selection out of range\nERROR: 0:150: 'z' : vector field selection out of range\n\u0000\n\n  89:       float a = 0.400000;\n  90:       float c = cos(f);\n  91:       float s = sin(f);\n  92:       h += a * s;\n  93:       disp.x += 0.4200 * a * d.x * c;\n> 94:       disp.z += 0.4200 * a * d.y * c;\n  95:       grad.x += a * k * d.x * c;\n  96:       grad.y += a * k * d.y * c;\n  97:     }\n  98:     {\n  99:       float k = 0.299199;\n  100:       float om = 1.713227;\n",
+        "re-graded 2026-10-26 after a test fix"
       ],
       "status": "ok",
       "finish": "stop",

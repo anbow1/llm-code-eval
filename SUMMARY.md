@@ -21,7 +21,7 @@
 - **DeepSeek-V4.1-Flash scored 100% in all 5 runs** (base suite once, hard suite 4 times at `low` and `high`). With 192 GB RAM it runs at 24–26 tok/s, twice as fast as with 128 GB, but the hard suite still takes 69–88 min. See Part 8. DeepSeek now has its own table and image, like GLM: [RESULTS_TABLE_DEEPSEEK.md](RESULTS_TABLE_DEEPSEEK.md), [deepseek.jpg](deepseek.jpg). See Part 7.
 - **Per task, fewest tokens vs shortest time** ([tasks_base.jpg](tasks_base.jpg), [tasks_hard.jpg](tasks_hard.jpg)): GLM-5.3-Flash solves tasks with the fewest tokens, but Flash-Next in Strata and Qwen3.8-27B in VRAM solve them fastest, because they run 5–10 times faster.
 - **Flash-Next in Strata, two new files on the hard suite (19–20 Oct):** UD-Q5_K_XL 100% in 8 min (one run), and NVFP4 GPTQ 100% and 93.2% in under 6 min at about 139 tok/s.
-- **New scene suite (26 Oct): one large graphics task**, a boat on an ocean next to an island. Six of seven runs scored 90–100%, so the gallery ([scene_gallery.jpg](scene_gallery.jpg)) separates them better than the score. DeepSeek-V4.1 made the best islands, GLM-5.3 the best water, Qwen3.8-Flash-Next NVFP4 finished in 1.2 min with the crudest picture. See Part 9.
+- **New scene suite (26 Oct): one large graphics task**, a boat on an ocean next to an island. Most runs score 96–100%, so each run also gets a by-eye rating (1–10) on the gallery ([scene_gallery.jpg](scene_gallery.jpg)). DeepSeek-V4.1 made the best scenes (7–7.5), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 finished in 1.2 min with the simplest picture (4). See Part 9.
 - **Maya stops thinking at about 32.8k tokens.** Since 12 Oct every long-thinking task in Maya ended at 32,776–32,836 thinking tokens, then the answer followed; DeepSeek in Strata does the same. This explains much of what looked like Maya's advantage on the hard suite (no time-outs, faster runs) and its wrong diffs. See Part 9.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 - **Some settings keep failing the same task over repeated runs.** The tables now list them as "Problem tasks" / "Often fails" (below 90% in at least half the runs). Most common:
@@ -452,18 +452,18 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 
 **Scene suite, s1_ocean_island** (one large Three.js task: ocean with waves in a shader, a boat that floats on them, an island with swaying palms, sky, shadows, fog; 30 min). All runs on the RTX 5090 + 192 GB RAM:
 
-| Model · quant · engine | Effort | Score | Time | Tokens (thinking) | Picture, by eye |
-|---|---|---|---|---|---|
-| Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | 1.2 min | 8.4k (1.6k) | crude: flat sand cone, blocky water |
-| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | 24.3 min | 39.5k (32.8k) | good |
-| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 100% | 27.8 min | 40.0k (32.8k) | good water, island nearly black |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | 29.4 min | 41.8k (32.8k) | good, the most complete island |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 100% | 40.5 min | 40.7k (32.8k) | best water and sky, island dark |
-| DeepSeek-V4.1-Flash Maya-S · Maya | high | 90% | 28.2 min | 43.4k (32.8k) | no water: shader compile error |
-| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | 30 min | 30.9k | still thinking at the limit |
+| Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
+|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high, 180 min | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
+| Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
+| DeepSeek-V4.1-Flash Maya-S · Maya | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
+| GLM-5.3-Flash EXL3 4.10 bpw · Maya | high | 0% | – | 30 min (limit) | 30.9k, no answer | – |
 
-- **The checks are too lenient for this task.** They test what can be measured (the boat follows `heightAt`, leaves sway, shadows, fog, camera), and almost every model gets that right; the pictures are what differ. A run whose ocean shader failed to compile still scored 90%. Next: a check that the water is actually on screen, and a by-eye rating next to the score.
-- **The gallery (by eye):** DeepSeek-V4.1 builds the most complete islands (sand, rocks, palms, shore foam); GLM-5.3 the best water and sky, but both GLM islands are almost black (lighting or materials too dark); Qwen3.8-Flash-Next NVFP4 is 20–30 times faster but its scene is the simplest.
+- **The checks were too lenient for this task.** They test what can be measured (the boat follows `heightAt`, leaves sway, shadows, fog, camera), and almost every model gets that right; the pictures are what differ. Two checks were added (`water_visible`, `island_lit`) and the saved answers graded again (`regrade.py` now also rebuilds Three.js answers): the scene without water fell to 87%, the dark GLM islands to 96%. Making the checks stable in the slow software renderer also needed the boat to be sampled inside `renderer.render`. The by-eye rating (1–10, [ratings_scene.json](ratings_scene.json)) now stands next to the score.
+- **By eye:** DeepSeek-V4.1 made the best scenes (7–7.5: the most complete islands, sand, rocks, palms, shore foam); GLM-5.3 the best water and sky but almost black islands (5–6); Qwen3.8-Flash-Next NVFP4 is 20–30 times faster but its scene is the simplest (4).
 - **The DeepSeek scene from Maya's chat** (the user's own longer prompt: pier, rowboat, lil-gui, bloom; about 3 hours) is far richer than any of these 30-minute results. It is not comparable: another prompt and no test hooks.
 
 **Maya stops thinking at about 32.8k tokens.**

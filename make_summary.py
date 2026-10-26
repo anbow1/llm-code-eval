@@ -248,6 +248,8 @@ def main():
                  "are averaged under \"Mean per setting\"" + (", and ranked by their best run under \"Best run per "
                  "setting\"" if folder == "results_hard" else "") + "; every single run is listed under \"Every run\".", ""]
         lines += section(runs, best_table=folder == "results_hard")
+        if folder == "results_scene":
+            lines += eye_table(runs)
         lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "
                   "(including prompt processing and waiting for the first token). This is the real working speed.",
                   "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
@@ -402,6 +404,33 @@ def write_family_table(prefix, path, title, intro):
               "looped, no final answer). `~` = token count partly estimated. All other suites' tables: "
               "RESULTS_TABLE*.md.", ""]
     (HERE / path).write_text("\n".join(lines), encoding="utf-8")
+
+
+def scene_ratings():
+    """By-eye ratings of the scene runs (ratings_scene.json), keyed by run folder."""
+    p = HERE / "ratings_scene.json"
+    if not p.is_file():
+        return {}
+    return {k: v for k, v in json.loads(p.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+
+
+def eye_table(runs):
+    """The scene runs with their automatic score next to the by-eye rating."""
+    rt = scene_ratings()
+    rows = [(rt[r["run"]], r) for r in runs if r["run"] in rt]
+    if not rows:
+        return []
+    out = ["## By eye", "",
+           "How the picture looks, 1-10 per part (from [ratings_scene.json](ratings_scene.json): rated from the gallery "
+           "screenshots, software renderer, same camera). The automatic score checks what can be measured; this is the "
+           "rest.", "",
+           "| Run | Model | Quant | Backend | Effort | Score | By eye | Water | Island | Light | Boat | Note |",
+           "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for e, r in sorted(rows, key=lambda x: -x[0]["overall"]):
+        out.append(f"| {when(r['run'])} | {r['model']} | {r['quant']} | {r['backend']} | {r['effort']} | "
+                   f"{r['overall']:.0f}% | **{e['overall']:g}** | {e['water']} | {e['island']} | {e['light']} | "
+                   f"{e['boat']} | {e.get('note', '')} |")
+    return out + [""]
 
 
 def when(run):

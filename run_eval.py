@@ -617,7 +617,7 @@ def run_three_task(task, code, workdir, browser):
         page.wait_for_timeout(300)
         ctx.s0 = ctx.snapshot()
         shot0 = page.screenshot()
-        page.wait_for_timeout(800)
+        page.wait_for_timeout(task.get("shot_gap", 800))
         ctx.s1 = ctx.snapshot()
         shot1 = page.screenshot()
         (workdir / "screenshot.png").write_bytes(shot1)
@@ -641,7 +641,7 @@ def run_three_task(task, code, workdir, browser):
             (workdir / f"screenshot_{i}.png").write_bytes(page.screenshot())
 
         page.set_viewport_size({"width": 500, "height": 400})
-        page.wait_for_timeout(400)
+        page.wait_for_timeout(task.get("resize_wait", 400))
         size = ctx.eval("[window.__renderer?.domElement?.clientWidth, window.__camera?.aspect]")
         res["resize"] = bool(size) and size[0] == 500 and abs((size[1] or 0) - 1.25) < 0.01
         res["no_console_errors"] = ready and not errors

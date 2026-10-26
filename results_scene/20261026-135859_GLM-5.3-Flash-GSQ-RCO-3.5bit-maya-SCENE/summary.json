@@ -2,15 +2,15 @@
   "name": "GLM-5.3-Flash-GSQ-RCO-3.5bit-maya-SCENE",
   "model": "local",
   "python": null,
-  "three": 100.0,
+  "three": 95.65217391304348,
   "tools": null,
-  "overall": 100.0,
+  "overall": 95.65217391304348,
   "summary": {
     "python": null,
-    "three": 100.0,
+    "three": 95.65217391304348,
     "tools": null,
-    "overall": 100.0,
-    "answered_score": 100.0,
+    "overall": 95.65217391304348,
+    "answered_score": 95.65217391304348,
     "tasks_total": 1,
     "tasks_answered": 1,
     "hit_max_tokens": 0,
@@ -52,7 +52,7 @@
     {
       "id": "s1_ocean_island",
       "kind": "three",
-      "score": 1.0,
+      "score": 0.9565217391304348,
       "checks": {
         "compiles_strict": true,
         "loads": true,
@@ -73,10 +73,14 @@
         "sky_gradient": true,
         "water_animates": true,
         "picture_rich": true,
+        "water_visible": true,
+        "island_lit": false,
         "resize": true,
         "no_console_errors": true
       },
-      "notes": [],
+      "notes": [
+        "re-graded 2026-10-26 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 1647.7,

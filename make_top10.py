@@ -562,6 +562,14 @@ def scene_shot(run_dir):
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
+def eye_line(x):
+    """'By eye 7/10 · water 6 · island 8 · light 6 · boat 6' under a gallery picture."""
+    if not x:
+        return ""
+    return (f'<div class="eye"><b>By eye {x["overall"]:g}/10</b> · water {x["water"]} · island {x["island"]} · '
+            f'light {x["light"]} · boat {x["boat"]}</div><div class="sub">{html.escape(x.get("note", ""))}</div>')
+
+
 def build_scene_gallery():
     """Every scene-suite run: its picture, setting, score, time, tokens and the checks it failed."""
     import json
@@ -571,7 +579,9 @@ def build_scene_gallery():
         return None
     e = html.escape
     cards = []
-    for r in runs:  # load_runs sorts by score, then time
+    eye = ms.scene_ratings()
+    runs.sort(key=lambda r: (-(eye.get(r["run"], {}).get("overall", -1)), -r["overall"]))  # best by eye first
+    for r in runs:
         d = json.loads((folder / r["run"] / "summary.json").read_text(encoding="utf-8"))
         res = next((x for x in d["results"] if x["id"] == "s1_ocean_island"), {})
         failed = [k for k, v in (res.get("checks") or {}).items() if not v]
@@ -582,6 +592,7 @@ def build_scene_gallery():
 <div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(ms.gpu_short(r['gpu']))} · {e(r['effort'])} · {ms.when(r['run'])}</div>
 <div class="sub">{r['minutes']:.1f} min · {"~" if r['tokens_approx'] else ""}{(r['tokens'] or 0) / 1000:.1f}k tokens · {r['tok_s_time'] or 0:.0f} tok/s</div>
 {f'<div class="warn">failed: {e(", ".join(failed))}</div>' if failed else '<div class="okc">all checks passed</div>'}
+{eye_line(eye.get(r['run']))}
 </div></div>""")
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
@@ -593,15 +604,16 @@ def build_scene_gallery():
 .cap {{ padding:10px 12px 12px; }}
 .sc {{ float:right; font-weight:700; }}
 .okc {{ font-size:13px; color:#1c7a3a; margin-top:3px; }}
+.eye {{ font-size:14px; margin-top:6px; padding-top:6px; border-top:1px solid var(--rule); }}
 </style></head><body><div class="wrap">
 <h1>Local LLM coding test: scene suite gallery</h1>
 <p class="lede">s1_ocean_island: a boat rocking on an ocean next to a tropical island, one TypeScript + Three.js file
-(30 min limit). Same camera in every run, picture taken about 5 s after start. Best score first. {date.today():%d %b %Y}.</p>
+(30 min limit). Same camera in every run, picture taken about 5 s after start. Best by eye first. {date.today():%d %b %Y}.</p>
 <div class="grid">{''.join(cards)}</div>
 <div class="notes">
-The score counts automatic checks (the boat floats on the waves the shader draws, leaves sway, shadows, fog, tone mapping,
-sky gradient, fixed camera, strict TypeScript, no console errors). How good the picture looks is not in the score: compare
-it here, or open the run's s1_ocean_island/scene.html, a single file that runs in any browser (on a real GPU; these pictures
+The score counts 23 automatic checks (the boat floats on the waves the shader draws, leaves sway, shadows, fog, tone mapping,
+sky gradient, water on screen, a lit island, fixed camera, strict TypeScript, no console errors). "By eye" is a 1-10 rating of
+the picture (ratings_scene.json, rated from these screenshots); compare the pictures here, or open the run's s1_ocean_island/scene.html, a single file that runs in any browser (on a real GPU; these pictures
 come from a software renderer). Details: RESULTS_TABLE_SCENE.md.
 </div></div></body></html>"""
 
