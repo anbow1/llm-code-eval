@@ -21,7 +21,7 @@
 - **DeepSeek-V4.1-Flash scored 100% in all 5 runs** (base suite once, hard suite 4 times at `low` and `high`). With 192 GB RAM it runs at 24–26 tok/s, twice as fast as with 128 GB, but the hard suite still takes 69–88 min. See Part 8. DeepSeek now has its own table and image, like GLM: [RESULTS_TABLE_DEEPSEEK.md](RESULTS_TABLE_DEEPSEEK.md), [deepseek.jpg](deepseek.jpg). See Part 7.
 - **Per task, fewest tokens vs shortest time** ([tasks_base.jpg](tasks_base.jpg), [tasks_hard.jpg](tasks_hard.jpg)): GLM-5.3-Flash solves tasks with the fewest tokens, but Flash-Next in Strata and Qwen3.8-27B in VRAM solve them fastest, because they run 5–10 times faster.
 - **Flash-Next in Strata, two new files on the hard suite (19–20 Oct):** UD-Q5_K_XL 100% in 8 min (one run), and NVFP4 GPTQ 100% and 93.2% in under 6 min at about 139 tok/s.
-- **New scene suite (26 Oct): one large graphics task**, a boat on an ocean next to an island. Most runs score 96–100%, so each run also gets a by-eye rating (1–10) on the gallery ([scene_gallery.jpg](scene_gallery.jpg)). DeepSeek-V4.1 made the best scenes (7–7.5), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 finished in 1.2 min with the simplest picture (4). See Part 9.
+- **New scene suite (26 Oct): one large graphics task**, a boat on an ocean next to an island. Most runs score 96–100% (two more DeepSeek runs on a new EXL2 2.9 bpw file also scored 100%), so each run also gets a by-eye rating (1–10) on the gallery ([scene_gallery.jpg](scene_gallery.jpg)). DeepSeek-V4.1 made the best scenes (7–7.5), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 finished in 1.2 min with the simplest picture (4). See Part 9.
 - **Maya stops thinking at about 32.8k tokens.** Since 12 Oct every long-thinking task in Maya ended at 32,776–32,836 thinking tokens, then the answer followed; DeepSeek in Strata does the same. This explains much of what looked like Maya's advantage on the hard suite (no time-outs, faster runs) and its wrong diffs. See Part 9.
 - **At temperature 1.0, one run is not enough.** The same setting ranged over up to 19 points between runs (Flash-Next UD-Q4_K_XL on the hard suite: 79–98%).
 - **Some settings keep failing the same task over repeated runs.** The tables now list them as "Problem tasks" / "Often fails" (below 90% in at least half the runs). Most common:
@@ -454,8 +454,10 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | high | 100% | **7.5** | 30.2 min | 41.6k (32.8k) | clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | low | 100% | **6.5** | 28.0 min | 40.1k (32.8k) | sun glint and foam rings around the island; palm crowns look bushy and odd |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
@@ -467,7 +469,7 @@ PC A got 192 GB of RAM on 23 Oct. Runs from then on are kept apart in the tables
 - **The DeepSeek scene from Maya's chat** (the user's own longer prompt: pier, rowboat, lil-gui, bloom; about 3 hours) is far richer than any of these 30-minute results. It is not comparable: another prompt and no test hooks.
 
 **Maya stops thinking at about 32.8k tokens.**
-- In Maya, every task that thought long since 12 Oct ended at 32,776–32,836 thinking tokens (15 tasks: 10 hard-suite `h_p3_line_diff` runs of GLM and all 5 DeepSeek and GLM scene runs), and the answer came right after. Only two runs on 11 Oct thought longer (37k and 45k).
+- In Maya, every task that thought long since 12 Oct ended at 32,776–32,836 thinking tokens (17 tasks: 10 hard-suite `h_p3_line_diff` runs of GLM and all 7 DeepSeek and GLM scene runs that finished), and the answer came right after. Only two runs on 11 Oct thought longer (37k and 45k).
 - llama.cpp, ExLlamaV3 and Strata with Qwen think up to the 98,304-token limit. DeepSeek in Strata also stopped at 32.8k on the scene task, so the limit may come from the DeepSeek chat template or from both engines; it is worth checking the engines' thinking-budget settings.
 - **This changes the reading of Part 5.** GLM in Maya never timed out on `h_p3_line_diff` and ran about twice as fast partly because its thinking was cut at 32.8k; the wrong diffs in Maya (7 of 18) fit that too. For the same reason a longer limit barely helps on the scene task: DeepSeek in Maya finished within 30 min both times (28 and 29 min; one was started with a 180-minute limit, so both count as the same setting, mean 93.5%); only GLM EXL3 4.10 bpw used more (40 min).
 

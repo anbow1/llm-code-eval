@@ -61,8 +61,11 @@ def describe(label, model):
         ver = "V4.1" if re.search(r"v?4[._]1(?![0-9])", m) else "V4"
         name = f"DeepSeek-{ver}-" + ("Pro" if re.search(r"[_-]pro(?![a-z0-9])", m) else "Flash")
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
+        exl2 = re.search(r"exl2\.(\d)", m)  # "exl2.9": EXL2 at 2.9 bpw
         if "exl3" in m and bpw:
             quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
+        elif exl2:
+            quant = f"EXL2 2.{exl2.group(1)} bpw"
         elif gguf:
             quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
         elif bit:

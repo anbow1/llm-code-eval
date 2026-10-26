@@ -1,27 +1,67 @@
 {
   "_about": "By-eye ratings of the scene suite, 1-10 per part and overall. Rated by Claude from the gallery screenshots (software renderer, same camera); edit freely, make_summary.py and make_top10.py read this file. Keys are run folder names.",
   "20261026-113719_DeepSeek-V4.1-Flash-1017-Maya-S-SCENE": {
-    "water": 0, "island": 7, "light": 6, "boat": 6, "overall": 3,
+    "water": 0,
+    "island": 7,
+    "light": 6,
+    "boat": 6,
+    "overall": 3,
     "note": "no ocean on screen: the water shader does not compile; the island itself is good (sand ring, rocks, palms)"
   },
   "20261026-120846_DeepSeek-V4.1-Flash-1017-Maya-S-SCENE": {
-    "water": 6, "island": 8, "light": 6, "boat": 6, "overall": 7,
+    "water": 6,
+    "island": 8,
+    "light": 6,
+    "boat": 6,
+    "overall": 7,
     "note": "the most complete island (sand, grass, rocky peak, palms, shore foam); water ripples repeat in a visible grid"
   },
   "20261026-125542_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-SCENE": {
-    "water": 4, "island": 3, "light": 5, "boat": 3, "overall": 4,
+    "water": 4,
+    "island": 3,
+    "light": 5,
+    "boat": 3,
+    "overall": 4,
     "note": "a flat sand cone with tiny palms; dark blocky water; the boat is a thin sail on an almost invisible hull"
   },
   "20261026-125949_DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-strata-SCENE": {
-    "water": 7, "island": 7, "light": 7, "boat": 7, "overall": 7.5,
+    "water": 7,
+    "island": 7,
+    "light": 7,
+    "boat": 7,
+    "overall": 7.5,
     "note": "turquoise water with a sun glint and a foam ring, green island with a beach, visible sun, a clear sailboat"
   },
   "20261026-135859_GLM-5.3-Flash-GSQ-RCO-3.5bit-maya-SCENE": {
-    "water": 8, "island": 3, "light": 4, "boat": 5, "overall": 5,
+    "water": 8,
+    "island": 3,
+    "light": 4,
+    "boat": 5,
+    "overall": 5,
     "note": "the best-looking deep-blue waves, but the island is a black silhouette (backlit, no fill light)"
   },
   "20261026-143418_GLM-5.3-Flash-exl3-4.10bpw-maya-SCENE": {
-    "water": 8, "island": 4, "light": 6, "boat": 5, "overall": 6,
+    "water": 8,
+    "island": 4,
+    "light": 6,
+    "boat": 5,
+    "overall": 6,
     "note": "turquoise water with a sun-glitter path and foam, a good sky; the island and palms are very dark"
+  },
+  "20261026-164344_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-low-SCENE": {
+    "water": 7,
+    "island": 6,
+    "light": 7,
+    "boat": 6,
+    "overall": 6.5,
+    "note": "low: sun glint and foam rings around the island; palm crowns look bushy and odd; sailboat small but clear"
+  },
+  "20261026-192905_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-SCENE": {
+    "water": 8,
+    "island": 7,
+    "light": 7,
+    "boat": 6,
+    "overall": 7.5,
+    "note": "high: clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail"
   }
 }
