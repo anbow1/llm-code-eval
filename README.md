@@ -429,6 +429,18 @@ The realism itself (the watch finishes and materials; the coast, the tower, how 
 
 Both checks were tested on reference solutions ([reference/e1_watch_unitas.ts](reference/e1_watch_unitas.ts), 22 of 22; [reference/e2_rocket_launch.ts](reference/e2_rocket_launch.ts), 16 of 16) and on broken versions: a 3 Hz balance, a smooth escape wheel without ticks, a full tooth per beat, a balance that passes its centre off the beat (cos instead of sin), wheels that do not mesh, meshing wheels turning the same way, an hour hand at the minute hand's speed, parts that do not separate, no gravity turn, thrust-to-weight 2.5, a constant mass and a sky that stays blue. Each lost the right checks.
 
+## Comparing with other APIs and harnesses
+
+[prompts/](prompts/) has the three large graphics tasks (island, watch, rocket) as plain prompts, to run in another API, a chat or an agent harness (Claude Code, Codex, Cursor and the like). Each `.md` has the system and the user prompt, the build setup and how to save the answer; `.system.txt` and `.user.txt` hold the plain text for an API call. They are generated from the task files by `python make_prompts.py`, so they always match what the local models get.
+
+Grade the answers like a local run, without a server; they go to the same tables and gallery:
+
+```
+python run_eval.py --suite engineering --from-file answers/ --label Claude-Opus-5.5-web
+```
+
+`answers/` holds `<task_id>.md` (a whole chat reply) or `<task_id>.ts` (the file an agent wrote), and optionally `<task_id>.json` with `{"minutes": ..., "tokens": ..., "reasoning_tokens": ...}`. A single file works too, with `--tasks <task_id>`.
+
 ## Output
 
 Each run is saved to `results/<date>_<name>/` (base suite), `results_hard/<date>_<name>-HARD/`, `results_practical/<date>_<name>-PRACTICAL/`, `results_tools/<date>_<name>-TOOLS/` or `results_scene/<date>_<name>-SCENE/`:

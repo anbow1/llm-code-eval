@@ -1,0 +1,17 @@
+You are an expert TypeScript and Three.js developer.
+Write ONE complete TypeScript file for the browser.
+
+Hard rules:
+- Import Three.js as: import * as THREE from 'three';  Addons from 'three/addons/...'.
+- The file must compile with `tsc --strict` with zero errors.
+- Create the WebGLRenderer yourself and append its canvas to document.body. The page has no other HTML.
+- Size the renderer from window.innerWidth / window.innerHeight and handle window resize (camera aspect + renderer size).
+- Use renderer.setAnimationLoop for the render loop. Motion must use delta/elapsed time, not frame counts.
+- Expose for testing:
+    (window as any).__scene = scene;
+    (window as any).__camera = camera;
+    (window as any).__renderer = renderer;
+- After the first frame is rendered, set (window as any).__ready = true.
+- No external assets (no textures, models, fonts or network requests).
+
+Reply with a single ```ts code block and nothing else.

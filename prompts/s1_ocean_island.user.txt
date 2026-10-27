@@ -1,0 +1,41 @@
+Build a realistic, good-looking 3D scene: a small boat rocking on an ocean next to a tropical island.
+Graphics quality matters: aim for a picture that looks like a game, not a demo.
+
+Ocean
+- A large water surface (at least 400 x 400 units, centered on the origin) animated in a vertex shader (ShaderMaterial, or a
+  built-in material extended with onBeforeCompile). Use a sum of at least 3 directional waves (Gerstner or sine) with
+  different directions, wavelengths and speeds; waves must be clearly visible (crest-to-trough height about 0.5 to 2 units).
+- Shade the water well: normals from the waves, a deep/shallow color, Fresnel reflection of the sky, a specular highlight
+  from the sun; foam near crests or near the shore is a plus.
+- Expose the same wave function to JavaScript:
+    (window as any).__ocean = { heightAt(x: number, z: number, t: number): number, time(): number }
+  heightAt returns the vertical displacement your shader applies at the undisplaced position (x, z) at wave time t
+  (for Gerstner waves ignore the small horizontal shift). time() returns the wave time in seconds that the shader uses
+  right now. The two must match the picture.
+
+Boat
+- A boat built from primitives (hull, deck or cabin, mast and sail; at least 3 meshes in one Group), about 4 units long,
+  floating at about (12, 0, 14) and staying within 25 units of the origin (it may drift slowly).
+- Every frame its height follows the water: y = heightAt(x, z, time()) plus a constant offset, and its pitch and roll
+  follow the wave slope (sample heightAt in front of, behind and beside the hull).
+- Expose the Group as (window as any).__boat. Its meshes cast shadows.
+
+Island
+- A procedural island centered on the origin: about 30 to 50 units across, peak 5 to 15 units above the water, sloping
+  into the sea, with sand near the water and grass or rock higher up (vertex colors, a shader, or several materials).
+- At least 5 palm trees on it: a curved trunk and a crown of leaves. Draw ALL leaves of all palms as ONE InstancedMesh
+  with at least 30 instances, and sway them in the wind by updating the instance matrices every frame
+  (instanceMatrix.needsUpdate = true). Expose it as (window as any).__leaves.
+- Expose the island (Mesh or Group) as (window as any).__island; it receives shadows.
+
+Light and atmosphere
+- A sky: a gradient sky dome or the Sky addon ('three/addons/objects/Sky.js'), with a visible sun position.
+- A DirectionalLight as the sun, matching the sky's sun direction, casting shadows (renderer.shadowMap.enabled, a shadow
+  camera that covers the island and the boat). Expose it as (window as any).__sun. Add hemisphere or ambient fill light.
+- scene.fog that blends the far ocean into the horizon, ACESFilmic (or AgX) tone mapping, sRGB output.
+
+Camera and performance
+- PerspectiveCamera at exactly (35, 12, 35) looking at (0, 2, 0); keep this view (OrbitControls are allowed if they start
+  there and do not move by themselves).
+- It must run smoothly on a mid-range GPU: keep the ocean grid at or below 256 x 256 segments and shadow maps at or below
+  2048 x 2048.

@@ -866,6 +866,10 @@ def main():
     ap.add_argument("--only", choices=["python", "three"], default=None)
     ap.add_argument("--tasks", default="", help="comma list of task ids, e.g. t5_raycast_click,p1_parse_duration")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
+    ap.add_argument("--from-file", default="",
+                    help="grade answers made elsewhere (another API, a chat, an agent harness) instead of asking the "
+                         "server: a file with the answer (one task, use --tasks) or a folder with <task_id>.md / .ts "
+                         "(or <task_id>/main.ts); optional <task_id>.json {minutes, tokens, reasoning_tokens}")
     args = ap.parse_args()
     for k, v in PRESETS.get(args.preset, {}).items():
         if getattr(args, k) is None:
@@ -947,6 +951,8 @@ def main():
                 if kind == "tools":
                     wd.mkdir()
                     g, tool_checks, tool_notes = run_tool_task(args, task, wd, min(args.task_timeout_min * 60, left))
+                elif args.from_file:
+                    g = external_answer(args, task["id"])
                 else:
                     g = chat(args, system, task["prompt"], timeout=min(args.task_timeout_min * 60, left))
             except ServerDown as e:
@@ -1028,6 +1034,31 @@ def main():
     write_report(run_dir, name, args, results, total, res)
 
 
+def external_answer(args, task_id):
+    """--from-file: the answer to one task, made outside this harness, as a chat() result."""
+    src = Path(args.from_file)
+    if src.is_file():
+        f = src
+    else:
+        cands = [src / f"{task_id}{ext}" for ext in (".md", ".ts", ".txt")] + [src / task_id / "main.ts"]
+        f = next((c for c in cands if c.exists()), None)
+        if f is None:
+            raise FileNotFoundError(f"no answer for {task_id} in {src} (expected {task_id}.md, .ts or {task_id}/main.ts)")
+    text = f.read_text(encoding="utf-8")
+    if f.suffix == ".ts" and "```" not in text:
+        text = "```ts\n" + text + "\n```"
+    meta = {}
+    side = (src if src.is_dir() else src.parent) / f"{task_id}.json"
+    if side.exists():
+        meta = json.loads(side.read_text(encoding="utf-8"))
+    secs = float(meta.get("minutes") or 0) * 60
+    tokens = meta.get("tokens")
+    return {"text": text, "reasoning": "", "finish": "stop", "tool_calls": [], "secs": secs, "ttft": None,
+            "think_secs": 0.0, "prompt_tokens": None, "tokens": tokens,
+            "reasoning_tokens": meta.get("reasoning_tokens"), "tokens_approx": False,
+            "decode_tps": (tokens / secs) if tokens and secs else None}
+
+
 def is_broken(r):
     """Broken generation (not wrong code): out of tokens or time, stopped mid-thought, a loop, or no final answer."""
     return r["status"] in ("max_tokens", "task_timeout", "no_answer", "max_turns") or any(
@@ -1071,6 +1102,8 @@ def write_report(run_dir, name, args, results, total, res):
     lines = [f"# {name}", "",
              f"- Date: {dt.datetime.now():%Y-%m-%d %H:%M}",
              f"- Model: {args.model}",
+             *([f"- External answers: graded from {args.from_file} (made outside this harness; time and tokens "
+                "as given in the optional <task_id>.json)"] if getattr(args, "from_file", "") else []),
              f"- Endpoint: {args.base_url} (preset {args.preset or 'none'}, temperature {args.temperature}, "
              + "".join(f"{k} {getattr(args, k)}, " for k in SAMPLING_KEYS if getattr(args, k) is not None)
              + f"max_tokens {args.max_tokens}, think {args.think}"
@@ -1115,7 +1148,8 @@ def write_report(run_dir, name, args, results, total, res):
                       "think": args.think, "reasoning_effort": args.reasoning_effort,
                       "max_completion_tokens": getattr(args, "max_completion_tokens", None),
                       "task_timeout_min": args.task_timeout_min, "budget_min": args.budget_min,
-                      "limits": args.limits, "suite": args.suite},
+                      "limits": args.limits, "suite": args.suite,
+                      "external": bool(getattr(args, "from_file", ""))},
          "minutes": round(total / 60, 1), "results": results}, indent=2), encoding="utf-8")
 
     print("\n" + "=" * 60)

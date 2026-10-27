@@ -1,0 +1,95 @@
+# e2_rocket_launch: prompt for comparisons
+
+Suite `engineering` ([README](../README.md)). Send the **system** and the **user** prompt below unchanged, as two
+messages (or, where the tool has no system prompt, the system text first and then the user text in one message).
+The local models get exactly this, with 120 min and 196,608 tokens per task.
+
+How the answer is run: one TypeScript file, bundled with esbuild against Three.js 0.186.1
+(`three` and `three/addons/...`), compiled with `tsc --strict`, opened in Chromium at 1280 x 720
+with a software WebGL renderer (SwiftShader).
+
+**Chat or API:** save the whole reply as `e2_rocket_launch.md` (the ```ts block is taken from it).
+**Agent harness** (Claude Code, Codex, Cursor and the like): add one line to the user prompt,
+"Write the file to main.ts instead of replying with a code block.", then save it as `e2_rocket_launch.ts`.
+Do not let the agent install other packages or add an HTML file: only the TypeScript file is used.
+
+Grade it like a local run (it goes to the same tables and gallery):
+
+```
+python run_eval.py --suite engineering --tasks e2_rocket_launch --from-file answers/ --label <Model-Name>-<harness>
+```
+
+Optional `answers/e2_rocket_launch.json` with `{"minutes": 12.5, "tokens": 48000, "reasoning_tokens": 30000}` adds time and
+tokens to the tables.
+
+## System prompt
+
+```text
+You are an expert TypeScript and Three.js developer.
+Write ONE complete TypeScript file for the browser.
+
+Hard rules:
+- Import Three.js as: import * as THREE from 'three';  Addons from 'three/addons/...'.
+- The file must compile with `tsc --strict` with zero errors.
+- Create the WebGLRenderer yourself and append its canvas to document.body. The page has no other HTML.
+- Size the renderer from window.innerWidth / window.innerHeight and handle window resize (camera aspect + renderer size).
+- Use renderer.setAnimationLoop for the render loop. Motion must use delta/elapsed time, not frame counts.
+- Expose for testing:
+    (window as any).__scene = scene;
+    (window as any).__camera = camera;
+    (window as any).__renderer = renderer;
+- After the first frame is rendered, set (window as any).__ready = true.
+- No external assets (no textures, models, fonts or network requests).
+
+Reply with a single ```ts code block and nothing else.
+```
+
+## User prompt
+
+```text
+Build a launch scene: a Falcon-9-like rocket (about 70 m tall, 3.7 m diameter, mass 550 000 kg at
+liftoff) on a launch pad at Cape Canaveral (a concrete pad with a launch tower), and its ascent to space.
+Units: 1 unit = 1 m. The ascent must follow a physics model, not an animation.
+
+Physics (window.__rocket, the simulated flight)
+- Constants: g0 = 9.81 m/s^2, Earth radius R = 6 371 000 m, liftoff mass m0 = 550 000 kg, dry mass 220 000 kg.
+- Thrust: T = 1.3 * m0 * g0 (thrust-to-weight 1.3 at liftoff), limited to 3 * m * g0 (throttle) and zero after the burn.
+- Burn: 200 s. The mass falls linearly from m0 to the dry mass during the burn.
+- Gravity: g(h) = g0 * (R / (R + h))^2, where h is the altitude.
+- Pitch = the angle of the thrust from vertical (0 = straight up). Pitch is 0 at liftoff; after 10 s it starts to grow
+  (a gravity turn), reaching about 0.5 rad at 150 s, and it never decreases.
+- Equations of motion: vertical and horizontal acceleration from the thrust component and gravity; integrate with a
+  fixed substep of at most 0.02 s; the rocket cannot go below the pad.
+- window.__rocket = {
+    reset(): time 0, the rocket on the pad, trail emptied (keep the same array object),
+    step(dt): advances the simulated time by dt seconds (any dt; use substeps inside),
+    state(): { t, alt (m), vel (m/s), acc (net vertical acceleration, m/s^2), pitch (rad) },
+    trail: array of {x, y, z} world points of the rocket, one per step() call,
+    paused: boolean (when true, the render loop does not call step()),
+  }
+- The render loop calls step(min(delta, 1/30)) when not paused.
+
+Realism: as realistic as possible, it must look like a launch photograph, not a diagram
+- Setting: the Florida coast. Flat land with green scrub vegetation, the Atlantic Ocean on the horizon behind the pad,
+  roads and low buildings around it, a pale hazy sky near the horizon (fog or haze toward the distance).
+- Pad: a concrete pad with a flame trench, a lattice launch/umbilical tower next to the rocket, and tall lattice
+  lightning-protection masts around the pad.
+- Rocket: white body with a visible interstage and a darker band, an engine section with nozzles, a nose fairing,
+  markings (a flag and lettering drawn on a canvas texture), physically based materials.
+- Rendering: physically based materials, ACES tone mapping, shadows from the sun, atmospheric scattering in the sky
+  (e.g. the Sky addon or your own shader), aerial perspective (distant things paler and bluer), bloom for the flame
+  (e.g. UnrealBloomPass); procedural textures (canvas or shader) for the concrete, the ground and the vegetation.
+- Liftoff: a blinding white-yellow core at the nozzles fading to orange, Mach diamonds are welcome, a
+  flickering light from the plume that lights the pad and the rocket, and large billowing white steam and smoke clouds
+  that roll sideways out of the flame trench along the ground and then rise. Build the clouds from many soft particles
+  or sprites, so they look soft and volumetric, not like solid spheres.
+- Ascent: the plume grows longer and wider as the air thins; the contrail stays in the sky and drifts slowly.
+- Camera: like launch photography: a low camera near the pad looking up at liftoff, then a long-lens shot that tracks
+  the rocket upward.
+- Sky: from blue at the ground to black at 100 km (the Karman line). Stars must appear above about 70 km and be clearly
+  visible above 100 km. Drive the sky from the rocket's altitude.
+- Trail: a visible white contrail behind the rocket, drawn from the trail points.
+- No external assets (no textures, models or fonts from the network).
+
+Reply with a single ```ts code block and nothing else.
+```
