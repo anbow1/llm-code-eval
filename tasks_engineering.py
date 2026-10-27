@@ -408,6 +408,20 @@ Parts (window.__watch.parts: an array of THREE.Object3D, each with a unique non-
   jewel_1 ... jewel_17 (at the pivots), the main plate and the bridges, and the screws.
 - Metal parts in brass or steel (metalness with an environment map, so they are not black), the jewels in red.
 
+Realism: as realistic as possible, like a macro photograph of a real 6497 movement (shapes may be simplified,
+the look must not be)
+- Materials: physically based (MeshPhysicalMaterial where it helps), an environment map for reflections (e.g.
+  RoomEnvironment with PMREMGenerator), ACES tone mapping, soft shadows.
+- Finishes drawn procedurally (canvas or shader, no downloaded textures): Geneva stripes (cotes de Geneve) on the
+  bridges, perlage (overlapping circular grain) on the main plate, polished bevels (chamfered edges) on the bridges,
+  gilded or rhodium-plated plates, heat-blued screws with slotted heads, steel wheels and pinions with a polished
+  look, golden chatons around the ruby jewels, translucent red jewels (transmission or clearcoat), a blued hairspring
+  as a thin flat spiral, an engraved text on the bridge ("UNITAS 6497 17 JEWELS SWISS MADE").
+- Wheels with spokes (crossings), not solid discs; the balance wheel with screws or a smooth rim; the hairspring
+  attached to the stud on the balance cock.
+- Lighting like a studio macro shot: a key light, a soft fill, a rim light, a dark background, a shallow depth of
+  field is welcome (e.g. BokehPass).
+
 Timing (window.__watch, the simulated clock)
 - reset(): sets the time t to 0 and every angle to 0.
 - step(dt): advances the simulated time t by dt seconds (for any dt, including large ones).
@@ -431,8 +445,8 @@ Timing (window.__watch, the simulated clock)
   and the hands with the angles from state(), so the picture matches the simulation.
 
 Scene
-- Dark background, a warm key light and a soft fill, shadows. The camera frames the movement from above and in
-  front, close enough to see the teeth mesh and the escapement work; orbit controls. A text label near each main part
+- The camera frames the movement from above and in front, close enough to see the teeth mesh and the escapement
+  work; orbit controls. A text label near each main part
   (canvas texture or DOM is fine).
 - No external assets (no textures, models or fonts from the network).
 
@@ -465,14 +479,17 @@ Physics (window.__rocket, the simulated flight)
   }
 - The render loop calls step(min(delta, 1/30)) when not paused.
 
-Realism: it must look like a launch photograph, not a diagram
+Realism: as realistic as possible, it must look like a launch photograph, not a diagram
 - Setting: the Florida coast. Flat land with green scrub vegetation, the Atlantic Ocean on the horizon behind the pad,
   roads and low buildings around it, a pale hazy sky near the horizon (fog or haze toward the distance).
 - Pad: a concrete pad with a flame trench, a lattice launch/umbilical tower next to the rocket, and tall lattice
   lightning-protection masts around the pad.
 - Rocket: white body with a visible interstage and a darker band, an engine section with nozzles, a nose fairing,
   markings (a flag and lettering drawn on a canvas texture), physically based materials.
-- Liftoff: a blinding white-yellow core at the nozzles fading to orange (bloom is allowed, e.g. UnrealBloomPass), a
+- Rendering: physically based materials, ACES tone mapping, shadows from the sun, atmospheric scattering in the sky
+  (e.g. the Sky addon or your own shader), aerial perspective (distant things paler and bluer), bloom for the flame
+  (e.g. UnrealBloomPass); procedural textures (canvas or shader) for the concrete, the ground and the vegetation.
+- Liftoff: a blinding white-yellow core at the nozzles fading to orange, Mach diamonds are welcome, a
   flickering light from the plume that lights the pad and the rocket, and large billowing white steam and smoke clouds
   that roll sideways out of the flame trench along the ground and then rise. Build the clouds from many soft particles
   or sprites, so they look soft and volumetric, not like solid spheres.
