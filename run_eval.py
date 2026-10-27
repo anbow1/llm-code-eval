@@ -1107,6 +1107,7 @@ def write_report(run_dir, name, args, results, total, res):
          "settings": {"preset": args.preset, "max_tokens": args.max_tokens, "temperature": args.temperature,
                       **{k: getattr(args, k) for k in SAMPLING_KEYS},
                       "think": args.think, "reasoning_effort": args.reasoning_effort,
+                      "max_completion_tokens": getattr(args, "max_completion_tokens", None),
                       "task_timeout_min": args.task_timeout_min, "budget_min": args.budget_min,
                       "limits": args.limits, "suite": args.suite},
          "minutes": round(total / 60, 1), "results": results}, indent=2), encoding="utf-8")

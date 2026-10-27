@@ -63,5 +63,37 @@
     "boat": 6,
     "overall": 7.5,
     "note": "high: clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail"
+  },
+  "20261026-213554_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-max-SCENE": {
+    "water": 7,
+    "island": 7,
+    "light": 7,
+    "boat": 7,
+    "overall": 7.5,
+    "note": "max: teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat"
+  },
+  "20261026-222021_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-high-SCENE": {
+    "water": 5,
+    "island": 7,
+    "light": 7,
+    "boat": 7,
+    "overall": 6.5,
+    "note": "high: the water shows a checkered grid pattern (a repeating ripple texture); island with palms and rocks; sailboat clear"
+  },
+  "20261026-231606_DeepSeek-V4.1-Flash-1017-Maya-S-max-SCENE": {
+    "water": 7,
+    "island": 7,
+    "light": 7,
+    "boat": 6,
+    "overall": 7,
+    "note": "max: sand beach and green island with palms and rocks; sun glints on the water; the boat is small"
+  },
+  "20261027-000138_DeepSeek-V4.1-Flash-1017-Maya-S-high-SCENE": {
+    "water": 8,
+    "island": 5,
+    "light": 6,
+    "boat": 7,
+    "overall": 6.5,
+    "note": "high: turquoise water with strong glints, but the island's peak is almost black (lighting); sailboat clear"
   }
 }

@@ -364,6 +364,8 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
 | DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | low | 100% | **6.5** | 28.0 min | 40.1k (32.8k) | sun glint and foam rings around the island; palm crowns look bushy and odd |
+| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | max, 60 min | 100% | **7.5** | 44.5 min | 60.0k (51.2k) | teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
+| DeepSeek-V4.1-Flash Maya-S · Maya | max, 60 min | 96% | **7** | 45.5 min | 60.2k (50.8k) | sand beach and green island with palms and rocks; sun glints on the water; the boat is small |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
@@ -373,7 +375,7 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 - **Two more DeepSeek-V4.1 runs on a different file (EXL2 2.9 bpw, Maya, 26 Oct, both at 100%):** `low` finished in 28.0 min (6.5 by eye), `high` in 30.2 min (7.5 by eye). Their thinking stopped at 32.8k tokens again (32,781 and 32,796), so `low` and `high` used almost the same number of tokens (40.1k and 41.6k): with the cap, the level barely changes this task.
 - **DeepSeek-V4.1 made the best scenes** (7–7.5 by eye), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 the fastest and simplest (4).
 - **Qwen3.8-Flash-Next NVFP4 in Strata did it in 1.2 min**, 20–30 times faster than the others, but its picture is the weakest of the finished ones.
-- **Thinking stopped at about 32.8k tokens in every DeepSeek and GLM run** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9: Maya (and Strata with DeepSeek) cut thinking there, so a longer limit barely helps: DeepSeek started with a 180-minute limit still finished in 29 min (it counts as a second run of the same setting, mean 93.5%), GLM-5.3 EXL3 4.10 bpw used 40 min.
+- **Thinking stopped at about 32.8k tokens in the 30-minute runs** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9. Four DeepSeek runs of 26–27 Oct with a 60-minute limit thought 51k–63k tokens instead, so the cap was not there for them. The cause is not yet known.
 
 ## Scene suite: task
 

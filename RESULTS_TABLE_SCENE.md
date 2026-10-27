@@ -72,8 +72,12 @@ How the picture looks, 1-10 per part (from [ratings_scene.json](ratings_scene.js
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 26.10 12:59 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | high | 100% | **7.5** | 7 | 7 | 7 | 7 | turquoise water with a sun glint and a foam ring, green island with a beach, visible sun, a clear sailboat |
 | 26.10 19:29 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | high | 100% | **7.5** | 8 | 7 | 7 | 6 | high: clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
+| 26.10 21:35 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | max, 60 min | 100% | **7.5** | 7 | 7 | 7 | 7 | max: teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
 | 26.10 12:08 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 100% | **7** | 6 | 8 | 6 | 6 | the most complete island (sand, grass, rocky peak, palms, shore foam); water ripples repeat in a visible grid |
+| 26.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | max, 60 min | 96% | **7** | 7 | 7 | 7 | 6 | max: sand beach and green island with palms and rocks; sun glints on the water; the boat is small |
 | 26.10 16:43 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | low | 100% | **6.5** | 7 | 6 | 7 | 6 | low: sun glint and foam rings around the island; palm crowns look bushy and odd; sailboat small but clear |
+| 26.10 22:20 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | high, 60 min | 100% | **6.5** | 5 | 7 | 7 | 7 | high: the water shows a checkered grid pattern (a repeating ripple texture); island with palms and rocks; sailboat clear |
+| 27.10 00:01 | DeepSeek-V4.1-Flash | Maya-S | Maya | high, 60 min | 96% | **6.5** | 8 | 5 | 6 | 7 | high: turquoise water with strong glints, but the island's peak is almost black (lighting); sailboat clear |
 | 26.10 14:34 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | high, 180 min | 96% | **6** | 8 | 4 | 6 | 5 | turquoise water with a sun-glitter path and foam, a good sky; the island and palms are very dark |
 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 96% | **5** | 8 | 3 | 4 | 5 | the best-looking deep-blue waves, but the island is a black silhouette (backlit, no fill light) |
 | 26.10 12:55 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | medium | 100% | **4** | 4 | 3 | 5 | 3 | a flat sand cone with tiny palms; dark blocky water; the boat is a thin sail on an almost invisible hull |
