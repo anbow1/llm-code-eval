@@ -1,15 +1,15 @@
 # llm-code-eval — a quick coding test for local LLMs
 
-The repository has five test suites, kept apart everywhere:
+The repository has six test suites, kept apart everywhere:
 
-| | Base | Hard | Practical | Tools | Scene |
-|---|---|---|---|---|---|
-| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) | 1 large graphics task: boat on an ocean next to an island ([tasks_scene.py](tasks_scene.py)) |
-| Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` | `--suite scene` |
-| Default limits | lenient (comparable with older runs) | lenient | practical | practical | 60 min, 98,304 tokens |
-| Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` |
-| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | RESULTS_TABLE_SCENE.md, scene_gallery.jpg (after the first run) |
-| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg |
+| | Base | Hard | Practical | Tools | Scene | Engineering |
+|---|---|---|---|---|---|---|
+| Tasks | 10: 6 × TypeScript + Three.js, 4 × Python ([tasks.py](tasks.py)) | 6: 3 × Three.js, 3 × Python ([tasks_hard.py](tasks_hard.py)) | 6 everyday jobs: edit, bug fix, refactor, SQL, JSON, long context ([tasks_practical.py](tasks_practical.py)) | 7 tool-calling tasks incl. a small coding agent ([tasks_tools.py](tasks_tools.py)) | 1 large graphics task: boat on an ocean next to an island ([tasks_scene.py](tasks_scene.py)) | 2 physics and mechanics tasks: a Unitas 6497 watch movement, a rocket launch ([tasks_engineering.py](tasks_engineering.py)) |
+| Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` | `--suite scene` | `--suite engineering` |
+| Default limits | lenient (comparable with older runs) | lenient | practical | practical | 60 min, 98,304 tokens | 60 min per task, 98,304 tokens |
+| Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` | `results_engineering/` |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | RESULTS_TABLE_SCENE.md, scene_gallery.jpg (after the first run) | RESULTS_TABLE_ENGINEERING.md (after the first run) |
+| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg | – |
 
 The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3-Flash has been run on them. All GLM-5.3-Flash variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md).
 
@@ -257,6 +257,7 @@ The limits decide what counts as a useful answer. A local model that thinks for 
 |---|---|---|---|---|
 | **practical** | 10 min (tool tasks: 5 min for all turns) | 32,768 | base 30 min, hard 30 min, practical 30 min, tools 15 min | `practical`, `tools` |
 | lenient | 60 min | 98,304 | none | `base`, `hard` (so new runs stay comparable with the old ones) |
+| engineering suite | 60 min | 98,304 | 130 min | `engineering` (two large tasks) |
 | scene suite | 60 min | 98,304 | 65 min | `scene` (one large task; the 30-min runs were cut off while still working) |
 
 The whole battery (all four suites) then takes at most about 1 h 45 min; a usable setup finishes it in 30–45 minutes. The tables also show **Score @10 min/32k** for every setting: the score with the practical limits applied after the fact to runs made with the lenient ones (later tasks count as 0). Dense Qwen3.8-27B keeps its score; Flash-Next in llama.cpp and GLM lose 8–25 points.
@@ -407,6 +408,24 @@ One larger Three.js task where the picture matters, for telling the strongest se
 The boat is sampled inside `renderer.render`, so its position and `__ocean.time()` belong to the same frame even when the software renderer runs at 1 frame per second; motion checks wait long enough for a frame. `python regrade.py --suite scene --tasks s1_ocean_island` builds and checks the saved `main.ts` files again after a change to the checks.
 
 The checks were tested with a reference solution ([reference/s1_ocean_island.ts](reference/s1_ocean_island.ts), 23 of 23) and with broken versions of it: a boat on its own sine wave, leaves that do not move, and a `heightAt` that does not match the shader each lose the right checks.
+
+## Engineering suite: tasks
+
+Two Three.js tasks that test physics and mechanics, not only the picture. Run with `--suite engineering` (60 min and 98,304 tokens per task, 1280 x 720). Each run saves a `scene.html` per task, like the scene suite. The checks read the simulation through hooks, so they test the numbers:
+
+**e1_watch_unitas:** a hand-wound ETA/Unitas 6497-1 movement (17 jewels, 18,000 vibrations per hour) in an exploded view, at least 40 named parts with labels. Checks (17):
+- **balance:** 2.5 Hz (±2%, measured from 20 s of simulated time), amplitude 180–360°, no decay;
+- **escapement:** the 15-tooth escape wheel moves in ticks, one tooth per tick, 5 ticks per second;
+- **gear train:** seconds hand one turn per 60 s, minute hand per hour, hour hand per 12 h;
+- **parts:** at least 40 with unique names, the 17 jewels (`jewel_1` ... `jewel_17`), `explode(0)` assembles and `explode(1)` separates them, and the parts are lit and visible;
+- strict TypeScript, loads, renders, resize, no console errors.
+
+**e2_rocket_launch:** a Falcon-9-like launch from Cape Canaveral, driven by a physics model (thrust-to-weight 1.3, a 200 s burn with the mass falling from 550 t to 220 t, gravity falling with altitude, a gravity turn). Checks (14):
+- **physics:** net acceleration at liftoff 0.1–0.6 g, vertical at the start, a pitch that only grows after 10 s and reaches 0.3–1.57 rad at 150 s, acceleration growing as the propellant burns, 100 km reached;
+- **pictures:** an orange or yellow plume at 2 s (`plume_t2.png`), a dark sky with stars above 100 km (`karman.png`), a trail of at least 50 points;
+- strict TypeScript, loads, renders, resize, no console errors.
+
+Both checks were tested on reference solutions ([reference/e1_watch_unitas.ts](reference/e1_watch_unitas.ts), 17 of 17; [reference/e2_rocket_launch.ts](reference/e2_rocket_launch.ts), 14 of 14) and on eight broken versions: a 3 Hz balance, a smooth escape wheel without ticks, an hour hand at the minute hand's speed, parts that do not separate, no gravity turn, thrust-to-weight 2.5, a constant mass and a sky that stays blue. Each lost the right checks.
 
 ## Output
 

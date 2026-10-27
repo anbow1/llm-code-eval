@@ -145,10 +145,15 @@ SUITES = {
               "1 large graphics task: a boat rocking on an ocean next to a tropical island (Three.js, 60 min). The "
               "checks test what can be measured (the boat floats on the waves the shader draws, swaying leaves, "
               "shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html."),
+    "engineering": ("results_engineering", "RESULTS_TABLE_ENGINEERING.md",
+                    "# Results table: engineering suite (--suite engineering)",
+                    "2 Three.js tasks that test physics and mechanics (60 min each): a Unitas 6497-1 watch movement in an "
+                    "exploded view (balance at 2.5 Hz, escapement and gear ratios), and a rocket launch from Cape "
+                    "Canaveral (thrust-to-weight, burn, gravity turn, the Karman line with a dark sky and stars)."),
 }
 # the suites the family tables (GLM, DeepSeek) and their mean cover; the scene suite has its own table and gallery
-FAMILY_SUITES = {k: v for k, v in SUITES.items() if k != "scene"}
-N_TASKS = {"base": 10, "hard": 6, "practical": 6, "tools": 7, "scene": 1}
+FAMILY_SUITES = {k: v for k, v in SUITES.items() if k not in ("scene", "engineering")}
+N_TASKS = {"base": 10, "hard": 6, "practical": 6, "tools": 7, "scene": 1, "engineering": 2}
 # "practical" limits, applied after the fact to runs made with the older, lenient ones
 PRACTICAL_SECONDS, PRACTICAL_TOKENS = 600, 32768
 BROKEN_STATUS = ("max_tokens", "task_timeout", "no_answer", "max_turns")

@@ -36,6 +36,7 @@ import tasks_hard as TH
 import tasks_practical as TP
 import tasks_tools as TT
 import tasks_scene as TSC
+import tasks_engineering as TEN
 
 SUITES = {  # module, results folder, run-name suffix
     "base": (T, "results", ""),
@@ -43,15 +44,17 @@ SUITES = {  # module, results folder, run-name suffix
     "practical": (TP, "results_practical", "-PRACTICAL"),
     "tools": (TT, "results_tools", "-TOOLS"),
     "scene": (TSC, "results_scene", "-SCENE"),
+    "engineering": (TEN, "results_engineering", "-ENG"),
 }
 # --limits. practical: what is still useful in daily work. 95% of the fully solved tasks so far took under
 # 10 minutes and under 19k tokens; above 32k tokens only about half were solved. lenient: the old defaults.
 LIMITS = {
-    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 60}, "default_timeout_min": 10,
-                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 65}},
+    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 60, "engineering": 60},
+                  "default_timeout_min": 10,
+                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 65, "engineering": 130}},
     # scene: one large task, 60 min (30 min was too short for the large models: they were cut off while still working)
-    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 60}, "default_timeout_min": 60,
-                "budget_min": {"scene": 65}},
+    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 60, "engineering": 60}, "default_timeout_min": 60,
+                "budget_min": {"scene": 65, "engineering": 130}},
 }
 
 HERE = Path(__file__).resolve().parent
@@ -609,6 +612,7 @@ def run_three_task(task, code, workdir, browser):
     page.on("console", lambda m: errors.append(f"console.error: {m.text}")
             if m.type == "error" else None)
     ctx = Ctx(page)
+    ctx.workdir = workdir  # checks may save extra pictures here (e.g. the rocket's plume and the Karman line)
     try:
         page.goto(html.as_uri())
         try:
@@ -856,7 +860,8 @@ def main():
                     help="easy = count the 7s from 1 to 1000; hard = digit sums (needs real thinking)")
     ap.add_argument("--suite", choices=list(SUITES), default="base",
                     help="base = 10 original tasks, hard = 6 harder tasks, practical = 6 everyday tasks, "
-                         "tools = 7 tool-calling tasks, scene = 1 large graphics task (ocean, boat, island)")
+                         "tools = 7 tool-calling tasks, scene = 1 large graphics task (ocean, boat, island), "
+                         "engineering = 2 physics and mechanics tasks (watch movement, rocket launch)")
     ap.add_argument("--only", choices=["python", "three"], default=None)
     ap.add_argument("--tasks", default="", help="comma list of task ids, e.g. t5_raycast_click,p1_parse_duration")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
