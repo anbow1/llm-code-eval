@@ -257,7 +257,7 @@ The limits decide what counts as a useful answer. A local model that thinks for 
 |---|---|---|---|---|
 | **practical** | 10 min (tool tasks: 5 min for all turns) | 32,768 | base 30 min, hard 30 min, practical 30 min, tools 15 min | `practical`, `tools` |
 | lenient | 60 min | 98,304 | none | `base`, `hard` (so new runs stay comparable with the old ones) |
-| engineering suite | 60 min | 98,304 | 130 min | `engineering` (two large tasks) |
+| engineering suite | 120 min | 196,608 | 245 min | `engineering` (two large tasks) |
 | scene suite | 60 min | 98,304 | 65 min | `scene` (one large task; the 30-min runs were cut off while still working) |
 
 The whole battery (all four suites) then takes at most about 1 h 45 min; a usable setup finishes it in 30–45 minutes. The tables also show **Score @10 min/32k** for every setting: the score with the practical limits applied after the fact to runs made with the lenient ones (later tasks count as 0). Dense Qwen3.8-27B keeps its score; Flash-Next in llama.cpp and GLM lose 8–25 points.
@@ -411,7 +411,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 ## Engineering suite: tasks
 
-Two Three.js tasks that test physics and mechanics, not only the picture. Run with `--suite engineering` (60 min and 98,304 tokens per task, 1280 x 720). Each run saves a `scene.html` per task, like the scene suite. The checks read the simulation through hooks, so they test the numbers:
+Two Three.js tasks that test physics and mechanics, not only the picture. Run with `--suite engineering` (120 min and 196,608 tokens per task, 1280 x 720; slow setups at about 25 tok/s need that much). Each run saves a `scene.html` per task, like the scene suite. The checks read the simulation through hooks, so they test the numbers:
 
 **e1_watch_unitas:** a hand-wound ETA/Unitas 6497-1 movement (17 jewels, 18,000 vibrations per hour = 5 beats per second) that works as a mechanism, with simplified shapes. Real toothed wheels (extruded shapes) and pinions: barrel → center wheel (1 turn per hour) → third → fourth (1 turn per minute) → escape wheel. The fork flips each time the balance passes its centre, and only then the escape wheel moves half a tooth (12°, one turn per 6 s), so the whole train moves in small jumps, 5 per second. It starts assembled and running; E or a button animates the exploded view. At least 40 named parts with labels. It must look as realistic as possible, like a macro photograph: physically based materials with reflections, Geneva stripes on the bridges, perlage on the plate, polished bevels, heat-blued screws, ruby jewels in gold chatons, a blued hairspring, engraving, studio lighting (all procedural, no downloaded textures). Checks (22):
 - **balance:** 2.5 Hz (±2%, measured from 20 s of simulated time), amplitude 180–360°, no decay;

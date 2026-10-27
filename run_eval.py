@@ -49,12 +49,13 @@ SUITES = {  # module, results folder, run-name suffix
 # --limits. practical: what is still useful in daily work. 95% of the fully solved tasks so far took under
 # 10 minutes and under 19k tokens; above 32k tokens only about half were solved. lenient: the old defaults.
 LIMITS = {
-    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 60, "engineering": 60},
+    "practical": {"max_tokens": 32768, "task_timeout_min": {"tools": 5, "scene": 60, "engineering": 120},
                   "default_timeout_min": 10,
-                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 65, "engineering": 130}},
+                  "budget_min": {"base": 30, "hard": 30, "practical": 30, "tools": 15, "scene": 65, "engineering": 245}},
     # scene: one large task, 60 min (30 min was too short for the large models: they were cut off while still working)
-    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 60, "engineering": 60}, "default_timeout_min": 60,
-                "budget_min": {"scene": 65, "engineering": 130}},
+    # engineering: 120 min per task (slow setups at ~25 tok/s need about 180k tokens in that time)
+    "lenient": {"max_tokens": 98304, "task_timeout_min": {"scene": 60, "engineering": 120}, "default_timeout_min": 60,
+                "budget_min": {"scene": 65, "engineering": 245}, "suite_max_tokens": {"engineering": 196608}},
 }
 
 HERE = Path(__file__).resolve().parent
@@ -875,7 +876,7 @@ def main():
         args.limits = "practical" if args.suite in ("practical", "tools") else "lenient"  # scene: lenient, 60 min
     L = LIMITS[args.limits]
     if args.max_tokens is None:
-        args.max_tokens = L["max_tokens"]
+        args.max_tokens = L.get("suite_max_tokens", {}).get(args.suite, L["max_tokens"])
     if args.task_timeout_min is None:
         args.task_timeout_min = L["task_timeout_min"].get(args.suite, L["default_timeout_min"])
     if args.budget_min is None:
