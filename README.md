@@ -422,7 +422,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 | Qwen3.8-Flash-Next NVFP4 (Strata) / low | 86% | 4.5 | 38% | 1 | 5 min | 141 |
 
 - DeepSeek gets the mechanism and the physics almost fully right, but needs about an hour per task at 23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, rocket with a flag, plume, haze) and watch finishes (perlage, Geneva stripes, blued parts).
-- Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile; at low and medium its launch is a white screen (fog or overexposure) and the watch skips the gear data.
+- Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile; at low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky); and the watch skips the gear data.
 - These runs were made with the earlier rocket prompt (no playback speed, no chase camera), so the three checks for those are left out of their scores. The scores were re-graded after four test fixes, see below.
 - All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).
 

@@ -4,19 +4,19 @@
     "watch": 4.5,
     "watch_note": "gold plate with toothed wheels, a balance with a spiral hairspring and red jewels; flat lighting, no finishes, crude",
     "rocket": 1,
-    "rocket_note": "the frame is white at liftoff and above 100 km (fog or overexposure); the rocket is never seen"
+    "rocket_note": "white frame: UnrealBloomPass (threshold 0.6, strength 1.2-1.7) on the HDR Sky addon blows the whole picture out; without the bloom the same code shows a red lattice tower, the rocket, the pad and a blue sky"
   },
   "20261027-213151_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-medium-ENG": {
     "watch": 2,
     "watch_note": "the camera sits inside the movement: glare, a few parts out of focus, the mechanism cannot be seen",
     "rocket": 1.5,
-    "rocket_note": "all white on the pad; above 100 km a black sky with a few stars, no rocket"
+    "rocket_note": "white frame for the same reason (bloom strength 1.5-2.0 on the bright Sky); above 100 km a black sky with a few stars, no rocket"
   },
   "20261027-213604_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-xhigh-ENG": {
     "watch": 4,
     "watch_note": "a guilloche plate, but one large Geneva-striped bridge block covers almost the whole train; labels everywhere",
     "rocket": 0,
-    "rocket_note": "does not compile, no picture"
+    "rocket_note": "does not compile (TS2339) and stops at startup with 'Cannot read properties of undefined (reading position)': a white page"
   },
   "20261028-020509_DeepSeek-V4.1-Flash-1017-Maya-S-high-ENG": {
     "watch": 6,
