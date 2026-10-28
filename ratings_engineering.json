@@ -1,0 +1,33 @@
+{
+  "_about": "By-eye ratings of the engineering suite, 1-10 per task. Rated by Claude from the saved pictures (software renderer): the watch screenshot, and the rocket at liftoff (plume_t2.png), at 4 s (smoke_t4.png) and above 100 km (karman.png). 0 = no picture. Edit freely; make_summary.py and make_top10.py read this file. Keys are run folder names.",
+  "20261027-212649_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-low-ENG": {
+    "watch": 4.5,
+    "watch_note": "gold plate with toothed wheels, a balance with a spiral hairspring and red jewels; flat lighting, no finishes, crude",
+    "rocket": 1,
+    "rocket_note": "the frame is white at liftoff and above 100 km (fog or overexposure); the rocket is never seen"
+  },
+  "20261027-213151_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-medium-ENG": {
+    "watch": 2,
+    "watch_note": "the camera sits inside the movement: glare, a few parts out of focus, the mechanism cannot be seen",
+    "rocket": 1.5,
+    "rocket_note": "all white on the pad; above 100 km a black sky with a few stars, no rocket"
+  },
+  "20261027-213604_Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-xhigh-ENG": {
+    "watch": 4,
+    "watch_note": "a guilloche plate, but one large Geneva-striped bridge block covers almost the whole train; labels everywhere",
+    "rocket": 0,
+    "rocket_note": "does not compile, no picture"
+  },
+  "20261028-020509_DeepSeek-V4.1-Flash-1017-Maya-S-high-ENG": {
+    "watch": 6,
+    "watch_note": "perlage plate (too coarse, looks knurled), Geneva-striped bridges, wheels visible between them, blued hands and hairspring",
+    "rocket": 6.5,
+    "rocket_note": "lattice tower, white rocket with a flag, a bright plume with a warm glow, haze; little steam; in space the sun, stars and the trail"
+  },
+  "20261028-035701_DeepSeek-V4.1-Flash-1017-Maya-S-max-ENG": {
+    "watch": 5,
+    "watch_note": "gilded plate with perlage and a domed glass rim, but a strong depth-of-field blur hides the mechanism",
+    "rocket": 6,
+    "rocket_note": "tower, lightning masts with wires, low buildings, a white-hot plume; above 100 km the sky is still dark blue"
+  }
+}

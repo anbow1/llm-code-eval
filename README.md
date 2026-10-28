@@ -8,8 +8,8 @@ The repository has six test suites, kept apart everywhere:
 | Run with | `--suite base` (default) | `--suite hard` | `--suite practical` | `--suite tools` | `--suite scene` | `--suite engineering` |
 | Default limits | lenient (comparable with older runs) | lenient | practical | practical | 60 min, 98,304 tokens | 60 min per task, 98,304 tokens |
 | Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` | `results_engineering/` |
-| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | RESULTS_TABLE_SCENE.md, scene_gallery.jpg (after the first run) | RESULTS_TABLE_ENGINEERING.md (after the first run) |
-| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg | – |
+| Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | [RESULTS_TABLE_SCENE.md](RESULTS_TABLE_SCENE.md), scene_gallery.jpg | [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md), engineering_gallery.jpg |
+| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg | engineering_gallery.jpg |
 
 The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3-Flash has been run on them. All GLM-5.3-Flash variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md).
 
@@ -409,6 +409,25 @@ The boat is sampled inside `renderer.render`, so its position and `__ocean.time(
 
 The checks were tested with a reference solution ([reference/s1_ocean_island.ts](reference/s1_ocean_island.ts), 23 of 23) and with broken versions of it: a boat on its own sine wave, leaves that do not move, and a `heightAt` that does not match the shader each lose the right checks.
 
+## Engineering suite: results (27–28 Oct 2026)
+
+![Engineering suite gallery: the watch and the rocket, best by eye per model](engineering_gallery.jpg)
+
+| Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Time | tok/s |
+|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash Maya-S / max | 100% | 5 | 94% | 6 | 121 min | 23 |
+| DeepSeek-V4.1-Flash Maya-S / high | 95% | 6 | 94% | 6.5 | 112 min | 23 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / xhigh | 100% | 4 | 0% (does not compile) | 0 | 24 min | 126 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / medium | 86% | 2 | 75% | 1.5 | 4 min | 140 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / low | 86% | 4.5 | 38% | 1 | 5 min | 141 |
+
+- DeepSeek gets the mechanism and the physics almost fully right, but needs about an hour per task at 23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, rocket with a flag, plume, haze) and watch finishes (perlage, Geneva stripes, blued parts).
+- Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile; at low and medium its launch is a white screen (fog or overexposure) and the watch skips the gear data.
+- These runs were made with the earlier rocket prompt (no playback speed, no chase camera), so the three checks for those are left out of their scores. The scores were re-graded after four test fixes, see below.
+- All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).
+
+Test fixes on 28 Oct (re-graded with `regrade.py`): the escape wheel was measured at exactly t = 1 s, where 120 summed steps of 1/120 s land just before the 5th beat, so every correct `floor(5*t)` lost a beat (now measured at 1.1 s); the exploded view was read from local positions and right after `explode()`, which missed parts on a moving parent and animated views (now world positions, after the parts stop moving; the prompt now says `explode(f)` applies at once); a blank white frame passed the flame-core and smoke checks (now rejected); the flame check needed a deep orange and the space check a mean brightness, which failed a realistic white-yellow flame and a sun in the frame (now a warm colour and the median); the resize check waited 0.4 s, too short for heavy scenes in the software renderer (now 3 s).
+
 ## Engineering suite: tasks
 
 Two Three.js tasks that test physics and mechanics, not only the picture. Run with `--suite engineering` (120 min and 196,608 tokens per task, 1280 x 720; slow setups at about 25 tok/s need that much). Each run saves a `scene.html` per task, like the scene suite. The checks read the simulation through hooks, so they test the numbers:
@@ -420,14 +439,15 @@ Two Three.js tasks that test physics and mechanics, not only the picture. Run wi
 - **parts:** at least 40 with unique names, the 17 jewels (`jewel_1` ... `jewel_17`), `explode(0)` assembles and `explode(1)` separates them, and the parts are lit and visible;
 - strict TypeScript, loads, renders, resize, no console errors.
 
-**e2_rocket_launch:** a Falcon-9-like launch from Cape Canaveral, driven by a physics model (thrust-to-weight 1.3, a 200 s burn with the mass falling from 550 t to 220 t, gravity falling with altitude, a gravity turn). It must look as realistic as possible, like a launch photograph (physically based materials, sun shadows, atmospheric scattering, aerial perspective, bloom on the flame, procedural textures): the Florida coast with scrub, roads, low buildings and the Atlantic behind the pad, haze, a concrete pad with a flame trench, a lattice tower and lightning masts, a white rocket with an interstage, nozzles and markings, a white-hot flame core fading to orange, a flickering light from the plume, and soft billowing steam and smoke rolling sideways out of the trench. The camera is low near the pad at liftoff, then a long lens tracks the rocket. Checks (16):
+**e2_rocket_launch:** a Falcon-9-like launch from Cape Canaveral, driven by a physics model (thrust-to-weight 1.3, a 200 s burn with the mass falling from 550 t to 220 t, gravity falling with altitude, a gravity turn). It must look as realistic as possible, like a launch photograph (physically based materials, sun shadows, atmospheric scattering, aerial perspective, bloom on the flame, procedural textures): the Florida coast with scrub, roads, low buildings and the Atlantic behind the pad, haze, a concrete pad with a flame trench, a lattice tower and lightning masts, a white rocket with an interstage, nozzles and markings, a white-hot flame core fading to orange, a flickering light from the plume, and soft billowing steam and smoke rolling sideways out of the trench. The flight lasts minutes, so playback runs at x1 for the liftoff and then x10, with a switch (keys 1/2/3 and buttons: x1, x10, x30) and an overlay with T+, altitude and speed. The camera is low near the pad at liftoff; once the rocket clears the tower the viewer travels with it, close to the rocket (a chase plane), up to space. Checks (19):
 - **physics:** net acceleration at liftoff 0.1–0.6 g, vertical at the start, a pitch that only grows after 10 s and reaches 0.3–1.57 rad at 150 s, acceleration growing as the propellant burns, 100 km reached;
-- **pictures:** an orange or yellow plume at 2 s and its white-hot core (`plume_t2.png`), white steam and smoke clouds at the pad at 4 s (at least 3% of the lower half, `smoke_t4.png`), a dark sky with stars above 100 km (`karman.png`), a trail of at least 50 points;
+- **playback and camera:** speed 1 at 1 s and 10 at 20 s, keys 3/1/2 give x30/x1/x10; the camera within 250 m of the rocket at 60 s and 150 s;
+- **pictures:** a warm (yellow, orange or warm-white) plume at 2 s and its white-hot core (`plume_t2.png`), white steam and smoke clouds at the pad at 4 s (3–85% of the lower half, `smoke_t4.png`), a dark sky with stars above 100 km (median brightness of the top quarter, so a sun in the frame does not count, `karman.png`), a trail of at least 50 points. A blank frame (all white from fog or overexposure) passes none of these;
 - strict TypeScript, loads, renders, resize, no console errors.
 
 The realism itself (the watch finishes and materials; the coast, the tower, how soft the smoke looks) cannot be measured; both tasks will be rated by eye from the saved pictures, like the scene suite. The references only show that the checks can be passed; they are not meant to look realistic.
 
-Both checks were tested on reference solutions ([reference/e1_watch_unitas.ts](reference/e1_watch_unitas.ts), 22 of 22; [reference/e2_rocket_launch.ts](reference/e2_rocket_launch.ts), 16 of 16) and on broken versions: a 3 Hz balance, a smooth escape wheel without ticks, a full tooth per beat, a balance that passes its centre off the beat (cos instead of sin), wheels that do not mesh, meshing wheels turning the same way, an hour hand at the minute hand's speed, parts that do not separate, no gravity turn, thrust-to-weight 2.5, a constant mass and a sky that stays blue. Each lost the right checks.
+Both checks were tested on reference solutions ([reference/e1_watch_unitas.ts](reference/e1_watch_unitas.ts), 22 of 22; [reference/e2_rocket_launch.ts](reference/e2_rocket_launch.ts), 19 of 19) and on broken versions: no speed change after liftoff, a camera that stays on the ground, a 3 Hz balance, a smooth escape wheel without ticks, a full tooth per beat, a balance that passes its centre off the beat (cos instead of sin), wheels that do not mesh, meshing wheels turning the same way, an hour hand at the minute hand's speed, parts that do not separate, no gravity turn, thrust-to-weight 2.5, a constant mass and a sky that stays blue. Each lost the right checks.
 
 ## Comparing with other APIs and harnesses
 

@@ -110,7 +110,8 @@ Timing (window.__watch, the simulated clock)
   Return { t, balance, pallet, escape, fourth, third, center, barrel, second, minute, hour }, angles not wrapped.
 - paused (boolean): when true, the render loop must not call step(); it keeps rendering.
 - explode(f): f in [0, 1]. 0 = assembled (every part at its place in the movement), 1 = exploded (every part moved
-  away from the centre, along its own direction, clearly separated).
+  away from the centre, along its own direction, clearly separated). It applies the view at once (only the E key and
+  the button animate).
 - The movement starts ASSEMBLED and running, so the mechanism can be watched working; the key E (and a button)
   animates between the assembled and the exploded view.
 - The render loop calls step(min(delta, 1/30)) when not paused. Rotate every wheel, pinion, the fork, the balance

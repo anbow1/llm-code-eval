@@ -63,3 +63,15 @@
 - PASS no_console_errors
   - note: src/e2_rocket_launch.ts(749,19): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.
   - note: src/e2_rocket_launch.ts(796,48): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 77% -> 77%, e2_rocket_launch 50% -> 38%. New overall: 57.4%.
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 77% -> 82%. New overall: 59.7%.
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 82% -> 86%. New overall: 61.9%.

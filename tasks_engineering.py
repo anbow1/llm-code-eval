@@ -30,7 +30,7 @@ def _mod_dist(a, b):
 
 # ---------------------------------------------------------------- e1: watch
 WATCH_JS = r"""
-() => {
+async () => {
   const w = window.__watch;
   if (!w || typeof w.step !== 'function' || typeof w.state !== 'function' || typeof w.reset !== 'function'
       || typeof w.explode !== 'function' || !Array.isArray(w.parts)) return null;
@@ -50,10 +50,10 @@ WATCH_JS = r"""
     out.kin.push({ center: s.center, third: s.third, fourth: s.fourth, escape: s.escape, barrel: s.barrel,
                    second: s.second, minute: s.minute });
   }
-  // escape wheel: one second in 1/120 s steps
+  // escape wheel: 1.1 s in 1/120 s steps (end between two beats: summed steps are not exact, 120 x 1/120 < 1)
   w.reset();
   const esc = [];
-  for (let i = 0; i <= 120; i++) { esc.push(w.state().escape); w.step(1 / 120); }
+  for (let i = 0; i <= 132; i++) { esc.push(w.state().escape); w.step(1 / 120); }
   out.esc = esc;
   // seconds / minute / hour hands: large steps, the hands must follow the time exactly
   w.reset(); w.step(30); out.s30 = w.state().second;
@@ -66,7 +66,25 @@ WATCH_JS = r"""
   out.nparts = parts.length;
   out.names = parts.map(p => (p && p.name) || '');
   out.jewels = parts.filter(p => /^jewel_\d+$/.test((p && p.name) || '')).length;
-  w.explode(0); const p0 = parts.map(p => [p.position.x, p.position.y, p.position.z]);
+  // world positions (a part may hang on a moving parent); wait until an animated explode has settled
+  const wpos = () => parts.map(p => {
+    if (!p || !p.updateWorldMatrix) return [0, 0, 0];
+    p.updateWorldMatrix(true, false); const e = p.matrixWorld.elements; return [e[12], e[13], e[14]];
+  });
+  // count rendered frames, not milliseconds: one frame of a heavy scene can take most of a second here
+  const frame = () => new Promise(res => requestAnimationFrame(() => res(null)));
+  const settle = async () => {
+    let prev = wpos(), still = 0;
+    const t0 = performance.now();
+    while (still < 3 && performance.now() - t0 < 20000) {
+      await frame();
+      const cur = wpos();
+      const d = Math.max(0, ...cur.map((a, j) => Math.hypot(a[0] - prev[j][0], a[1] - prev[j][1], a[2] - prev[j][2])));
+      still = d < 1e-4 ? still + 1 : 0; prev = cur;
+    }
+    return prev;
+  };
+  w.explode(0); const p0 = await settle();
   // wheel data and assembled world positions (x, z) of the train wheels
   out.train = {};
   for (const n of ['mainspring_barrel', 'center_wheel', 'third_wheel', 'fourth_wheel', 'escape_wheel']) {
@@ -77,9 +95,9 @@ WATCH_JS = r"""
     out.train[n] = { x: e[12], z: e[14], teeth: u.teeth, pinion: u.pinion, radius: u.radius,
                      pinionRadius: u.pinionRadius };
   }
-  w.explode(1); const p1 = parts.map(p => [p.position.x, p.position.y, p.position.z]);
+  w.explode(1); const p1 = await settle();
   out.disp = p0.map((a, i) => Math.hypot(p1[i][0] - a[0], p1[i][1] - a[1], p1[i][2] - a[2]));
-  w.explode(0);
+  w.explode(0); await settle();
   w.paused = was;
   return out;
 }
@@ -189,7 +207,8 @@ def check_watch(ctx):
     esc = f["esc"]
     step = TWO_PI / 30
     multiples = all(abs(e / step - round(e / step)) < 0.01 for e in esc)
-    # 5 beats per second, half a tooth (12 degrees) per beat: one turn per 6 s, 10 turns per minute
+    # 5 beats per second, half a tooth (12 degrees) per beat: one turn per 6 s, 10 turns per minute.
+    # The last sample is at t = 1.1 s (5 beats), away from a beat, so float error in the summed steps cannot move it.
     res["escape_ticks"] = abs(abs(esc[-1] - esc[0]) - 5 * step) < 0.02 and multiples
     res["seconds_hand"] = _mod_dist(f["s30"], PI) <= 0.03 and _mod_dist(f["s60"], 0.0) <= 0.03
     res["minute_hand"] = _mod_dist(f["m900"], PI / 2) <= 0.02 and _mod_dist(f["m3600"], 0.0) <= 0.02
@@ -235,6 +254,31 @@ async () => {
 }
 """
 
+SPEED_JS = r"""
+async () => {
+  const r = window.__rocket;
+  r.paused = true; r.reset(); r.step(1);
+  const a = r.state().speed;
+  r.step(19);
+  const b = r.state().speed;
+  return { a, b };
+}
+"""
+
+CHASE_JS = r"""
+async (T) => {
+  const r = window.__rocket, cam = window.__camera;
+  r.paused = true; r.reset();
+  const n = Math.round(T / 0.25);
+  for (let i = 0; i < n; i++) r.step(0.25);
+  await new Promise(res => setTimeout(res, 2500));   // let a smoothed camera catch up
+  const p = r.trail[r.trail.length - 1];
+  cam.updateMatrixWorld();
+  const e = cam.matrixWorld.elements;
+  return Math.hypot(e[12] - p.x, e[13] - p.y, e[14] - p.z);
+}
+"""
+
 KARMAN_JS = r"""
 async () => {
   const r = window.__rocket;
@@ -261,9 +305,17 @@ def _flame_count(png):
     for y in range(small.size[1]):
         for x in range(small.size[0]):
             r, g, b = px[x, y]
-            if r > 200 and b < 140 and r - b > 90:  # bright and warm: an orange or yellow flame, not smoke or sky
+            if r > 190 and b < 170 and r - b > 60:  # bright and warm: yellow, orange or warm-white flame, not smoke or sky
                 n += 1
     return n
+
+
+def _detail(png):
+    """Standard deviation of the luminance: about 0 for a blank (all white, all black) picture."""
+    img = _png_pixels(png).convert("L").resize((160, 90))
+    d = list(img.getdata())
+    m = sum(d) / len(d)
+    return (sum((x - m) ** 2 for x in d) / len(d)) ** 0.5
 
 
 def _hot_core_count(png):
@@ -300,12 +352,12 @@ async () => {
 
 
 def _sky_metrics(png):
-    """Mean luminance of the top quarter (dark sky above 100 km) and bright star-like pixels in the top half."""
-    from PIL import Image
+    """Median luminance of the top quarter (dark sky above 100 km; the median ignores a sun in the frame) and bright
+    star-like pixels in the top half."""
     img = _png_pixels(png).convert("L")
     w, h = img.size
-    top = img.crop((0, 0, w, h // 4))
-    mean_top = sum(top.getdata()) / (w * (h // 4))
+    top = sorted(img.crop((0, 0, w, h // 4)).getdata())
+    mean_top = top[len(top) // 2]
     half = img.crop((0, 0, w, h // 2)).load()
     stars = 0
     for y in range(h // 2):
@@ -321,7 +373,8 @@ def check_rocket(ctx):
     if not f:
         for k in ("rocket_api", "liftoff_thrust_to_weight", "vertical_start", "gravity_turn",
                   "mass_burn_acc_grows", "karman_line_reached", "trail_visible", "plume_at_liftoff",
-                  "plume_hot_core", "smoke_clouds_at_pad", "karman_dark_sky_with_stars"):
+                  "plume_hot_core", "smoke_clouds_at_pad", "karman_dark_sky_with_stars", "speed_x1_then_x10",
+                  "speed_keys_1_10_30", "camera_follows_close"):
             res[k] = False
         return res
     res["rocket_api"] = True
@@ -342,20 +395,42 @@ def check_rocket(ctx):
     res["karman_line_reached"] = kar is not None and all(b >= a - 1e-6 for a, b in zip(alts, alts[1:]))
     res["trail_visible"] = f["trailLen"] >= 50
 
+    # playback speed: x1 at liftoff, then x10; keys 1/2/3 = x1/x10/x30
+    try:
+        sp = ctx.page.evaluate(SPEED_JS)
+        got = []
+        for key in ("3", "1", "2"):
+            ctx.page.keyboard.press(key)
+            ctx.page.wait_for_timeout(150)
+            got.append(ctx.page.evaluate("() => window.__rocket.state().speed"))
+        res["speed_x1_then_x10"] = sp["a"] == 1 and sp["b"] == 10
+        res["speed_keys_1_10_30"] = got == [30, 1, 10]
+    except Exception:
+        res["speed_x1_then_x10"] = res["speed_keys_1_10_30"] = False
+    # the viewer travels close to the rocket (at 60 s and 150 s of the flight)
+    try:
+        d60 = ctx.page.evaluate(CHASE_JS, 60)
+        d150 = ctx.page.evaluate(CHASE_JS, 150)
+        res["camera_follows_close"] = d60 <= 250 and d150 <= 250
+    except Exception:
+        res["camera_follows_close"] = False
+
     # pictures: the plume at the first seconds, the sky above the Karman line
     try:
         ctx.page.evaluate(PLUME_JS)
         png = ctx.page.screenshot()
         (ctx.workdir / "plume_t2.png").write_bytes(png)
         res["plume_at_liftoff"] = _flame_count(png) >= 40
-        res["plume_hot_core"] = _hot_core_count(png) >= 20
+        # a blank white frame (fog, overexposure) is neither a flame core nor smoke
+        hot = _hot_core_count(png)
+        res["plume_hot_core"] = 20 <= hot <= 0.15 * (VIEWPORT[0] // 2) * (VIEWPORT[1] // 2) and _detail(png) >= 8
     except Exception:
         res["plume_at_liftoff"] = res["plume_hot_core"] = False
     try:
         ctx.page.evaluate(SMOKE_JS)
         png = ctx.page.screenshot()
         (ctx.workdir / "smoke_t4.png").write_bytes(png)
-        res["smoke_clouds_at_pad"] = _smoke_share(png) >= 0.03
+        res["smoke_clouds_at_pad"] = 0.03 <= _smoke_share(png) <= 0.85 and _detail(png) >= 8
     except Exception:
         res["smoke_clouds_at_pad"] = False
     try:
@@ -374,6 +449,7 @@ THREE_TASKS = [
     {
         "id": "e1_watch_unitas",
         "viewport": VIEWPORT,
+        "resize_wait": 3000,  # heavy scenes under the software renderer need time to handle the resize
         "standalone": True,
         "prompt": """Build a working model of a hand-wound mechanical wristwatch movement: the ETA/Unitas 6497-1
 (17 jewels, 18 000 vibrations per hour = 2.5 Hz = 5 beats per second, hand-wound, Swiss lever escapement with a
@@ -438,7 +514,8 @@ Timing (window.__watch, the simulated clock)
   Return { t, balance, pallet, escape, fourth, third, center, barrel, second, minute, hour }, angles not wrapped.
 - paused (boolean): when true, the render loop must not call step(); it keeps rendering.
 - explode(f): f in [0, 1]. 0 = assembled (every part at its place in the movement), 1 = exploded (every part moved
-  away from the centre, along its own direction, clearly separated).
+  away from the centre, along its own direction, clearly separated). It applies the view at once (only the E key and
+  the button animate).
 - The movement starts ASSEMBLED and running, so the mechanism can be watched working; the key E (and a button)
   animates between the assembled and the exploded view.
 - The render loop calls step(min(delta, 1/30)) when not paused. Rotate every wheel, pinion, the fork, the balance
@@ -456,6 +533,7 @@ Reply with a single ```ts code block and nothing else.""",
     {
         "id": "e2_rocket_launch",
         "viewport": VIEWPORT,
+        "resize_wait": 3000,  # heavy scenes under the software renderer need time to handle the resize
         "standalone": True,
         "prompt": """Build a launch scene: a Falcon-9-like rocket (about 70 m tall, 3.7 m diameter, mass 550 000 kg at
 liftoff) on a launch pad at Cape Canaveral (a concrete pad with a launch tower), and its ascent to space.
@@ -473,11 +551,15 @@ Physics (window.__rocket, the simulated flight)
 - window.__rocket = {
     reset(): time 0, the rocket on the pad, trail emptied (keep the same array object),
     step(dt): advances the simulated time by dt seconds (any dt; use substeps inside),
-    state(): { t, alt (m), vel (m/s), acc (net vertical acceleration, m/s^2), pitch (rad) },
+    state(): { t, alt (m), vel (m/s), acc (net vertical acceleration, m/s^2), pitch (rad), speed },
     trail: array of {x, y, z} world points of the rocket, one per step() call,
     paused: boolean (when true, the render loop does not call step()),
   }
-- The render loop calls step(min(delta, 1/30)) when not paused.
+- Playback speed (the flight lasts minutes, too long to watch in real time): speed is the time scale. It is 1 for
+  the liftoff (t < 10 s) and then 10, unless the viewer chose a speed: keys 1, 2, 3 (and three buttons) set x1, x10,
+  x30. state().speed returns the current value; reset() clears the viewer's choice. Show the speed and the mission
+  data (T+ time, altitude in km, velocity) in a small overlay.
+- The render loop calls step(min(delta, 1/30) * speed) when not paused.
 
 Realism: as realistic as possible, it must look like a launch photograph, not a diagram
 - Setting: the Florida coast. Flat land with green scrub vegetation, the Atlantic Ocean on the horizon behind the pad,
@@ -494,8 +576,9 @@ Realism: as realistic as possible, it must look like a launch photograph, not a 
   that roll sideways out of the flame trench along the ground and then rise. Build the clouds from many soft particles
   or sprites, so they look soft and volumetric, not like solid spheres.
 - Ascent: the plume grows longer and wider as the air thins; the contrail stays in the sky and drifts slowly.
-- Camera: like launch photography: a low camera near the pad looking up at liftoff, then a long-lens shot that tracks
-  the rocket upward.
+- Camera: a low camera near the pad looking up at liftoff; once the rocket clears the tower the viewer travels with
+  it, close to the rocket (within about 100 m, like a chase plane), so the rocket, its plume and the view of the coast,
+  the curve of the Earth and then space are seen from near the rocket all the way up. Smooth camera motion.
 - Sky: from blue at the ground to black at 100 km (the Karman line). Stars must appear above about 70 km and be clearly
   visible above 100 km. Drive the sky from the rocket's altitude.
 - Trail: a visible white contrail behind the rocket, drawn from the trail points.
@@ -503,6 +586,9 @@ Realism: as realistic as possible, it must look like a launch photograph, not a 
 
 Reply with a single ```ts code block and nothing else.""",
         "check": check_rocket,
+        # added with the playback speed and the chase camera (regrade.py leaves them out for older runs)
+        "checks_since": {k: "20261028-060000" for k in ("speed_x1_then_x10", "speed_keys_1_10_30",
+                                                         "camera_follows_close")},
     },
 ]
 

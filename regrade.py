@@ -65,7 +65,12 @@ def main():
                 ts = wd / "main.ts"
                 if not ts.is_file() or not ts.read_text(encoding="utf-8").strip():
                     continue
-                checks, notes = R.run_three_task(defs[r["id"]], ts.read_text(encoding="utf-8"), wd, browser)
+                saved = ts.read_bytes()
+                checks, notes = R.run_three_task(defs[r["id"]], saved.decode("utf-8"), wd, browser)
+                ts.write_bytes(saved)  # keep the model's file exactly as it was (line endings too)
+                # checks added with a later prompt do not apply to runs made with the earlier prompt
+                since = defs[r["id"]].get("checks_since", {})
+                checks = {k: v for k, v in checks.items() if f.parent.name[:15] >= since.get(k, "")}
             elif r["kind"] == "python":
                 sol = wd / "solution.py"
                 saved = sol.read_bytes() if sol.is_file() else b""

@@ -147,9 +147,12 @@ SUITES = {
               "shadows, fog, sky); how good it looks is compared on scene_gallery.jpg and in each run's scene.html."),
     "engineering": ("results_engineering", "RESULTS_TABLE_ENGINEERING.md",
                     "# Results table: engineering suite (--suite engineering)",
-                    "2 Three.js tasks that test physics and mechanics (60 min each): a Unitas 6497-1 watch movement in an "
-                    "exploded view (balance at 2.5 Hz, escapement and gear ratios), and a rocket launch from Cape "
-                    "Canaveral (thrust-to-weight, burn, gravity turn, the Karman line with a dark sky and stars)."),
+                    "2 Three.js tasks that test physics and mechanics (120 min each): a Unitas 6497-1 watch movement "
+                    "that works as a mechanism (balance at 2.5 Hz, pallet fork in step with it, half a tooth per beat, "
+                    "meshing toothed wheels with the right ratios, an exploded view), and a realistic rocket launch from "
+                    "Cape Canaveral (thrust-to-weight, burn, gravity turn, plume and steam at the pad, the Karman line "
+                    "with a dark sky and stars). How real it looks is rated by eye from each run's pictures and "
+                    "scene.html."),
 }
 # the suites the family tables (GLM, DeepSeek) and their mean cover; the scene suite has its own table and gallery
 FAMILY_SUITES = {k: v for k, v in SUITES.items() if k not in ("scene", "engineering")}
@@ -254,13 +257,16 @@ def main():
         lines = [title, "", note, "",
                  "Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU column says "
                  "which). All runs: temperature 1.0, sampling preset recommended by the model maker, "
-                 + ("30-minute and 98,304-token limit for the task." if folder == "results_scene" else
-                    "60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep).") + " Settings that were run more than once "
+                 + {"results_scene": "60-minute and 98,304-token limit for the task (30 minutes in the first runs).",
+                    "results_engineering": "120-minute and 196,608-token limit per task."}.get(
+                     folder, "60-minute and 65,536-token limit per task (98,304 tokens in the runs from 30 Sep).") + " Settings that were run more than once "
                  "are averaged under \"Mean per setting\"" + (", and ranked by their best run under \"Best run per "
                  "setting\"" if folder == "results_hard" else "") + "; every single run is listed under \"Every run\".", ""]
         lines += section(runs, best_table=folder == "results_hard")
         if folder == "results_scene":
             lines += eye_table(runs)
+        if folder == "results_engineering":
+            lines += eye_table_engineering(runs)
         lines += ["- **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks "
                   "(including prompt processing and waiting for the first token). This is the real working speed.",
                   "- **tok/s (decode)** = average over tasks, measured from the first token to the end (pure writing "
@@ -423,6 +429,34 @@ def scene_ratings():
     if not p.is_file():
         return {}
     return {k: v for k, v in json.loads(p.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+
+
+def engineering_ratings():
+    """By-eye ratings of the engineering runs (ratings_engineering.json), keyed by run folder."""
+    p = HERE / "ratings_engineering.json"
+    if not p.is_file():
+        return {}
+    return {k: v for k, v in json.loads(p.read_text(encoding="utf-8")).items() if not k.startswith("_")}
+
+
+def eye_table_engineering(runs):
+    """The engineering runs: automatic score per task next to the by-eye rating per task."""
+    rt = engineering_ratings()
+    rows = [(rt[r["run"]], r) for r in runs if r["run"] in rt]
+    if not rows:
+        return []
+    out = ["## By eye", "",
+           "How real it looks, 1-10 per task (from [ratings_engineering.json](ratings_engineering.json): rated from the "
+           "saved pictures, software renderer; 0 = no picture). The automatic checks test the physics and the mechanism; "
+           "this is the rest. Pictures: engineering_gallery.jpg.", "",
+           "| Run | Model | Quant | Backend | Effort | Watch score | Watch by eye | Rocket score | Rocket by eye | Notes |",
+           "|---|---|---|---|---|---|---|---|---|---|"]
+    for e, r in sorted(rows, key=lambda x: -(x[0]["watch"] + x[0]["rocket"])):
+        sc = lambda t: f"{r['tasks'][t][0]:.0f}%" if t in r["tasks"] else "–"
+        out.append(f"| {when(r['run'])} | {r['model']} | {r['quant']} | {r['backend']} | {r['effort']} | "
+                   f"{sc('e1_watch_unitas')} | **{e['watch']:g}** | {sc('e2_rocket_launch')} | **{e['rocket']:g}** | "
+                   f"watch: {e.get('watch_note', '')}; rocket: {e.get('rocket_note', '')} |")
+    return out + [""]
 
 
 def eye_table(runs):

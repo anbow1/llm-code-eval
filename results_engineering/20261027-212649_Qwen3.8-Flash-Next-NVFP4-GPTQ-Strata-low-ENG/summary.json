@@ -2,15 +2,15 @@
   "name": "Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata-low-ENG",
   "model": "local",
   "python": null,
-  "three": 63.63636363636363,
+  "three": 61.93181818181819,
   "tools": null,
-  "overall": 63.63636363636363,
+  "overall": 61.93181818181819,
   "summary": {
     "python": null,
-    "three": 63.63636363636363,
+    "three": 61.93181818181819,
     "tools": null,
-    "overall": 63.63636363636363,
-    "answered_score": 63.63636363636363,
+    "overall": 61.93181818181819,
+    "answered_score": 61.93181818181819,
     "tasks_total": 2,
     "tasks_answered": 2,
     "hit_max_tokens": 0,
@@ -53,7 +53,7 @@
     {
       "id": "e1_watch_unitas",
       "kind": "three",
-      "score": 0.7727272727272727,
+      "score": 0.8636363636363636,
       "checks": {
         "compiles_strict": true,
         "loads": true,
@@ -62,13 +62,13 @@
         "balance_2_5_hz": true,
         "balance_amplitude": true,
         "balance_steady": true,
-        "escape_ticks": false,
+        "escape_ticks": true,
         "seconds_hand": true,
         "minute_hand": true,
         "hour_ratio": true,
         "parts_40_unique": true,
         "jewels_17": true,
-        "explode_separates": false,
+        "explode_separates": true,
         "train_ratios": false,
         "gears_mesh": false,
         "train_kinematics": false,
@@ -78,7 +78,9 @@
         "resize": true,
         "no_console_errors": true
       },
-      "notes": [],
+      "notes": [
+        "re-graded 2026-10-28 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 183.3,
@@ -94,7 +96,7 @@
     {
       "id": "e2_rocket_launch",
       "kind": "three",
-      "score": 0.5,
+      "score": 0.375,
       "checks": {
         "compiles_strict": false,
         "loads": true,
@@ -107,15 +109,18 @@
         "karman_line_reached": false,
         "trail_visible": false,
         "plume_at_liftoff": false,
-        "plume_hot_core": true,
-        "smoke_clouds_at_pad": true,
+        "plume_hot_core": false,
+        "smoke_clouds_at_pad": false,
         "karman_dark_sky_with_stars": false,
         "resize": true,
         "no_console_errors": true
       },
       "notes": [
         "src/e2_rocket_launch.ts(749,19): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.",
-        "src/e2_rocket_launch.ts(796,48): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'."
+        "src/e2_rocket_launch.ts(796,48): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.",
+        "src/e2_rocket_launch.ts(749,19): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.",
+        "src/e2_rocket_launch.ts(796,48): error TS2339: Property 'opacity' does not exist on type 'Material<MaterialEventMap> | Material<MaterialEventMap>[]'.",
+        "re-graded 2026-10-28 after a test fix"
       ],
       "status": "ok",
       "finish": "stop",

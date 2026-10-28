@@ -2,15 +2,15 @@
   "name": "DeepSeek-V4.1-Flash-1017-Maya-S-max-ENG",
   "model": "local",
   "python": null,
-  "three": 91.47727272727273,
+  "three": 96.875,
   "tools": null,
-  "overall": 91.47727272727273,
+  "overall": 96.875,
   "summary": {
     "python": null,
-    "three": 91.47727272727273,
+    "three": 96.875,
     "tools": null,
-    "overall": 91.47727272727273,
-    "answered_score": 91.47727272727273,
+    "overall": 96.875,
+    "answered_score": 96.875,
     "tasks_total": 2,
     "tasks_answered": 2,
     "hit_max_tokens": 0,
@@ -53,7 +53,7 @@
     {
       "id": "e1_watch_unitas",
       "kind": "three",
-      "score": 0.9545454545454546,
+      "score": 1.0,
       "checks": {
         "compiles_strict": true,
         "loads": true,
@@ -62,7 +62,7 @@
         "balance_2_5_hz": true,
         "balance_amplitude": true,
         "balance_steady": true,
-        "escape_ticks": false,
+        "escape_ticks": true,
         "seconds_hand": true,
         "minute_hand": true,
         "hour_ratio": true,
@@ -78,7 +78,9 @@
         "resize": true,
         "no_console_errors": true
       },
-      "notes": [],
+      "notes": [
+        "re-graded 2026-10-28 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 3531.0,
@@ -94,7 +96,7 @@
     {
       "id": "e2_rocket_launch",
       "kind": "three",
-      "score": 0.875,
+      "score": 0.9375,
       "checks": {
         "compiles_strict": true,
         "loads": true,
@@ -106,14 +108,16 @@
         "mass_burn_acc_grows": true,
         "karman_line_reached": true,
         "trail_visible": true,
-        "plume_at_liftoff": false,
+        "plume_at_liftoff": true,
         "plume_hot_core": true,
         "smoke_clouds_at_pad": true,
         "karman_dark_sky_with_stars": false,
         "resize": true,
         "no_console_errors": true
       },
-      "notes": [],
+      "notes": [
+        "re-graded 2026-10-28 after a test fix"
+      ],
       "status": "ok",
       "finish": "stop",
       "gen_seconds": 3710.9,

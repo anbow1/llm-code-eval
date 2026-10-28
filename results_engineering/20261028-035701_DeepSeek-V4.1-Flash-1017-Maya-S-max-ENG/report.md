@@ -61,3 +61,11 @@
 - FAIL karman_dark_sky_with_stars
 - PASS resize
 - PASS no_console_errors
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 95% -> 95%, e2_rocket_launch 88% -> 94%. New overall: 94.6%.
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 95% -> 100%. New overall: 96.9%.

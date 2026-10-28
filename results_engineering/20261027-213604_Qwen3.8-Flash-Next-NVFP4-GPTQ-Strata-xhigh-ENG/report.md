@@ -53,3 +53,11 @@
   - note: src/e2_rocket_launch.ts(575,91): error TS2339: Property 'position' does not exist on type 'void'.
   - note: __ready never became true
   - note: pageerror: Cannot read properties of undefined (reading 'position')
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 91% -> 95%. New overall: 47.7%.
+
+## Re-graded 2026-10-28
+
+A test was fixed after this run; the saved answers were graded again: e1_watch_unitas 95% -> 100%. New overall: 50.0%.

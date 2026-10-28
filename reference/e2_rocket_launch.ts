@@ -29,7 +29,7 @@ const skyMat = new THREE.ShaderMaterial({
       float h = clamp(vDir.y, 0.0, 1.0);
       vec3 day = mix(vec3(0.80,0.84,0.88), vec3(0.30,0.52,0.84), pow(h, 0.45));
       float space = smoothstep(8000.0, 100000.0, uAlt);
-      vec3 high = mix(vec3(0.10,0.18,0.40), vec3(0.0,0.0,0.015), smoothstep(0.0, 0.6, h));
+      vec3 high = mix(vec3(0.04,0.08,0.20), vec3(0.0,0.0,0.01), smoothstep(-0.05, 0.25, h));
       gl_FragColor = vec4(mix(day, high, space), 1.0);
     }`,
 });
@@ -205,8 +205,7 @@ for (let i = 0; i < 9; i++) {
 // plume: an unlit white-hot core and an orange outer flame (not tone mapped, so it stays blinding)
 const plume = new THREE.Mesh(new THREE.ConeGeometry(4.2, 46, 32, 1, true),
   new THREE.MeshBasicMaterial({ color: 0xff9030, transparent: true, opacity: 0.92, depthWrite: false, toneMapped: false }));
-plume.position.y = -23;
-plume.rotation.x = Math.PI;
+plume.position.y = -23;      // apex at the nozzles, widening downstream
 const core = new THREE.Mesh(new THREE.ConeGeometry(2.0, 14, 24), new THREE.MeshBasicMaterial({ color: 0xfffbe8, toneMapped: false }));
 core.position.y = -7.5;
 core.rotation.x = Math.PI;
@@ -275,17 +274,36 @@ function sub(dt: number) {
   acc = ay;
   t += dt;
 }
+/* playback speed: x1 for the liftoff, then x10, unless the viewer chose one (keys 1/2/3, buttons) */
+let chosenSpeed = 0;
+const speedNow = () => chosenSpeed || (t < 10 ? 1 : 10);
+const SPEEDS: Record<string, number> = { '1': 1, '2': 10, '3': 30 };
+window.addEventListener('keydown', e => { if (SPEEDS[e.key]) chosenSpeed = SPEEDS[e.key]; });
+const hud = document.createElement('div');
+Object.assign(hud.style, { position: 'fixed', left: '12px', top: '12px', color: '#fff', font: '13px monospace',
+  background: 'rgba(0,0,0,0.45)', padding: '6px 10px', borderRadius: '4px' });
+document.body.appendChild(hud);
+const hudText = document.createElement('div');
+hud.appendChild(hudText);
+for (const k of ['1', '2', '3']) {
+  const b = document.createElement('button');
+  b.textContent = `x${SPEEDS[k]}`;
+  b.style.marginRight = '4px';
+  b.onclick = () => { chosenSpeed = SPEEDS[k]; };
+  hud.appendChild(b);
+}
+
 const hook = {
   paused: false,
   trail,
-  reset() { t = 0; x = 0; y = 0; vx = 0; vy = 0; acc = 0; trail.length = 0; trailT.length = 0; },
+  reset() { t = 0; x = 0; y = 0; vx = 0; vy = 0; acc = 0; trail.length = 0; trailT.length = 0; chosenSpeed = 0; },
   step(dt: number) {
     const n = Math.max(1, Math.ceil(dt / 0.02));
     for (let i = 0; i < n; i++) sub(dt / n);
     trail.push({ x, y: y + 3 + MOUNT, z: 0 });
     trailT.push(t);
   },
-  state() { return { t, alt: y, vel: Math.hypot(vx, vy), acc, pitch: pitchAt(t) }; },
+  state() { return { t, alt: y, vel: Math.hypot(vx, vy), acc, pitch: pitchAt(t), speed: speedNow() }; },
 };
 (window as any).__rocket = hook;
 
@@ -328,19 +346,19 @@ function updateView() {
   pos.needsUpdate = true;
   trailGeo.setDrawRange(0, n);
 
-  // camera: a low camera near the pad looking up, then a long lens tracking the rocket, then a chase view
-  const ry = y + 3 + MOUNT + 35;
-  if (y < 3000) {
-    const u = THREE.MathUtils.smoothstep(y, 60, 600);
-    camera.position.set(THREE.MathUtils.lerp(-70, -900, u), THREE.MathUtils.lerp(4, 25, u), THREE.MathUtils.lerp(220, 2400, u));
-    camera.fov = THREE.MathUtils.lerp(48, 12, u);
-  } else {
-    const u = THREE.MathUtils.smoothstep(y, 3000, 9000);
-    camera.position.set(THREE.MathUtils.lerp(-900, x - 140, u), THREE.MathUtils.lerp(25, y - 60, u), THREE.MathUtils.lerp(2400, 260, u));
-    camera.fov = THREE.MathUtils.lerp(12, 40, u);
-  }
+  // camera: low near the pad at liftoff, then the viewer rides along close to the rocket (a chase plane)
+  const ry = y + 3 + MOUNT;
+  const p = pitchAt(t);
+  const axis = new THREE.Vector3(Math.sin(p), Math.cos(p), 0);           // the rocket's long axis
+  const mid = new THREE.Vector3(x, ry, 0).addScaledVector(axis, 30);
+  const ground = new THREE.Vector3(-70, 4, 220);
+  const chase = mid.clone().add(new THREE.Vector3(-42, 20, 80));
+  const u = THREE.MathUtils.smoothstep(y, 70, 450);
+  camera.position.copy(ground).lerp(chase, u);
+  camera.fov = THREE.MathUtils.lerp(48, 50, u);
   camera.updateProjectionMatrix();
-  camera.lookAt(x, ry, 0);
+  camera.lookAt(new THREE.Vector3(x, ry + 35, 0).lerp(mid.clone().addScaledVector(axis, -12), u));
+  hudText.textContent = `T+${t.toFixed(0)} s  alt ${(y / 1000).toFixed(1)} km  v ${Math.hypot(vx, vy).toFixed(0)} m/s  x${speedNow()}`;
   sky.position.copy(camera.position);
   stars.position.copy(camera.position);
 }
@@ -358,7 +376,7 @@ const clock = new THREE.Clock();
 let first = true;
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 1 / 30);
-  if (!hook.paused) hook.step(dt);
+  if (!hook.paused) hook.step(dt * speedNow());
   updateView();
   renderer.render(scene, camera);
   if (first) { first = false; (window as any).__ready = true; }

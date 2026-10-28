@@ -63,11 +63,15 @@ Physics (window.__rocket, the simulated flight)
 - window.__rocket = {
     reset(): time 0, the rocket on the pad, trail emptied (keep the same array object),
     step(dt): advances the simulated time by dt seconds (any dt; use substeps inside),
-    state(): { t, alt (m), vel (m/s), acc (net vertical acceleration, m/s^2), pitch (rad) },
+    state(): { t, alt (m), vel (m/s), acc (net vertical acceleration, m/s^2), pitch (rad), speed },
     trail: array of {x, y, z} world points of the rocket, one per step() call,
     paused: boolean (when true, the render loop does not call step()),
   }
-- The render loop calls step(min(delta, 1/30)) when not paused.
+- Playback speed (the flight lasts minutes, too long to watch in real time): speed is the time scale. It is 1 for
+  the liftoff (t < 10 s) and then 10, unless the viewer chose a speed: keys 1, 2, 3 (and three buttons) set x1, x10,
+  x30. state().speed returns the current value; reset() clears the viewer's choice. Show the speed and the mission
+  data (T+ time, altitude in km, velocity) in a small overlay.
+- The render loop calls step(min(delta, 1/30) * speed) when not paused.
 
 Realism: as realistic as possible, it must look like a launch photograph, not a diagram
 - Setting: the Florida coast. Flat land with green scrub vegetation, the Atlantic Ocean on the horizon behind the pad,
@@ -84,8 +88,9 @@ Realism: as realistic as possible, it must look like a launch photograph, not a 
   that roll sideways out of the flame trench along the ground and then rise. Build the clouds from many soft particles
   or sprites, so they look soft and volumetric, not like solid spheres.
 - Ascent: the plume grows longer and wider as the air thins; the contrail stays in the sky and drifts slowly.
-- Camera: like launch photography: a low camera near the pad looking up at liftoff, then a long-lens shot that tracks
-  the rocket upward.
+- Camera: a low camera near the pad looking up at liftoff; once the rocket clears the tower the viewer travels with
+  it, close to the rocket (within about 100 m, like a chase plane), so the rocket, its plume and the view of the coast,
+  the curve of the Earth and then space are seen from near the rocket all the way up. Smooth camera motion.
 - Sky: from blue at the ground to black at 100 km (the Karman line). Stars must appear above about 70 km and be clearly
   visible above 100 km. Drive the sky from the rocket's altitude.
 - Trail: a visible white contrail behind the rocket, drawn from the trail points.
