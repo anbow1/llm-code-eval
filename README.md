@@ -411,7 +411,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 ## Engineering suite: results (27–28 Oct 2026)
 
-![Engineering suite gallery: the watch and the rocket, best by eye per model](engineering_gallery.jpg)
+![Engineering suite gallery: every run, the watch and the rocket](engineering_gallery.jpg)
 
 | Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Time | tok/s |
 |---|---|---|---|---|---|---|

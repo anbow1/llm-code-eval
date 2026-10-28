@@ -586,14 +586,9 @@ def build_engineering_gallery():
     e = html.escape
     eye = ms.engineering_ratings()
 
-    def best_per_model(key):
-        rated = [r for r in runs if eye.get(r["run"], {}).get(key, 0) > 0]
-        top = {}
-        for r in rated:
-            k = (r["model"], r["quant"], r["backend"])
-            top[k] = max(top.get(k, -1), eye[r["run"]][key])
-        keep = [r for r in rated if eye[r["run"]][key] == top[(r["model"], r["quant"], r["backend"])]]
-        return sorted(keep, key=lambda r: (-eye[r["run"]][key], -r["overall"]))
+    def by_eye(key):
+        """Every run, best by eye first; unrated runs last."""
+        return sorted(runs, key=lambda r: (-eye.get(r["run"], {}).get(key, -1), -r["overall"]))
 
     def caption(r, tid, key):
         d = json.loads((folder / r["run"] / "summary.json").read_text(encoding="utf-8"))
@@ -607,12 +602,12 @@ def build_engineering_gallery():
 <div class="eye"><b>By eye {x.get(key, 0):g}/10</b></div><div class="sub">{e(x.get(key + "_note", ""))}</div></div>"""
 
     watch = []
-    for r in best_per_model("watch"):
+    for r in by_eye("watch"):
         src = png_uri(folder / r["run"] / "e1_watch_unitas" / "screenshot.png")
         img = f'<img src="{src}">' if src else '<div class="noimg">no picture</div>'
         watch.append(f'<div class="card">{img}{caption(r, "e1_watch_unitas", "watch")}</div>')
     rocket = []
-    for r in best_per_model("rocket"):
+    for r in by_eye("rocket"):
         wd = folder / r["run"] / "e2_rocket_launch"
         pics = [(png_uri(wd / f, (720, 405)), lab) for f, lab in
                 (("plume_t2.png", "liftoff, 2 s"), ("smoke_t4.png", "steam at the pad, 4 s"), ("karman.png", "above 100 km"))]
@@ -636,8 +631,8 @@ h2 {{ margin:26px 0 12px; }}
 .eye {{ font-size:14px; margin-top:6px; padding-top:6px; border-top:1px solid var(--rule); }}
 </style></head><body><div class="wrap">
 <h1>Local LLM coding test: engineering suite gallery</h1>
-<p class="lede">Two Three.js tasks with a physics model behind the picture (120 min limit each). Best by eye first: for each
-model and quant, the run(s) with the top rating; all runs are in RESULTS_TABLE_ENGINEERING.md. {date.today():%d %b %Y}.</p>
+<p class="lede">Two Three.js tasks with a physics model behind the picture (120 min limit each). Every run, best by
+eye first; the same runs with their numbers are in RESULTS_TABLE_ENGINEERING.md. {date.today():%d %b %Y}.</p>
 <h2>e1_watch_unitas: a Unitas 6497-1 movement that works as a mechanism</h2>
 <div class="grid">{''.join(watch)}</div>
 <h2>e2_rocket_launch: a launch from Cape Canaveral to above the Karman line</h2>
