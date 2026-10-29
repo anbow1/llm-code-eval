@@ -29,5 +29,35 @@
     "watch_note": "gilded plate with perlage and a domed glass rim, but a strong depth-of-field blur hides the mechanism",
     "rocket": 6,
     "rocket_note": "tower, lightning masts with wires, low buildings, a white-hot plume; above 100 km the sky is still dark blue"
+  },
+  "20261028-183221_DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XS-strata-high-ENG": {
+    "watch": 5,
+    "watch_note": "gold plate with the gear train, blued hairspring, pallet and labels; flat finishes and a small mechanism in the frame",
+    "rocket": 2,
+    "rocket_note": "launch frames washed out to white (no pad or rocket visible at 2 s and 4 s); the space frame above 100 km is good: stars, the Earth's limb, the trail"
+  },
+  "20261028-195531_DeepSeek-V4.1-Flash-1017-Maya-S-high-ENG": {
+    "watch": 6,
+    "watch_note": "perlage plate, gilded barrel with the mainspring, blued hairspring and steel parts, labels; the plate reads as silver rather than brass",
+    "rocket": 6.5,
+    "rocket_note": "tower, masts with wires, a rocket with a warm plume, grass and haze; steam is faint; above 100 km a dark blue sky with stars and the trail"
+  },
+  "20261028-220945_DeepSeek-V4.1-Flash-1017-GSQ-RCO-IQ2_XXS-strata-ENG": {
+    "watch": 1,
+    "watch_note": "the page does not compile (TS7053) and never starts: a black screen with one button",
+    "rocket": 0,
+    "rocket_note": "no answer: the model stopped while still thinking (no code)"
+  },
+  "20261028-231344_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-high-ENG": {
+    "watch": 5,
+    "watch_note": "gold plate, grey bridges and balance cock, labels; runs, but the train is hard to read from this angle and the finish is flat",
+    "rocket": 1,
+    "rocket_note": "white frames: the page fails on start (setting 'value' of undefined), so the frame is blank"
+  },
+  "20261029-011403_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-max-ENG": {
+    "watch": 4.5,
+    "watch_note": "a small gold movement on a brown background, shadows, labels; the file fails to compile (TS7053), but the picture renders",
+    "rocket": 6.5,
+    "rocket_note": "a Falcon 9 on a pad with a lattice tower, masts with wires, a concrete flame trench, a white-hot plume; above 100 km the Earth's limb and a bright trail; the plume is very white, no steam"
   }
 }

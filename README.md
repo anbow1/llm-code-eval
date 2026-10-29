@@ -413,18 +413,24 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 ![Engineering suite gallery: every run, the watch and the rocket](engineering_gallery.jpg)
 
-| Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Time | tok/s |
-|---|---|---|---|---|---|---|
-| DeepSeek-V4.1-Flash Maya-S / max | 100% | 5 | 94% | 6 | 121 min | 23 |
-| DeepSeek-V4.1-Flash Maya-S / high | 95% | 6 | 94% | 6.5 | 112 min | 23 |
-| Qwen3.8-Flash-Next NVFP4 (Strata) / xhigh | 100% | 4 | 0% (does not compile) | 0 | 24 min | 126 |
-| Qwen3.8-Flash-Next NVFP4 (Strata) / medium | 86% | 2 | 75% | 1.5 | 4 min | 140 |
-| Qwen3.8-Flash-Next NVFP4 (Strata) / low | 86% | 4.5 | 38% | 1 | 5 min | 141 |
+| Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Watch time (min) | Rocket time (min) | tok/s |
+|---|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash Maya-S / high (second run) | 100% | 6 | 100% | 6.5 | 61.7 | 61.5 | 22.6 |
+| DeepSeek-V4.1-Flash Maya-S / high | 95% | 6 | 94% | 6.5 | 57.7 | 53.6 | 23.2 |
+| DeepSeek-V4.1-Flash Maya-S / max | 100% | 5 | 94% | 6 | 58.9 | 61.8 | 22.7 |
+| DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / max | 95% | 4.5 | 95% | 6.5 | 64.0 | 64.9 | 22.1 |
+| DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high | 86% | 5 | 47% | 1 | 67.2 | 52.2 | 21.5 |
+| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS (Strata) / high | 100% | 5 | 68% | 2 | 45.0 | 27.5 | 27.5 |
+| DeepSeek-V4.1-Flash GSQ-RCO IQ2_XXS (Strata) / high | 20% | 1 | 0% (no answer) | 0 | 27.9 | 4.6 | 27.6 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / xhigh | 100% | 4 | 0% (does not compile) | 0 | 11.6 | 12.0 | 126 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / medium | 86% | 2 | 75% | 1.5 | 2.0 | 1.5 | 144 |
+| Qwen3.8-Flash-Next NVFP4 (Strata) / low | 86% | 4.5 | 38% | 1 | 3.1 | 1.4 | 154 |
 
-- DeepSeek gets the mechanism and the physics almost fully right, but needs about an hour per task at 23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, rocket with a flag, plume, haze) and watch finishes (perlage, Geneva stripes, blued parts).
-- Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile; at low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky); and the watch skips the gear data.
-- These runs were made with the earlier rocket prompt (no playback speed, no chase camera), so the three checks for those are left out of their scores. The scores were re-graded after four test fixes, see below.
-- All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).
+- DeepSeek-V4.1-Flash gets the mechanism and the physics almost fully right, but needs about an hour per task at 22–23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, masts, rocket, plume) and watch finishes (perlage, Geneva stripes, blued parts). Maya-S high (second run) is the best: every check passes on both tasks.
+- Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile. At low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky), and the watch skips the gear data.
+- The IQ2_XXS run has a watch that does not compile and never starts, and no answer for the rocket. The EXL2 high run's rocket page fails on start and stays blank.
+- The first runs (Qwen low, medium and xhigh, DeepSeek Maya-S high and max) were made before the playback speed and the chase camera were added, so their scores leave out those three checks. The newer runs have all 19.
+- The gallery shows the best run by eye for each model (ties all shown). All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).
 
 Test fixes on 28 Oct (re-graded with `regrade.py`): the escape wheel was measured at exactly t = 1 s, where 120 summed steps of 1/120 s land just before the 5th beat, so every correct `floor(5*t)` lost a beat (now measured at 1.1 s); the exploded view was read from local positions and right after `explode()`, which missed parts on a moving parent and animated views (now world positions, after the parts stop moving; the prompt now says `explode(f)` applies at once); a blank white frame passed the flame-core and smoke checks (now rejected); the flame check needed a deep orange and the space check a mean brightness, which failed a realistic white-yellow flame and a sun in the frame (now a warm colour and the median); the resize check waited 0.4 s, too short for heavy scenes in the software renderer (now 3 s).
 
