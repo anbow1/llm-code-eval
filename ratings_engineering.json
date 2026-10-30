@@ -59,5 +59,11 @@
     "watch_note": "a small gold movement on a brown background, shadows, labels; the file fails to compile (TS7053), but the picture renders",
     "rocket": 6.5,
     "rocket_note": "a Falcon 9 on a pad with a lattice tower, masts with wires, a concrete flame trench, a white-hot plume; above 100 km the Earth's limb and a bright trail; the plume is very white, no steam"
+  },
+  "20261030-020151_DeepSeek-V4.1-Flash-1017-UD-IQ3_XXS-maya-ENG": {
+    "watch": 6.5,
+    "watch_note": "gilded plate with clear bridges, a gear train and blued parts, the balance and the stud read well; the finish is plain and the mechanism is small in the frame",
+    "rocket": 3,
+    "rocket_note": "launch frames are white haze (pad, tower and plume hardly visible at 2 s and 4 s); above 100 km a flame glow and the Earth's limb, but with stripe artefacts on the ground and a flat horizon"
   }
 }
