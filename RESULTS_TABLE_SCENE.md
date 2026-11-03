@@ -12,16 +12,19 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | 1 | **100.0%** | – | 100.0% | 0% | 1.2 | 8.4k | 155.8 | 30.8 |
 | 2 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 24.3 | 39.5k | 27.4 | 31.3 |
-| 3 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | 1 | **100.0%** | – | 0.0% | 0% | 28.0 | 40.1k | 24.2 | 31.0 |
-| 4 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 30.2 | 41.6k | 23.2 | 31.2 |
-| 5 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 44.5 | 60.0k | 22.7 | 31.0 |
-| 6 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 49.7 | 68.2k | 23.1 | 31.0 |
-| 7 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **95.7%** | – | 0.0% | 0% | 27.8 | 40.0k | 24.2 | 31.0 |
-| 8 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | 1 | **95.7%** | – | 0.0% | 0% | 40.5 | 40.7k | 16.9 | 30.7 |
-| 9 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 45.5 | 60.2k | 22.2 | 31.3 |
-| 10 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 46.2 | 50.7k | 18.5 | 31.0 |
-| 11 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 49.7 | 70.9k | 24.0 | 31.3 |
-| 12 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | 2 | **93.5%** | 87–100 | 0.0% | 0% | 28.8 | 42.6k | 24.9 | 31.4 |
+| 3 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 27.9 | 72.6k | 44.2 | 31.2 |
+| 4 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | 1 | **100.0%** | – | 0.0% | 0% | 28.0 | 40.1k | 24.2 | 31.0 |
+| 5 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 30.2 | 41.6k | 23.2 | 31.2 |
+| 6 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 44.5 | 60.0k | 22.7 | 31.0 |
+| 7 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 49.7 | 68.2k | 23.1 | 31.0 |
+| 8 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **95.7%** | – | 0.0% | 0% | 27.8 | 40.0k | 24.2 | 31.0 |
+| 9 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 33.8 | 74.1k | 37.0 | 31.2 |
+| 10 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | 1 | **95.7%** | – | 0.0% | 0% | 40.5 | 40.7k | 16.9 | 30.7 |
+| 11 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 45.5 | 60.2k | 22.2 | 31.3 |
+| 12 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 46.2 | 50.7k | 18.5 | 31.0 |
+| 13 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 49.7 | 70.9k | 24.0 | 31.3 |
+| 14 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 52.9 | 75.1k | 23.9 | 31.0 |
+| 15 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | 2 | **93.5%** | 87–100 | 0.0% | 0% | 28.8 | 42.6k | 24.9 | 31.4 |
 
 ## Stability (settings run 2+ times)
 
@@ -37,17 +40,20 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 26.10 12:55 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | **100.0%** | n/a | 100.0 | 1.2 | 8.4k | 1.6k | 6.8k | **152.4** | 163 | 30.8 | 85.8 |
 | 2 | 26.10 12:59 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 24.3 | 39.5k | 32.8k | 6.7k | **27.4** | 28 | 31.3 | 166.4 |
-| 3 | 26.10 16:43 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | **100.0%** | n/a | 100.0 | 28.0 | 40.1k | 32.8k | 7.3k | **24.2** | 25 | 31.0 | 177.0 |
-| 4 | 26.10 12:08 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 29.4 | 41.8k | 32.8k | 9.1k | **24.0** | 24 | 31.3 | 163.2 |
-| 5 | 26.10 19:29 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 30.2 | 41.6k | 32.8k | 8.8k | **23.3** | 24 | 31.2 | 187.2 |
-| 6 | 26.10 21:35 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **100.0%** | n/a | 100.0 | 44.5 | 60.0k | 51.2k | 8.8k | **22.7** | 23 | 31.0 | 189.1 |
-| 7 | 26.10 22:20 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **100.0%** | n/a | 100.0 | 49.7 | 68.2k | 59.7k | 8.5k | **23.1** | 23 | 31.0 | 190.2 |
-| 8 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | **95.7%** | n/a | 95.7 | 27.8 | 40.0k | 32.8k | 7.2k | **24.3** | 24 | 31.0 | 129.0 |
-| 9 | 26.10 14:34 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | **95.7%** | n/a | 95.7 | 40.5 | 40.7k | 32.8k | 7.9k | **16.9** | 17 | 30.7 | 155.7 |
-| 10 | 26.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **95.7%** | n/a | 95.7 | 45.5 | 60.2k | 50.8k | 9.4k | **22.2** | 22 | 31.3 | 166.4 |
-| 11 | 29.10 23:10 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 46.2 | 50.7k | 41.2k | 9.5k | **18.5** | 18 | 31.0 | 191.0 |
-| 12 | 27.10 00:01 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 49.7 | 70.9k | 63.3k | 7.7k | **24.0** | 24 | 31.3 | 166.2 |
-| 13 | 26.10 11:37 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **87.0%** | n/a | 87.0 | 28.2 | 43.4k | 32.8k | 10.6k | **25.9** | 26 | 31.4 | 161.6 |
+| 3 | 02.11 04:47 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 27.9 | 72.6k | 32.8k | 39.8k | **44.1** | 44 | 31.2 | 118.5 |
+| 4 | 26.10 16:43 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | **100.0%** | n/a | 100.0 | 28.0 | 40.1k | 32.8k | 7.3k | **24.2** | 25 | 31.0 | 177.0 |
+| 5 | 26.10 12:08 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 29.4 | 41.8k | 32.8k | 9.1k | **24.0** | 24 | 31.3 | 163.2 |
+| 6 | 26.10 19:29 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 30.2 | 41.6k | 32.8k | 8.8k | **23.3** | 24 | 31.2 | 187.2 |
+| 7 | 26.10 21:35 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **100.0%** | n/a | 100.0 | 44.5 | 60.0k | 51.2k | 8.8k | **22.7** | 23 | 31.0 | 189.1 |
+| 8 | 26.10 22:20 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **100.0%** | n/a | 100.0 | 49.7 | 68.2k | 59.7k | 8.5k | **23.1** | 23 | 31.0 | 190.2 |
+| 9 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | **95.7%** | n/a | 95.7 | 27.8 | 40.0k | 32.8k | 7.2k | **24.3** | 24 | 31.0 | 129.0 |
+| 10 | 03.11 11:07 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 33.8 | 74.1k | 65.5k | 8.5k | **37.0** | 37 | 31.2 | 68.3 |
+| 11 | 26.10 14:34 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | **95.7%** | n/a | 95.7 | 40.5 | 40.7k | 32.8k | 7.9k | **16.9** | 17 | 30.7 | 155.7 |
+| 12 | 26.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **95.7%** | n/a | 95.7 | 45.5 | 60.2k | 50.8k | 9.4k | **22.2** | 22 | 31.3 | 166.4 |
+| 13 | 29.10 23:10 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 46.2 | 50.7k | 41.2k | 9.5k | **18.5** | 18 | 31.0 | 191.0 |
+| 14 | 27.10 00:01 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 49.7 | 70.9k | 63.3k | 7.7k | **24.0** | 24 | 31.3 | 166.2 |
+| 15 | 03.11 01:21 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 52.9 | 75.1k | 65.6k | 9.5k | **23.9** | 24 | 31.0 | 177.8 |
+| 16 | 26.10 11:37 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **87.0%** | n/a | 87.0 | 28.2 | 43.4k | 32.8k | 10.6k | **25.9** | 26 | 31.4 | 161.6 |
 
 ## Score per task (%)
 
@@ -55,16 +61,19 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|
 | 26.10 12:55 | Qwen3.8-Flash-Next NVFP4 GPTQ (Strata) / medium | 100 |
 | 26.10 12:59 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS (Strata) / high | 100 |
+| 02.11 04:47 | DeepSeek-V4.1-Flash ? (Maya) / high | 100 |
 | 26.10 16:43 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / low | 100 |
 | 26.10 12:08 | DeepSeek-V4.1-Flash Maya-S (Maya) / high | 100 |
 | 26.10 19:29 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high | 100 |
 | 26.10 21:35 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / max, 60 min | 100 |
 | 26.10 22:20 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high, 60 min | 100 |
 | 26.10 13:58 | GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / high | 96 |
+| 03.11 11:07 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XXS (Strata) / high, 60 min | 96 |
 | 26.10 14:34 | GLM-5.3-Flash EXL3 4.10 bpw (Maya) / high, 180 min | 96 |
 | 26.10 23:16 | DeepSeek-V4.1-Flash Maya-S (Maya) / max, 60 min | 96 |
 | 29.10 23:10 | DeepSeek-V4.1-Flash UD-IQ3_XXS (Maya) / high, 60 min | 96 |
 | 27.10 00:01 | DeepSeek-V4.1-Flash Maya-S (Maya) / high, 60 min | 96 |
+| 03.11 01:21 | DeepSeek-V4.1-Flash UD-Q2_K_XL (Maya) / high, 60 min | 96 |
 | 26.10 11:37 | DeepSeek-V4.1-Flash Maya-S (Maya) / high | 87 |
 
 ## By eye
