@@ -92,7 +92,15 @@ def capture(browser, html, kind, outdir, fps):
         return sorted(outdir.glob("*.jpg"))
     page = browser.new_page(viewport={"width": 640, "height": 360})
     page.goto(html.as_uri())
-    page.wait_for_function("() => window.__ready === true", timeout=180000)
+    from playwright.sync_api import TimeoutError as PlaywrightTimeout
+    try:
+        page.wait_for_function("() => window.__ready === true", timeout=60000)
+    except PlaywrightTimeout:
+        # the page never starts (it does not compile): film its screen as it is
+        for i in range(n):
+            shot(page, outdir / f"{i:04d}.jpg")
+        page.close()
+        return sorted(outdir.glob("*.jpg"))
     if kind == "watch":
         page.evaluate("() => { const w = window.__watch; w.paused = true; w.reset(); }")
         for i in range(n):
