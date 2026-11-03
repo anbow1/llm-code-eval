@@ -202,9 +202,13 @@ def main():
     from playwright.sync_api import sync_playwright
     chosen = args.test or list(TESTS)
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(
-            executable_path=os.environ.get("CHROMIUM_PATH") or None,
-            args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
+        chromium = os.environ.get("CHROMIUM_PATH")
+        if chromium:  # the cloud container has no GPU: software WebGL (SwiftShader)
+            browser = pw.chromium.launch(
+                executable_path=chromium,
+                args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
+        else:  # a PC: the full Chromium renders on the graphics card
+            browser = pw.chromium.launch(channel="chromium")
         for test in chosen:
             run_test(test, browser)
         browser.close()
