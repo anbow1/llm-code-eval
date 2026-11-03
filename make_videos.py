@@ -68,9 +68,15 @@ def pick_runs(folder, key):
 
 
 def shot(page, path):
-    """One rendered frame, after two animation frames, as a small JPEG."""
-    page.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(1))))")
-    im = Image.open(io.BytesIO(page.screenshot(type="jpeg", quality=88))).convert("RGB")
+    """One rendered frame, after two animation frames, as a small JPEG.
+    The wait gives up after 2 s if the browser stops producing animation frames, and the screenshot after 60 s."""
+    page.evaluate("""() => new Promise(r => {
+        let done = false;
+        const finish = () => { if (!done) { done = true; r(1); } };
+        requestAnimationFrame(() => requestAnimationFrame(finish));
+        setTimeout(finish, 2000);
+    })""")
+    im = Image.open(io.BytesIO(page.screenshot(type="jpeg", quality=88, timeout=60000))).convert("RGB")
     im.resize((TILE_W, TILE_H), Image.LANCZOS).save(path, quality=88)
 
 
@@ -106,6 +112,8 @@ def capture(browser, html, kind, outdir, fps):
         for i in range(n):
             page.evaluate(f"() => window.__watch.step(1 / {fps})")
             shot(page, outdir / f"{i:04d}.jpg")
+            if i % 20 == 0:
+                print(f"    frame {i + 1}/{n}", flush=True)
     else:
         page.evaluate("() => { const r = window.__rocket; r.paused = true; r.reset(); }")
         for i in range(n):
@@ -114,6 +122,8 @@ def capture(browser, html, kind, outdir, fps):
             speed = 1 if i < 2 * fps else 30
             page.evaluate("d => window.__rocket.step(d)", speed / fps)
             shot(page, outdir / f"{i:04d}.jpg")
+            if i % 20 == 0:
+                print(f"    frame {i + 1}/{n}", flush=True)
     page.close()
     return sorted(outdir.glob("*.jpg"))
 
