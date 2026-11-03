@@ -8,7 +8,8 @@ Each tile is the best run of one model version (model, quant, backend), the same
 eye for the test (the island uses the scene ratings). The tile caption is the quantization only.
 Watch and rocket are rendered frame by frame: the simulation is stepped by exactly 1/fps per frame, so the motion
 does not depend on how fast the software renderer runs. The rocket is at x1 for the first 2 s, then x30 (the page's own
-key 3). The island has no stepping hook: it is recorded in real time for 10 s and stretched to 10 s.
+key 3). The island has no stepping hook, so its clock and frame loop are replaced by a manual clock (FAKE_CLOCK_JS): each frame
+advances the scene by exactly 1/30 s, so the water and the boat move smoothly at 30 frames per second.
 Needs ffmpeg, Pillow and Playwright with Chromium (CHROMIUM_PATH, as for run_eval.py).
 """
 import argparse
@@ -29,17 +30,28 @@ import make_summary as ms  # noqa: E402
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "videos"
 WORK = Path(os.environ.get("VIDEO_WORK", HERE / "video_work"))  # frames; not part of the repo
-FPS, SECS = 20, 10
+FPS, SECS = 20, 10  # watch and rocket; the island uses 30
 TILE_W, TILE_H = 480, 270
 COLS_MAX = 4
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 TESTS = {
-    # name: (suite folder, html file inside the run folder, capture kind, rating key)
-    "island": ("results_scene", "s1_ocean_island/scene.html", "scene", "overall"),
-    "watch": ("results_engineering", "e1_watch_unitas/scene.html", "watch", "watch"),
-    "rocket": ("results_engineering", "e2_rocket_launch/scene.html", "rocket", "rocket"),
+    # name: (suite folder, html file inside the run folder, capture kind, rating key, frames per second)
+    "island": ("results_scene", "s1_ocean_island/scene.html", "scene", "overall", 30),
+    "watch": ("results_engineering", "e1_watch_unitas/scene.html", "watch", "watch", 20),
+    "rocket": ("results_engineering", "e2_rocket_launch/scene.html", "rocket", "rocket", 20),
 }
+
+# replaces the page's clock and frame loop: window.__tick(ms) advances the clock and runs the queued frame callbacks,
+# so one call renders exactly one frame at a known time (THREE.Clock reads performance.now())
+FAKE_CLOCK_JS = """
+(() => {
+  let now = 0, queue = [];
+  performance.now = () => now;
+  window.requestAnimationFrame = cb => { queue.push(cb); return queue.length; };
+  window.__tick = ms => { now += ms; const q = queue; queue = []; q.forEach(cb => cb(now)); return now; };
+})();
+"""
 
 
 def pick_runs(folder, key):
@@ -62,32 +74,38 @@ def shot(page, path):
     im.resize((TILE_W, TILE_H), Image.LANCZOS).save(path, quality=88)
 
 
-def capture(browser, html, kind, outdir):
-    """Frames of one run, FPS * SECS of them (the island: as many as fit in SECS of real time)."""
+def capture(browser, html, kind, outdir, fps):
+    """Frames of one run: FPS * SECS of them, one per simulated 1/fps s (the island: one per 1/30 s of its own clock)."""
     outdir.mkdir(parents=True, exist_ok=True)
+    n = fps * SECS
+    if kind == "scene":
+        page = browser.new_page(viewport={"width": TILE_W, "height": TILE_H})
+        page.add_init_script(FAKE_CLOCK_JS)
+        page.goto(html.as_uri())
+        for _ in range(60):  # the first rendered frame sets __ready
+            if page.evaluate("() => { window.__tick(1000 / 30); return window.__ready === true; }"):
+                break
+        for i in range(n):
+            page.evaluate("() => window.__tick(1000 / 30)")
+            page.screenshot(path=str(outdir / f"{i:04d}.jpg"), type="jpeg", quality=88)
+        page.close()
+        return sorted(outdir.glob("*.jpg"))
     page = browser.new_page(viewport={"width": 640, "height": 360})
     page.goto(html.as_uri())
     page.wait_for_function("() => window.__ready === true", timeout=180000)
-    n = FPS * SECS
     if kind == "watch":
         page.evaluate("() => { const w = window.__watch; w.paused = true; w.reset(); }")
         for i in range(n):
-            page.evaluate("() => window.__watch.step(1 / 20)")
-            shot(page, outdir / f"{i:04d}.jpg")
-    elif kind == "rocket":
-        page.evaluate("() => { const r = window.__rocket; r.paused = true; r.reset(); }")
-        for i in range(n):
-            if i == 2 * FPS:
-                page.keyboard.press("3")  # x30 from 2 s on, the page's own speed key
-            speed = 1 if i < 2 * FPS else 30
-            page.evaluate("d => window.__rocket.step(d)", speed / FPS)
+            page.evaluate(f"() => window.__watch.step(1 / {fps})")
             shot(page, outdir / f"{i:04d}.jpg")
     else:
-        t0 = time.time()
-        i = 0
-        while time.time() - t0 < SECS:
+        page.evaluate("() => { const r = window.__rocket; r.paused = true; r.reset(); }")
+        for i in range(n):
+            if i == 2 * fps:
+                page.keyboard.press("3")  # x30 from 2 s on, the page's own speed key
+            speed = 1 if i < 2 * fps else 30
+            page.evaluate("d => window.__rocket.step(d)", speed / fps)
             shot(page, outdir / f"{i:04d}.jpg")
-            i += 1
     page.close()
     return sorted(outdir.glob("*.jpg"))
 
@@ -104,14 +122,14 @@ def placeholder(outdir, text):
     return [p]
 
 
-def compose(tiles, out_mp4, frames_dir):
+def compose(tiles, out_mp4, frames_dir, fps):
     """tiles: list of (caption, [frame files]). Writes out_mp4 (H.264) with the tiles side by side in a grid."""
     n = len(tiles)
     cols = min(COLS_MAX, n)
     rows = math.ceil(n / cols)
     font = ImageFont.truetype(FONT, 22)
     frames_dir.mkdir(parents=True, exist_ok=True)
-    total = FPS * SECS
+    total = fps * SECS
     for i in range(total):
         canvas = Image.new("RGB", (cols * TILE_W, rows * TILE_H), (0, 0, 0))
         for k, (caption, files) in enumerate(tiles):
@@ -123,12 +141,12 @@ def compose(tiles, out_mp4, frames_dir):
             d.text((x + 12, y + TILE_H - 18), caption, fill=(255, 255, 255), font=font, anchor="lm")
         canvas.save(frames_dir / f"{i:04d}.jpg", quality=90)
     out_mp4.parent.mkdir(parents=True, exist_ok=True)
-    os.system(f'ffmpeg -y -loglevel error -framerate {FPS} -i "{frames_dir}/%04d.jpg" -c:v libx264 '
+    os.system(f'ffmpeg -y -loglevel error -framerate {fps} -i "{frames_dir}/%04d.jpg" -c:v libx264 '
               f'-pix_fmt yuv420p -crf 23 -movflags +faststart "{out_mp4}"')
 
 
 def run_test(test, browser):
-    folder, html_rel, kind, key = TESTS[test]
+    folder, html_rel, kind, key, fps = TESTS[test]
     picked = pick_runs(folder, key)
     tiles = []
     for r in picked:
@@ -139,7 +157,7 @@ def run_test(test, browser):
             files = sorted(tile_dir.glob("*.jpg"))
         elif html.is_file():
             print(f"[{test}] {r['model']} {r['quant']} {r['backend']}", flush=True)
-            files = capture(browser, html, kind, tile_dir)
+            files = capture(browser, html, kind, tile_dir, fps)
             (tile_dir / "done").write_text("ok", encoding="utf-8")
         else:
             files = placeholder(tile_dir, "no answer")
@@ -154,7 +172,7 @@ def run_test(test, browser):
     for name, subset in sets.items():
         if not subset:
             continue
-        compose([(t["caption"], t["files"]) for t in subset], OUT / f"{name}.mp4", WORK / "frames" / name)
+        compose([(t["caption"], t["files"]) for t in subset], OUT / f"{name}.mp4", WORK / "frames" / name, fps)
         shutil.rmtree(WORK / "frames" / name, ignore_errors=True)
         print("wrote", OUT / f"{name}.mp4", f"({len(subset)} tiles)", flush=True)
 
