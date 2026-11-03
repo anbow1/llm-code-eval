@@ -9,7 +9,7 @@ The repository has six test suites, kept apart everywhere:
 | Default limits | lenient (comparable with older runs) | lenient | practical | practical | 60 min, 98,304 tokens | 60 min per task, 98,304 tokens |
 | Raw results | `results/` | `results_hard/` | `results_practical/` | `results_tools/` | `results_scene/` | `results_engineering/` |
 | Tables | [RESULTS_TABLE.md](RESULTS_TABLE.md) | [RESULTS_TABLE_HARD.md](RESULTS_TABLE_HARD.md) | [RESULTS_TABLE_PRACTICAL.md](RESULTS_TABLE_PRACTICAL.md) | [RESULTS_TABLE_TOOLS.md](RESULTS_TABLE_TOOLS.md) | [RESULTS_TABLE_SCENE.md](RESULTS_TABLE_SCENE.md), scene_gallery.jpg | [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md), engineering_gallery.jpg |
-| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg | engineering_gallery.jpg |
+| Compare | `python compare.py` | `--hard` | `--practical` | `--tools` | scene_gallery.jpg | engineering_watch.jpg, engineering_rocket.jpg |
 
 The practical and tool-calling suites are new (11 Oct 2026); so far only GLM-5.3-Flash has been run on them. All GLM-5.3-Flash variants in all suites: [RESULTS_TABLE_GLM.md](RESULTS_TABLE_GLM.md).
 
@@ -361,14 +361,17 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash GSQ-RCO Coder IQ2_XXS · Strata | high, 60 min | 96% | **7.5** | 33.8 min | 74.1k (65.5k) | bright turquoise water with foam and sun glints, a sand island with a green hill and palms, a clear sailboat; the water is close to overexposed |
 | DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | high | 100% | **7.5** | 30.2 min | 41.6k (32.8k) | clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
+| DeepSeek-V4.1-Flash Maya-XS · Maya | high | 100% | **6.5** | 27.9 min | 72.6k (32.8k) | a dark green island with palms and a rock peak, grey-blue water with soft glints; the boat is small |
 | DeepSeek-V4.1-Flash UD-IQ3_XXS · Maya | high | 96% | **6.5** | 46.2 min | 50.7k (41.2k) | turquoise water with sun glints and foam, a green island with palms and a dark peak, a small boat |
 | DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | low | 100% | **6.5** | 28.0 min | 40.1k (32.8k) | sun glint and foam rings around the island; palm crowns look bushy and odd |
 | DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | max, 60 min | 100% | **7.5** | 44.5 min | 60.0k (51.2k) | teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | max, 60 min | 96% | **7** | 45.5 min | 60.2k (50.8k) | sand beach and green island with palms and rocks; sun glints on the water; the boat is small |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
+| DeepSeek-V4.1-Flash UD-Q2_K_XL · Maya | high, 60 min | 96% | **5** | 52.9 min | 75.1k (65.6k) | the island is almost white (blown out), palms pale; dark navy water; the boat is hard to see |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
 | DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
@@ -412,7 +415,9 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 ## Engineering suite: results (27–28 Oct 2026)
 
-![Engineering suite gallery: every run, the watch and the rocket](engineering_gallery.jpg)
+![Engineering suite: the watch, one run per model version](engineering_watch.jpg)
+
+![Engineering suite: the rocket, one run per model version](engineering_rocket.jpg)
 
 | Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Watch time (min) | Rocket time (min) | tok/s |
 |---|---|---|---|---|---|---|---|
@@ -427,6 +432,11 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 | Qwen3.8-Flash-Next NVFP4 (Strata) / xhigh | 100% | 4 | 0% (does not compile) | 0 | 11.6 | 12.0 | 126 |
 | Qwen3.8-Flash-Next NVFP4 (Strata) / medium | 86% | 2 | 75% | 1.5 | 2.0 | 1.5 | 144 |
 | Qwen3.8-Flash-Next NVFP4 (Strata) / low | 86% | 4.5 | 38% | 1 | 3.1 | 1.4 | 154 |
+| DeepSeek-V4.1-Flash Maya-XS / high | 100% | 5 | 79% | 3 | 42.0 | 31.0 | 45.8 |
+| DeepSeek-V4.1-Flash UD-Q2_K_XL (Maya) / high | 95% | 6 | 95% | 6.5 | 55.9 | 51.2 | 24.4 |
+| DeepSeek-V4.1-Flash GSQ-RCO Coder IQ2_XXS (Maya) / high | 100% | 3 | 68% | 2 | 31.9 | 33.1 | 40.0 |
+| GLM-5.3-Flash EXL3 4.10 bpw (Maya) / high | 14% | 4.5 | 84% | 4.5 | 44.3 | 60.7 | 17.9 |
+| GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / high | 40% | 4 | 0% (no answer) | 0 | 37.4 | 26.7 | 22.5 |
 
 - DeepSeek-V4.1-Flash gets the mechanism and the physics almost fully right, but needs about an hour per task at 22–23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, masts, rocket, plume) and watch finishes (perlage, Geneva stripes, blued parts). Maya-S high (second run) is the best: every check passes on both tasks.
 - Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile. At low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky), and the watch skips the gear data.

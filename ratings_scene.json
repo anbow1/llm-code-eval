@@ -103,5 +103,29 @@
     "boat": 6,
     "overall": 6.5,
     "note": "turquoise water with sun glints and foam, a green island with palms and a rock peak (dark side), a small boat; the island is dark-sided and the boat small"
+  },
+  "20261102-044746_DeepSeek-V4.1-Flash-1017-Maya-XS-SCENE": {
+    "water": 6,
+    "island": 7,
+    "light": 6,
+    "boat": 5,
+    "overall": 6.5,
+    "note": "a dark green island with palms and a rock peak, grey-blue water with soft glints; the island's shadow side is dark and the boat is small"
+  },
+  "20261103-110731_DeepSeek-V4.1-Flash-1017-GSQ-RCO-Coder-IQ2_XXS-strata-SCENE": {
+    "water": 8,
+    "island": 7,
+    "light": 7,
+    "boat": 7,
+    "overall": 7.5,
+    "note": "bright turquoise water with foam and sun glints, a sand island with a green hill and palms, a clear sailboat; the water is close to overexposed"
+  },
+  "20261103-012159_DeepSeek-V4.1-Flash-1017-UD-Q2_K_XL-maya-SCENE": {
+    "water": 6,
+    "island": 5,
+    "light": 4,
+    "boat": 5,
+    "overall": 5,
+    "note": "the island is almost white (blown out), palms pale; dark navy water with waves; the boat is under the island and hard to see"
   }
 }

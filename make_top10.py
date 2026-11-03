@@ -31,7 +31,8 @@ OUT_HARD = HERE / "top10_hard.jpg"
 OUT_GLM = HERE / "glm_flash.jpg"
 OUT_DS = HERE / "deepseek.jpg"
 OUT_SCENE = HERE / "scene_gallery.jpg"
-OUT_ENG = HERE / "engineering_gallery.jpg"
+OUT_ENG_WATCH = HERE / "engineering_watch.jpg"
+OUT_ENG_ROCKET = HERE / "engineering_rocket.jpg"
 OUT_TASKS = {"base": HERE / "tasks_base.jpg", "hard": HERE / "tasks_hard.jpg"}
 TASK_TOP = 5
 OUT_4080 = HERE / "rtx4080.jpg"
@@ -576,8 +577,9 @@ def png_uri(path, size=(720, 405)):
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
-def build_engineering_gallery():
-    """Engineering suite: the watch and the rocket pictures, best by eye per model and quant."""
+def build_engineering_gallery(task):
+    """Engineering suite, one task per picture ("watch" or "rocket"): one run per model version (model, quant,
+    backend), the best by eye for that task."""
     import json
     folder = HERE / ms.SUITES["engineering"][0]
     runs = ms.load_runs(ms.SUITES["engineering"][0])
@@ -585,72 +587,80 @@ def build_engineering_gallery():
         return None
     e = html.escape
     eye = ms.engineering_ratings()
+    tid = {"watch": "e1_watch_unitas", "rocket": "e2_rocket_launch"}[task]
 
-    def best_per_version(key):
-        """One run per model version (model, quant, backend): the best by eye, then by the automatic score.
-        A version whose runs are all unrated or 0 still gets its best run, so no version is left out."""
-        groups = {}
-        for r in runs:
-            groups.setdefault((r["model"], r["quant"], r["backend"]), []).append(r)
-        keep = [max(rs, key=lambda r: (eye.get(r["run"], {}).get(key, -1), r["overall"], r["run"]))
-                for rs in groups.values()]
-        return sorted(keep, key=lambda r: (-eye.get(r["run"], {}).get(key, -1), -r["overall"]))
+    # one run per model version: the best by eye for this task, then by the automatic score; a version whose runs
+    # are all unrated or 0 still gets its best run, so no version is left out
+    groups = {}
+    for r in runs:
+        groups.setdefault((r["model"], r["quant"], r["backend"]), []).append(r)
+    keep = [max(rs, key=lambda r: (eye.get(r["run"], {}).get(task, -1), r["overall"], r["run"]))
+            for rs in groups.values()]
+    keep.sort(key=lambda r: (-eye.get(r["run"], {}).get(task, -1), -r["overall"]))
 
-    def caption(r, tid, key):
+    def caption(r):
         d = json.loads((folder / r["run"] / "summary.json").read_text(encoding="utf-8"))
         res = next((x for x in d["results"] if x["id"] == tid), {})
         failed = [k for k, v in (res.get("checks") or {}).items() if not v]
         x = eye.get(r["run"], {})
-        return f"""<div class="cap"><div class="model">{e(r['model'])} <span class="sc">{(res.get('score') or 0) * 100:.0f}%</span></div>
-<div class="sub">{e(r['quant'])} · {e(r['backend'])} · {e(ms.gpu_short(r['gpu']))} · {e(r['effort'])} · {ms.when(r['run'])}</div>
+        return f"""<div class="cap"><div class="model">{e(r['quant'])} <span class="sc">{(res.get('score') or 0) * 100:.0f}%</span></div>
+<div class="sub">{e(r['model'])} · {e(r['backend'])} · {e(ms.gpu_short(r['gpu']))} · {e(r['effort'])} · {ms.when(r['run'])}</div>
 <div class="sub">{(res.get('gen_seconds') or 0) / 60:.1f} min · {(res.get('tokens') or 0) / 1000:.1f}k tokens · {res.get('tok_per_s') or 0:.0f} tok/s</div>
 {f'<div class="warn">failed: {e(", ".join(failed))}</div>' if failed else '<div class="okc">all checks passed</div>'}
-<div class="eye"><b>By eye {x.get(key, 0):g}/10</b></div><div class="sub">{e(x.get(key + "_note", ""))}</div></div>"""
+<div class="eye"><b>By eye {x.get(task, 0):g}/10</b></div><div class="sub">{e(x.get(task + "_note", ""))}</div></div>"""
 
-    watch = []
-    for r in best_per_version("watch"):
-        src = png_uri(folder / r["run"] / "e1_watch_unitas" / "screenshot.png")
-        img = f'<img src="{src}">' if src else '<div class="noimg">no picture</div>'
-        watch.append(f'<div class="card">{img}{caption(r, "e1_watch_unitas", "watch")}</div>')
-    rocket = []
-    for r in best_per_version("rocket"):
-        wd = folder / r["run"] / "e2_rocket_launch"
-        pics = [(png_uri(wd / f, (720, 405)), lab) for f, lab in
-                (("plume_t2.png", "liftoff, 2 s"), ("smoke_t4.png", "steam at the pad, 4 s"), ("karman.png", "above 100 km"))]
-        strip = "".join(f'<div class="pic">{f"<img src={chr(34)}{u}{chr(34)}>" if u else "<div class=noimg>no picture</div>"}'
-                        f'<div class="lab">{lab}</div></div>' for u, lab in pics)
-        rocket.append(f'<div class="card wide"><div class="strip">{strip}</div>{caption(r, "e2_rocket_launch", "rocket")}</div>')
+    cards = []
+    for r in keep:
+        if task == "watch":
+            src = png_uri(folder / r["run"] / "e1_watch_unitas" / "screenshot.png")
+            img = f'<img src="{src}">' if src else '<div class="noimg">no picture</div>'
+            cards.append(f'<div class="card">{img}{caption(r)}</div>')
+        else:
+            wd = folder / r["run"] / "e2_rocket_launch"
+            pics = [(png_uri(wd / f, (720, 405)), lab) for f, lab in
+                    (("plume_t2.png", "liftoff, 2 s"), ("smoke_t4.png", "steam at the pad, 4 s"),
+                     ("karman.png", "above 100 km"))]
+            strip = "".join(f'<div class="pic">{f"<img src={chr(34)}{u}{chr(34)}>" if u else "<div class=noimg>no picture</div>"}'
+                            f'<div class="lab">{lab}</div></div>' for u, lab in pics)
+            cards.append(f'<div class="card wide"><div class="strip">{strip}</div>{caption(r)}</div>')
+    if task == "watch":
+        title = "e1_watch_unitas: a Unitas 6497-1 movement that works as a mechanism"
+        body = f'<div class="grid">{"".join(cards)}</div>'
+        notes = ("The score counts the automatic checks: the balance frequency, the pallet fork in step with it, the escape "
+                 "wheel's half tooth per beat, meshing toothed wheels with the right ratios, the hands and the exploded view "
+                 "(22 checks).")
+    else:
+        title = "e2_rocket_launch: a launch from Cape Canaveral to above the Karman line"
+        body = f'<div class="rows">{"".join(cards)}</div>'
+        notes = ("The score counts the automatic checks: the thrust-to-weight, the gravity turn, the burn, 100 km, the plume "
+                 "and its white-hot core, steam at the pad, a dark sky with stars, the playback speed and the chase camera "
+                 "(19 checks; 16 for runs made before the speed and camera were added).")
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {STYLE}
 .wrap {{ width:2280px; }}
 h2 {{ margin:26px 0 12px; }}
 .grid {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; }}
-.rows {{ display:grid; grid-template-columns:1fr; gap:22px; }}
+.rows {{ display:grid; grid-template-columns:repeat(2, 1fr); gap:22px; }}
 .card {{ border:1px solid var(--rule); border-radius:8px; overflow:hidden; background:#fff; }}
 .card img {{ width:100%; display:block; }}
 .strip {{ display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; background:#000; }}
+.strip img {{ width:100%; display:block; }}
 .lab {{ font-size:13px; color:#ddd; padding:3px 8px; background:#111; }}
 .noimg {{ height:405px; display:flex; align-items:center; justify-content:center; color:var(--muted); background:var(--track); }}
+.strip .noimg {{ height:213px; }}
 .cap {{ padding:10px 12px 12px; }}
 .sc {{ float:right; font-weight:700; }}
 .okc {{ font-size:13px; color:#1c7a3a; margin-top:3px; }}
 .eye {{ font-size:14px; margin-top:6px; padding-top:6px; border-top:1px solid var(--rule); }}
 </style></head><body><div class="wrap">
-<h1>Local LLM coding test: engineering suite gallery</h1>
-<p class="lede">Two Three.js tasks with a physics model behind the picture (120 min limit each). One run per model version (model, quant, backend), the best by eye for each
-test; every run is in RESULTS_TABLE_ENGINEERING.md. {date.today():%d %b %Y}.</p>
-<h2>e1_watch_unitas: a Unitas 6497-1 movement that works as a mechanism</h2>
-<div class="grid">{''.join(watch)}</div>
-<h2>e2_rocket_launch: a launch from Cape Canaveral to above the Karman line</h2>
-<div class="rows">{''.join(rocket)}</div>
-<div class="notes">
-The score per task counts the automatic checks: for the watch the balance frequency, the pallet fork in step with it, the
-escape wheel's half tooth per beat, meshing toothed wheels with the right ratios, the hands and the exploded view (22);
-for the rocket the thrust-to-weight, the gravity turn, the burn, 100 km, the plume and its white-hot core, steam at the pad,
-a dark sky with stars, the playback speed and the chase camera (19; 16 for runs made before the speed and camera were
-added). "By eye" is a 1-10 rating of how real it looks (ratings_engineering.json). These pictures come from a software
-renderer; open the run's scene.html (one file, any browser, a real GPU) to see it move.
-</div></div></body></html>"""
+<h1>Local LLM coding test: engineering suite, {task}</h1>
+<p class="lede">{'Three.js' if task == 'watch' else 'Three.js with a physics model'} (120 min limit per task). One run per model version
+(model, quant, backend), the best by eye: the quantization is the caption. Every run is in RESULTS_TABLE_ENGINEERING.md.
+{date.today():%d %b %Y}.</p>
+<h2>{title}</h2>
+{body}
+<div class="notes">{notes} "By eye" is a 1-10 rating of how real it looks (ratings_engineering.json). These pictures come from a
+software renderer; open the run's scene.html (one file, any browser, a real GPU) to see it move.</div></div></body></html>"""
 
 
 def eye_line(x):
@@ -802,9 +812,10 @@ def main():
         gallery = build_scene_gallery()
         if gallery:
             pages.append((gallery, OUT_SCENE))
-        eng = build_engineering_gallery()
-        if eng:
-            pages.append((eng, OUT_ENG))
+        for task, out in (("watch", OUT_ENG_WATCH), ("rocket", OUT_ENG_ROCKET)):
+            eng = build_engineering_gallery(task)
+            if eng:
+                pages.append((eng, out))
         top10 = build_split_html(
             f"Local LLM coding test: top {TOP}", "Every model, quant, backend, GPU and reasoning level tested: the base "
             "suite (10 tasks) and the hard suite (6 tasks), TypeScript + Three.js in a real browser and Python with hidden "

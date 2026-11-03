@@ -65,5 +65,35 @@
     "watch_note": "gilded plate with clear bridges, a gear train and blued parts, the balance and the stud read well; the finish is plain and the mechanism is small in the frame",
     "rocket": 3,
     "rocket_note": "launch frames are white haze (pad, tower and plume hardly visible at 2 s and 4 s); above 100 km a flame glow and the Earth's limb, but with stripe artefacts on the ground and a flat horizon"
+  },
+  "20261102-233413_DeepSeek-V4.1-Flash-1017-UD-Q2_K_XL-maya-ENG": {
+    "watch": 6,
+    "watch_note": "gold plate with a dense grain, labelled train and balance, clear wheels and a crown; the grain looks knurled",
+    "rocket": 6.5,
+    "rocket_note": "pad with a lattice tower and masts with wires, a rocket with a white plume and haze; above 100 km the Earth's limb, stars and a bright trail"
+  },
+  "20261102-000413_DeepSeek-V4.1-Flash-1017-Maya-XS-ENG": {
+    "watch": 5,
+    "watch_note": "dark speckled plate with a visible train, labels and balance; the finish looks dirty rather than polished",
+    "rocket": 3,
+    "rocket_note": "at 2 s the frame is empty sky (rocket not in view); at 4 s the pad with steam clouds and the rocket; above 100 km a dark sky with the rocket and a plume"
+  },
+  "20261103-100101_DeepSeek-V4.1-Flash-1017-GSQ-RCO-Coder-IQ2_XXS-maya-ENG": {
+    "watch": 3,
+    "watch_note": "copper plate with a few wheels that are hard to read, no clear train or bridges",
+    "rocket": 2,
+    "rocket_note": "washed-out frames at liftoff and at 4 s with no rocket; above 100 km stars and the Earth's limb, but no rocket visible"
+  },
+  "20261030-231922_GLM-5.3-Flash-exl3-4.10bpw-maya-ENG": {
+    "watch": 4.5,
+    "watch_note": "gold plate with a hexagon pattern, a sparse gear train and labels; the balance is hard to see",
+    "rocket": 4.5,
+    "rocket_note": "liftoff and pad frames washed out to white haze; above 100 km a dark sky, the Earth's limb and a rocket with a flame"
+  },
+  "20261030-215906_GLM-5.3-Flash-GSQ-RCO-3.5bit-maya-ENG": {
+    "watch": 4,
+    "watch_note": "white and gold plate with gears and a balance, but the layout reads as a flat plate; the watch passes only 40% of the checks",
+    "rocket": 0,
+    "rocket_note": "no answer: the model stopped while still thinking (no code)"
   }
 }

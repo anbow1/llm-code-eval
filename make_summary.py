@@ -62,14 +62,18 @@ def describe(label, model):
         name = f"DeepSeek-{ver}-" + ("Pro" if re.search(r"[_-]pro(?![a-z0-9])", m) else "Flash")
         gguf = re.search(r"(ud-)?i?q\d_[a-z0-9]+(_[a-z]{1,2})?", m)
         exl2 = re.search(r"exl2\.(\d)", m)  # "exl2.9": EXL2 at 2.9 bpw
+        # the Coder build of GSQ-RCO is a different file from the general one: its own label
+        gsq_prefix = ("GSQ-RCO Coder " if "coder" in m else "GSQ-RCO ") if "gsq-rco" in m else ""
         if "exl3" in m and bpw:
             quant = f"EXL3 {bpw.group(1) or bpw.group(2) or bpw.group(3) + '.' + bpw.group(4)} bpw"
         elif exl2:
             quant = f"EXL2 2.{exl2.group(1)} bpw"
         elif gguf:
-            quant = ("GSQ-RCO " if "gsq-rco" in m else "") + gguf.group(0).upper()
+            quant = gsq_prefix + gguf.group(0).upper()
         elif bit:
-            quant = ("GSQ-RCO " if "gsq-rco" in m else "") + f"{bit.group(1)}-bit"
+            quant = gsq_prefix + f"{bit.group(1)}-bit"
+        elif re.search(r"maya-xs(?![a-z0-9])", m):
+            quant = "Maya-XS"  # a smaller file made for Maya
         elif re.search(r"maya-([sml])(?![a-z0-9])", m):
             quant = "Maya-" + re.search(r"maya-([sml])(?![a-z0-9])", m).group(1).upper()  # a file made for Maya
         else:

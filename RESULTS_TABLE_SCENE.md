@@ -12,13 +12,13 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | 1 | **100.0%** | – | 100.0% | 0% | 1.2 | 8.4k | 155.8 | 30.8 |
 | 2 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 24.3 | 39.5k | 27.4 | 31.3 |
-| 3 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 27.9 | 72.6k | 44.2 | 31.2 |
+| 3 | DeepSeek-V4.1-Flash | Maya-XS | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 27.9 | 72.6k | 44.2 | 31.2 |
 | 4 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | 1 | **100.0%** | – | 0.0% | 0% | 28.0 | 40.1k | 24.2 | 31.0 |
 | 5 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **100.0%** | – | 0.0% | 0% | 30.2 | 41.6k | 23.2 | 31.2 |
 | 6 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 44.5 | 60.0k | 22.7 | 31.0 |
 | 7 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **100.0%** | – | 0.0% | 0% | 49.7 | 68.2k | 23.1 | 31.0 |
 | 8 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **95.7%** | – | 0.0% | 0% | 27.8 | 40.0k | 24.2 | 31.0 |
-| 9 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 33.8 | 74.1k | 37.0 | 31.2 |
+| 9 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 33.8 | 74.1k | 37.0 | 31.2 |
 | 10 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | 1 | **95.7%** | – | 0.0% | 0% | 40.5 | 40.7k | 16.9 | 30.7 |
 | 11 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 45.5 | 60.2k | 22.2 | 31.3 |
 | 12 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | 1 | **95.7%** | – | 0.0% | 0% | 46.2 | 50.7k | 18.5 | 31.0 |
@@ -40,14 +40,14 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 26.10 12:55 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | **100.0%** | n/a | 100.0 | 1.2 | 8.4k | 1.6k | 6.8k | **152.4** | 163 | 30.8 | 85.8 |
 | 2 | 26.10 12:59 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 24.3 | 39.5k | 32.8k | 6.7k | **27.4** | 28 | 31.3 | 166.4 |
-| 3 | 02.11 04:47 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 27.9 | 72.6k | 32.8k | 39.8k | **44.1** | 44 | 31.2 | 118.5 |
+| 3 | 02.11 04:47 | DeepSeek-V4.1-Flash | Maya-XS | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 27.9 | 72.6k | 32.8k | 39.8k | **44.1** | 44 | 31.2 | 118.5 |
 | 4 | 26.10 16:43 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | low | **100.0%** | n/a | 100.0 | 28.0 | 40.1k | 32.8k | 7.3k | **24.2** | 25 | 31.0 | 177.0 |
 | 5 | 26.10 12:08 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 29.4 | 41.8k | 32.8k | 9.1k | **24.0** | 24 | 31.3 | 163.2 |
 | 6 | 26.10 19:29 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high | **100.0%** | n/a | 100.0 | 30.2 | 41.6k | 32.8k | 8.8k | **23.3** | 24 | 31.2 | 187.2 |
 | 7 | 26.10 21:35 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **100.0%** | n/a | 100.0 | 44.5 | 60.0k | 51.2k | 8.8k | **22.7** | 23 | 31.0 | 189.1 |
 | 8 | 26.10 22:20 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **100.0%** | n/a | 100.0 | 49.7 | 68.2k | 59.7k | 8.5k | **23.1** | 23 | 31.0 | 190.2 |
 | 9 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | RTX 5090 32 GB + 192 GB RAM | high | **95.7%** | n/a | 95.7 | 27.8 | 40.0k | 32.8k | 7.2k | **24.3** | 24 | 31.0 | 129.0 |
-| 10 | 03.11 11:07 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 33.8 | 74.1k | 65.5k | 8.5k | **37.0** | 37 | 31.2 | 68.3 |
+| 10 | 03.11 11:07 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Strata | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 33.8 | 74.1k | 65.5k | 8.5k | **37.0** | 37 | 31.2 | 68.3 |
 | 11 | 26.10 14:34 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | high, 180 min | **95.7%** | n/a | 95.7 | 40.5 | 40.7k | 32.8k | 7.9k | **16.9** | 17 | 30.7 | 155.7 |
 | 12 | 26.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max, 60 min | **95.7%** | n/a | 95.7 | 45.5 | 60.2k | 50.8k | 9.4k | **22.2** | 22 | 31.3 | 166.4 |
 | 13 | 29.10 23:10 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high, 60 min | **95.7%** | n/a | 95.7 | 46.2 | 50.7k | 41.2k | 9.5k | **18.5** | 18 | 31.0 | 191.0 |
@@ -61,14 +61,14 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 |---|---|---|
 | 26.10 12:55 | Qwen3.8-Flash-Next NVFP4 GPTQ (Strata) / medium | 100 |
 | 26.10 12:59 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS (Strata) / high | 100 |
-| 02.11 04:47 | DeepSeek-V4.1-Flash ? (Maya) / high | 100 |
+| 02.11 04:47 | DeepSeek-V4.1-Flash Maya-XS (Maya) / high | 100 |
 | 26.10 16:43 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / low | 100 |
 | 26.10 12:08 | DeepSeek-V4.1-Flash Maya-S (Maya) / high | 100 |
 | 26.10 19:29 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high | 100 |
 | 26.10 21:35 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / max, 60 min | 100 |
 | 26.10 22:20 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high, 60 min | 100 |
 | 26.10 13:58 | GLM-5.3-Flash GSQ-RCO 3.5-bit (Maya) / high | 96 |
-| 03.11 11:07 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XXS (Strata) / high, 60 min | 96 |
+| 03.11 11:07 | DeepSeek-V4.1-Flash GSQ-RCO Coder IQ2_XXS (Strata) / high, 60 min | 96 |
 | 26.10 14:34 | GLM-5.3-Flash EXL3 4.10 bpw (Maya) / high, 180 min | 96 |
 | 26.10 23:16 | DeepSeek-V4.1-Flash Maya-S (Maya) / max, 60 min | 96 |
 | 29.10 23:10 | DeepSeek-V4.1-Flash UD-IQ3_XXS (Maya) / high, 60 min | 96 |
@@ -85,14 +85,17 @@ How the picture looks, 1-10 per part (from [ratings_scene.json](ratings_scene.js
 | 26.10 12:59 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | high | 100% | **7.5** | 7 | 7 | 7 | 7 | turquoise water with a sun glint and a foam ring, green island with a beach, visible sun, a clear sailboat |
 | 26.10 19:29 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | high | 100% | **7.5** | 8 | 7 | 7 | 6 | high: clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
 | 26.10 21:35 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | max, 60 min | 100% | **7.5** | 7 | 7 | 7 | 7 | max: teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
+| 03.11 11:07 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Strata | high, 60 min | 96% | **7.5** | 8 | 7 | 7 | 7 | bright turquoise water with foam and sun glints, a sand island with a green hill and palms, a clear sailboat; the water is close to overexposed |
 | 26.10 12:08 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 100% | **7** | 6 | 8 | 6 | 6 | the most complete island (sand, grass, rocky peak, palms, shore foam); water ripples repeat in a visible grid |
 | 26.10 23:16 | DeepSeek-V4.1-Flash | Maya-S | Maya | max, 60 min | 96% | **7** | 7 | 7 | 7 | 6 | max: sand beach and green island with palms and rocks; sun glints on the water; the boat is small |
+| 02.11 04:47 | DeepSeek-V4.1-Flash | Maya-XS | Maya | high | 100% | **6.5** | 6 | 7 | 6 | 5 | a dark green island with palms and a rock peak, grey-blue water with soft glints; the island's shadow side is dark and the boat is small |
 | 26.10 16:43 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | low | 100% | **6.5** | 7 | 6 | 7 | 6 | low: sun glint and foam rings around the island; palm crowns look bushy and odd; sailboat small but clear |
 | 26.10 22:20 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | high, 60 min | 100% | **6.5** | 5 | 7 | 7 | 7 | high: the water shows a checkered grid pattern (a repeating ripple texture); island with palms and rocks; sailboat clear |
 | 29.10 23:10 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | high, 60 min | 96% | **6.5** | 7 | 6 | 6 | 6 | turquoise water with sun glints and foam, a green island with palms and a rock peak (dark side), a small boat; the island is dark-sided and the boat small |
 | 27.10 00:01 | DeepSeek-V4.1-Flash | Maya-S | Maya | high, 60 min | 96% | **6.5** | 8 | 5 | 6 | 7 | high: turquoise water with strong glints, but the island's peak is almost black (lighting); sailboat clear |
 | 26.10 14:34 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | high, 180 min | 96% | **6** | 8 | 4 | 6 | 5 | turquoise water with a sun-glitter path and foam, a good sky; the island and palms are very dark |
 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 96% | **5** | 8 | 3 | 4 | 5 | the best-looking deep-blue waves, but the island is a black silhouette (backlit, no fill light) |
+| 03.11 01:21 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | high, 60 min | 96% | **5** | 6 | 5 | 4 | 5 | the island is almost white (blown out), palms pale; dark navy water with waves; the boat is under the island and hard to see |
 | 26.10 12:55 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | medium | 100% | **4** | 4 | 3 | 5 | 3 | a flat sand cone with tiny palms; dark blocky water; the boat is a thin sail on an almost invisible hull |
 | 26.10 11:37 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 87% | **3** | 0 | 7 | 6 | 6 | no ocean on screen: the water shader does not compile; the island itself is good (sand ring, rocks, palms) |
 

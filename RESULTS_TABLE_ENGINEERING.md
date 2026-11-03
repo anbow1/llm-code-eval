@@ -14,8 +14,8 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 2 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | max | 1 | **96.9%** | – | 0.0% | 0% | 121.4 | 164.9k | 22.8 | 30.9 |
 | 3 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **95.1%** | – | 0.0% | 50% | 107.8 | 154.1k | 24.0 | 30.9 |
 | 4 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max | 1 | **95.1%** | – | 0.0% | 0% | 129.9 | 168.0k | 21.7 | 30.8 |
-| 5 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **89.5%** | – | 0.0% | 0% | 73.6 | 198.0k | 45.1 | 31.0 |
-| 6 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **84.2%** | – | 0.0% | 0% | 65.8 | 152.3k | 39.1 | 31.2 |
+| 5 | DeepSeek-V4.1-Flash | Maya-XS | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **89.5%** | – | 0.0% | 0% | 73.6 | 198.0k | 45.1 | 31.0 |
+| 6 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **84.2%** | – | 0.0% | 0% | 65.8 | 152.3k | 39.1 | 31.2 |
 | 7 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | 1 | **84.2%** | – | 0.0% | 0% | 73.4 | 119.3k | 27.4 | 31.3 |
 | 8 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | 1 | **84.2%** | – | 0.0% | 0% | 163.5 | 171.3k | 17.6 | 31.0 |
 | 9 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | 1 | **80.7%** | – | 80.7% | 0% | 4.2 | 30.1k | 139.3 | 31.1 |
@@ -43,8 +43,8 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 3 | 02.11 23:34 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | RTX 5090 32 GB + 192 GB RAM | high | **95.1%** | n/a | 95.1 | 107.8 | 154.1k | 120.2k | 33.9k | **24.0** | 24 | 30.9 | 177.9 |
 | 4 | 29.10 01:14 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | RTX 5090 32 GB + 192 GB RAM | max | **95.1%** | n/a | 95.1 | 129.9 | 168.0k | 131.1k | 36.9k | **21.7** | 22 | 30.8 | 191.0 |
 | 5 | 28.10 02:05 | DeepSeek-V4.1-Flash | Maya-S | Maya | RTX 5090 32 GB + 192 GB RAM | high | **94.6%** | n/a | 94.6 | 111.9 | 153.9k | 124.3k | 29.6k | **23.0** | 23 | 30.9 | 160.0 |
-| 6 | 02.11 00:04 | DeepSeek-V4.1-Flash | ? | Maya | RTX 5090 32 GB + 192 GB RAM | high | **89.5%** | n/a | 89.5 | 73.6 | 198.0k | 65.7k | 132.3k | **45.2** | 45 | 31.0 | 114.2 |
-| 7 | 03.11 10:01 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | **84.2%** | n/a | 84.2 | 65.8 | 152.3k | 131.2k | 21.2k | **39.1** | 39 | 31.2 | 68.6 |
+| 6 | 02.11 00:04 | DeepSeek-V4.1-Flash | Maya-XS | Maya | RTX 5090 32 GB + 192 GB RAM | high | **89.5%** | n/a | 89.5 | 73.6 | 198.0k | 65.7k | 132.3k | **45.2** | 45 | 31.0 | 114.2 |
+| 7 | 03.11 10:01 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | **84.2%** | n/a | 84.2 | 65.8 | 152.3k | 131.2k | 21.2k | **39.1** | 39 | 31.2 | 68.6 |
 | 8 | 28.10 18:32 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | RTX 5090 32 GB + 192 GB RAM | high | **84.2%** | n/a | 84.2 | 73.4 | 119.3k | 65.7k | 53.7k | **27.4** | 28 | 31.3 | 165.6 |
 | 9 | 30.10 02:01 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | RTX 5090 32 GB + 192 GB RAM | high | **84.2%** | n/a | 84.2 | 163.5 | 171.3k | 119.5k | 51.8k | **17.6** | 18 | 31.0 | 190.9 |
 | 10 | 27.10 21:31 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | RTX 5090 32 GB + 192 GB RAM | medium | **80.7%** | n/a | 80.7 | 4.2 | 30.1k | 6.9k | 23.2k | **139.8** | 144 | 31.1 | 137.8 |
@@ -64,8 +64,8 @@ Hardware: RTX 5090 32 GB + 128 GB RAM, and RTX 4080 16 GB + 32 GB DDR5 (the GPU 
 | 02.11 23:34 | DeepSeek-V4.1-Flash UD-Q2_K_XL (Maya) / high | 95 | 95 |
 | 29.10 01:14 | DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / max | 95 | 95 |
 | 28.10 02:05 | DeepSeek-V4.1-Flash Maya-S (Maya) / high | 95 | 94 |
-| 02.11 00:04 | DeepSeek-V4.1-Flash ? (Maya) / high | 100 | 79 |
-| 03.11 10:01 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XXS (Maya) / high | 100 | 68 |
+| 02.11 00:04 | DeepSeek-V4.1-Flash Maya-XS (Maya) / high | 100 | 79 |
+| 03.11 10:01 | DeepSeek-V4.1-Flash GSQ-RCO Coder IQ2_XXS (Maya) / high | 100 | 68 |
 | 28.10 18:32 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS (Strata) / high | 100 | 68 |
 | 30.10 02:01 | DeepSeek-V4.1-Flash UD-IQ3_XXS (Maya) / high | 100 | 68 |
 | 27.10 21:31 | Qwen3.8-Flash-Next NVFP4 GPTQ (Strata) / medium | 86 | 75 |
@@ -83,14 +83,19 @@ How real it looks, 1-10 per task (from [ratings_engineering.json](ratings_engine
 | Run | Model | Quant | Backend | Effort | Watch score | Watch by eye | Rocket score | Rocket by eye | Notes |
 |---|---|---|---|---|---|---|---|---|---|
 | 28.10 19:55 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 100% | **6** | 100% | **6.5** | watch: perlage plate, gilded barrel with the mainspring, blued hairspring and steel parts, labels; the plate reads as silver rather than brass; rocket: tower, masts with wires, a rocket with a warm plume, grass and haze; steam is faint; above 100 km a dark blue sky with stars and the trail |
+| 02.11 23:34 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | high | 95% | **6** | 95% | **6.5** | watch: gold plate with a dense grain, labelled train and balance, clear wheels and a crown; the grain looks knurled; rocket: pad with a lattice tower and masts with wires, a rocket with a white plume and haze; above 100 km the Earth's limb, stars and a bright trail |
 | 28.10 02:05 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 95% | **6** | 94% | **6.5** | watch: perlage plate (too coarse, looks knurled), Geneva-striped bridges, wheels visible between them, blued hands and hairspring; rocket: lattice tower, white rocket with a flag, a bright plume with a warm glow, haze; little steam; in space the sun, stars and the trail |
 | 28.10 03:57 | DeepSeek-V4.1-Flash | Maya-S | Maya | max | 100% | **5** | 94% | **6** | watch: gilded plate with perlage and a domed glass rim, but a strong depth-of-field blur hides the mechanism; rocket: tower, lightning masts with wires, low buildings, a white-hot plume; above 100 km the sky is still dark blue |
 | 29.10 01:14 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | max | 95% | **4.5** | 95% | **6.5** | watch: a small gold movement on a brown background, shadows, labels; the file fails to compile (TS7053), but the picture renders; rocket: a Falcon 9 on a pad with a lattice tower, masts with wires, a concrete flame trench, a white-hot plume; above 100 km the Earth's limb and a bright trail; the plume is very white, no steam |
 | 30.10 02:01 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | high | 100% | **6.5** | 68% | **3** | watch: gilded plate with clear bridges, a gear train and blued parts, the balance and the stud read well; the finish is plain and the mechanism is small in the frame; rocket: launch frames are white haze (pad, tower and plume hardly visible at 2 s and 4 s); above 100 km a flame glow and the Earth's limb, but with stripe artefacts on the ground and a flat horizon |
+| 30.10 23:19 | GLM-5.3-Flash | EXL3 4.10 bpw | Maya | high | 14% | **4.5** | 84% | **4.5** | watch: gold plate with a hexagon pattern, a sparse gear train and labels; the balance is hard to see; rocket: liftoff and pad frames washed out to white haze; above 100 km a dark sky, the Earth's limb and a rocket with a flame |
+| 02.11 00:04 | DeepSeek-V4.1-Flash | Maya-XS | Maya | high | 100% | **5** | 79% | **3** | watch: dark speckled plate with a visible train, labels and balance; the finish looks dirty rather than polished; rocket: at 2 s the frame is empty sky (rocket not in view); at 4 s the pad with steam clouds and the rocket; above 100 km a dark sky with the rocket and a plume |
 | 28.10 18:32 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XS | Strata | high | 100% | **5** | 68% | **2** | watch: gold plate with the gear train, blued hairspring, pallet and labels; flat finishes and a small mechanism in the frame; rocket: launch frames washed out to white (no pad or rocket visible at 2 s and 4 s); the space frame above 100 km is good: stars, the Earth's limb, the trail |
 | 28.10 23:13 | DeepSeek-V4.1-Flash | EXL2 2.9 bpw | Maya | high | 86% | **5** | 47% | **1** | watch: gold plate, grey bridges and balance cock, labels; runs, but the train is hard to read from this angle and the finish is flat; rocket: white frames: the page fails on start (setting 'value' of undefined), so the frame is blank |
 | 27.10 21:26 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | low | 86% | **4.5** | 38% | **1** | watch: gold plate with toothed wheels, a balance with a spiral hairspring and red jewels; flat lighting, no finishes, crude; rocket: white frame: UnrealBloomPass (threshold 0.6, strength 1.2-1.7) on the HDR Sky addon blows the whole picture out; without the bloom the same code shows a red lattice tower, the rocket, the pad and a blue sky |
+| 03.11 10:01 | DeepSeek-V4.1-Flash | GSQ-RCO Coder IQ2_XXS | Maya | high | 100% | **3** | 68% | **2** | watch: copper plate with a few wheels that are hard to read, no clear train or bridges; rocket: washed-out frames at liftoff and at 4 s with no rocket; above 100 km stars and the Earth's limb, but no rocket visible |
 | 27.10 21:36 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | xhigh | 100% | **4** | 0% | **0** | watch: a guilloche plate, but one large Geneva-striped bridge block covers almost the whole train; labels everywhere; rocket: does not compile (TS2339) and stops at startup with 'Cannot read properties of undefined (reading position)': a white page |
+| 30.10 21:59 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 40% | **4** | 0% | **0** | watch: white and gold plate with gears and a balance, but the layout reads as a flat plate; the watch passes only 40% of the checks; rocket: no answer: the model stopped while still thinking (no code) |
 | 27.10 21:31 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | medium | 86% | **2** | 75% | **1.5** | watch: the camera sits inside the movement: glare, a few parts out of focus, the mechanism cannot be seen; rocket: white frame for the same reason (bloom strength 1.5-2.0 on the bright Sky); above 100 km a black sky with a few stars, no rocket |
 | 28.10 22:09 | DeepSeek-V4.1-Flash | GSQ-RCO IQ2_XXS | Strata | high | 20% | **1** | 0% | **0** | watch: the page does not compile (TS7053) and never starts: a black screen with one button; rocket: no answer: the model stopped while still thinking (no code) |
 
