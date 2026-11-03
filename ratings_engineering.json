@@ -48,13 +48,13 @@
     "rocket": 0,
     "rocket_note": "no answer: the model stopped while still thinking (no code)"
   },
-  "20261028-231344_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-high-ENG": {
+  "20261028-231344_DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-high-ENG": {
     "watch": 5,
     "watch_note": "gold plate, grey bridges and balance cock, labels; runs, but the train is hard to read from this angle and the finish is flat",
     "rocket": 1,
     "rocket_note": "white frames: the page fails on start (setting 'value' of undefined), so the frame is blank"
   },
-  "20261029-011403_DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-max-ENG": {
+  "20261029-011403_DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-max-ENG": {
     "watch": 4.5,
     "watch_note": "a small gold movement on a brown background, shadows, labels; the file fails to compile (TS7053), but the picture renders",
     "rocket": 6.5,

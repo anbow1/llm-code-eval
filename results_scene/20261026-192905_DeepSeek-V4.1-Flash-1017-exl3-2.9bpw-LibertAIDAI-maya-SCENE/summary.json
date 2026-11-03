@@ -1,5 +1,5 @@
 {
-  "name": "DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-low-SCENE",
+  "name": "DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-SCENE",
   "model": "local",
   "python": null,
   "three": 100.0,
@@ -17,18 +17,18 @@
     "timeouts": 0,
     "broken": 0,
     "not_run": 0,
-    "tokens_total": 40088,
-    "reasoning_tokens_total": 32781,
-    "tok_per_s": 24.6,
-    "ttft_avg_s": 29.2,
-    "gen_minutes": 27.6
+    "tokens_total": 41568,
+    "reasoning_tokens_total": 32796,
+    "tok_per_s": 23.9,
+    "ttft_avg_s": 48.0,
+    "gen_minutes": 29.8
   },
   "resources": {
     "gpu": "RTX 5090 32 GB",
-    "vram_peak_gb": 31.0,
-    "ram_peak_gb": 177.0,
-    "ram_at_start_gb": 175.7,
-    "disk_read_gb": 8.4,
+    "vram_peak_gb": 31.2,
+    "ram_peak_gb": 187.2,
+    "ram_at_start_gb": 17.4,
+    "disk_read_gb": 123.9,
     "note": null
   },
   "settings": {
@@ -41,13 +41,13 @@
     "presence_penalty": null,
     "repetition_penalty": null,
     "think": "default",
-    "reasoning_effort": "low",
+    "reasoning_effort": "high",
     "task_timeout_min": 30,
     "budget_min": 60,
     "limits": "lenient",
     "suite": "scene"
   },
-  "minutes": 28.0,
+  "minutes": 30.2,
   "results": [
     {
       "id": "s1_ocean_island",
@@ -81,15 +81,15 @@
       "notes": [],
       "status": "ok",
       "finish": "stop",
-      "gen_seconds": 1655.5,
-      "ttft_s": 29.2,
-      "think_seconds": 1325.7,
+      "gen_seconds": 1786.6,
+      "ttft_s": 48.0,
+      "think_seconds": 1369.8,
       "prompt_tokens": 1054,
-      "tokens": 40088,
-      "reasoning_tokens": 32781,
-      "answer_tokens": 7307,
+      "tokens": 41568,
+      "reasoning_tokens": 32796,
+      "answer_tokens": 8772,
       "tokens_approx": false,
-      "tok_per_s": 24.6
+      "tok_per_s": 23.9
     }
   ]
 }

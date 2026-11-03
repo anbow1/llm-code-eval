@@ -1,4 +1,4 @@
-# DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-max-ENG
+# DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-max-ENG
 
 - Date: 2026-10-29 03:23
 - Model: local

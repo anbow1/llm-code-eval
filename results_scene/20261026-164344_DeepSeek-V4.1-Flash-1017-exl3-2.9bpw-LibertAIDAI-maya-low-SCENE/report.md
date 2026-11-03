@@ -1,4 +1,4 @@
-# DeepSeek-V4.1-Flash-1017-exl2.9-LibertAIDAI-maya-low-SCENE
+# DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-low-SCENE
 
 - Date: 2026-10-26 17:11
 - Model: local

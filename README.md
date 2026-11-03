@@ -362,13 +362,13 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | Model · quant · engine | Effort | Score | By eye | Time | Tokens (thinking) | Picture |
 |---|---|---|---|---|---|---|
 | DeepSeek-V4.1-Flash GSQ-RCO Coder IQ2_XXS · Strata | high, 60 min | 96% | **7.5** | 33.8 min | 74.1k (65.5k) | bright turquoise water with foam and sun glints, a sand island with a green hill and palms, a clear sailboat; the water is close to overexposed |
-| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | high | 100% | **7.5** | 30.2 min | 41.6k (32.8k) | clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
+| DeepSeek-V4.1-Flash EXL3 2.9 bpw · Maya | high | 100% | **7.5** | 30.2 min | 41.6k (32.8k) | clean turquoise water with foam rings, sand beach, green hill, palms; sailboat with a rectangular sail |
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS · Strata | high | 100% | **7.5** | 24.3 min | 39.5k (32.8k) | turquoise water with a sun glint and foam, green island with a beach, a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | high | 100% | **7** | 29.4 min | 41.8k (32.8k) | the most complete island (sand, grass, rocky peak, palms, foam); water ripples repeat in a grid |
 | DeepSeek-V4.1-Flash Maya-XS · Maya | high | 100% | **6.5** | 27.9 min | 72.6k (32.8k) | a dark green island with palms and a rock peak, grey-blue water with soft glints; the boat is small |
 | DeepSeek-V4.1-Flash UD-IQ3_XXS · Maya | high | 96% | **6.5** | 46.2 min | 50.7k (41.2k) | turquoise water with sun glints and foam, a green island with palms and a dark peak, a small boat |
-| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | low | 100% | **6.5** | 28.0 min | 40.1k (32.8k) | sun glint and foam rings around the island; palm crowns look bushy and odd |
-| DeepSeek-V4.1-Flash EXL2 2.9 bpw · Maya | max, 60 min | 100% | **7.5** | 44.5 min | 60.0k (51.2k) | teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
+| DeepSeek-V4.1-Flash EXL3 2.9 bpw · Maya | low | 100% | **6.5** | 28.0 min | 40.1k (32.8k) | sun glint and foam rings around the island; palm crowns look bushy and odd |
+| DeepSeek-V4.1-Flash EXL3 2.9 bpw · Maya | max, 60 min | 100% | **7.5** | 44.5 min | 60.0k (51.2k) | teal water with soft ripples and a sun glint; sand-and-green island with palms; a clear sailboat |
 | DeepSeek-V4.1-Flash Maya-S · Maya | max, 60 min | 96% | **7** | 45.5 min | 60.2k (50.8k) | sand beach and green island with palms and rocks; sun glints on the water; the boat is small |
 | GLM-5.3-Flash EXL3 4.10 bpw · Maya | high, 180 min | 96% | **6** | 40.5 min | 40.7k (32.8k) | the best water (glitter path, foam) and sky; island and palms very dark |
 | DeepSeek-V4.1-Flash UD-Q2_K_XL · Maya | high, 60 min | 96% | **5** | 52.9 min | 75.1k (65.6k) | the island is almost white (blown out), palms pale; dark navy water; the boat is hard to see |
@@ -378,7 +378,7 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 
 - **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.
-- **Two more DeepSeek-V4.1 runs on a different file (EXL2 2.9 bpw, Maya, 26 Oct, both at 100%):** `low` finished in 28.0 min (6.5 by eye), `high` in 30.2 min (7.5 by eye). Their thinking stopped at 32.8k tokens again (32,781 and 32,796), so `low` and `high` used almost the same number of tokens (40.1k and 41.6k): with the cap, the level barely changes this task.
+- **Two more DeepSeek-V4.1 runs on a different file (EXL3 2.9 bpw, Maya, 26 Oct, both at 100%):** `low` finished in 28.0 min (6.5 by eye), `high` in 30.2 min (7.5 by eye). Their thinking stopped at 32.8k tokens again (32,781 and 32,796), so `low` and `high` used almost the same number of tokens (40.1k and 41.6k): with the cap, the level barely changes this task.
 - **DeepSeek-V4.1 made the best scenes** (7–7.5 by eye), GLM-5.3 the best water but dark islands (5–6), Qwen3.8-Flash-Next NVFP4 the fastest and simplest (4).
 - **Qwen3.8-Flash-Next NVFP4 in Strata did it in 1.2 min**, 20–30 times faster than the others, but its picture is the weakest of the finished ones.
 - **Thinking stopped at about 32.8k tokens in the 30-minute runs** (32,776–32,798), then the model wrote the answer. See SUMMARY.md, Part 9. Four DeepSeek runs of 26–27 Oct with a 60-minute limit thought 51k–63k tokens instead, so the cap was not there for them. The cause is not yet known.
@@ -426,8 +426,8 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 | DeepSeek-V4.1-Flash Maya-S / high (second run) | 100% | 6 | 100% | 6.5 | 61.7 | 61.5 | 22.6 |
 | DeepSeek-V4.1-Flash Maya-S / high | 95% | 6 | 94% | 6.5 | 57.7 | 53.6 | 23.2 |
 | DeepSeek-V4.1-Flash Maya-S / max | 100% | 5 | 94% | 6 | 58.9 | 61.8 | 22.7 |
-| DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / max | 95% | 4.5 | 95% | 6.5 | 64.0 | 64.9 | 22.1 |
-| DeepSeek-V4.1-Flash EXL2 2.9 bpw (Maya) / high | 86% | 5 | 47% | 1 | 67.2 | 52.2 | 21.5 |
+| DeepSeek-V4.1-Flash EXL3 2.9 bpw (Maya) / max | 95% | 4.5 | 95% | 6.5 | 64.0 | 64.9 | 22.1 |
+| DeepSeek-V4.1-Flash EXL3 2.9 bpw (Maya) / high | 86% | 5 | 47% | 1 | 67.2 | 52.2 | 21.5 |
 | DeepSeek-V4.1-Flash UD-IQ3_XXS (Maya) / high | 100% | 6.5 | 68% | 3 | 93.6 | 68.8 | 18 |
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XS (Strata) / high | 100% | 5 | 68% | 2 | 45.0 | 27.5 | 27.5 |
 | DeepSeek-V4.1-Flash GSQ-RCO IQ2_XXS (Strata) / high | 20% | 1 | 0% (no answer) | 0 | 27.9 | 4.6 | 27.6 |
@@ -443,7 +443,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 - DeepSeek-V4.1-Flash gets the mechanism and the physics almost fully right, but needs about an hour per task at 22–23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, masts, rocket, plume) and watch finishes (perlage, Geneva stripes, blued parts). Maya-S high (second run) is the best: every check passes on both tasks.
 - Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile. At low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky), and the watch skips the gear data.
 - UD-IQ3_XXS in Maya (the fifth DeepSeek quant) has the highest by-eye watch so far (7 in its second run): all 22 checks pass, a gilded movement with labelled parts and a readable train. Its second-run rocket keeps the pad, tower and plume readable from liftoff to 4 s and shows a dark sky with stars above 100 km (6.5; 18 of 19 checks, the failing one is the dark-sky check). The first run had white launch frames and passed 68% of the rocket checks.
-- The IQ2_XXS run has a watch that does not compile and never starts, and no answer for the rocket. The EXL2 high run's rocket page fails on start and stays blank.
+- The IQ2_XXS run has a watch that does not compile and never starts, and no answer for the rocket. The EXL3 high run's rocket page fails on start and stays blank.
 - The first runs (Qwen low, medium and xhigh, DeepSeek Maya-S high and max) were made before the playback speed and the chase camera were added, so their scores leave out those three checks. The newer runs have all 19.
 - The gallery shows one run per model version (model, quant, backend): the best by eye for each test, ties broken by the automatic score. All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).
 
