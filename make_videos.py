@@ -32,7 +32,7 @@ OUT = HERE / "videos"
 WORK = Path(os.environ.get("VIDEO_WORK", HERE / "video_work"))  # frames; not part of the repo
 FPS, SECS = 20, 10  # watch and rocket; the island uses 30
 TILE_W, TILE_H = 480, 270
-COLS_MAX = 4
+CANVAS_W, CANVAS_H = 1920, 1080  # 16:9, shown whole on X (no cropping)
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 TESTS = {
@@ -140,19 +140,32 @@ def placeholder(outdir, text):
     return [p]
 
 
+def layout(n):
+    """Columns and rows for n tiles that fit the 16:9 canvas, closest to 16:9, then fewest empty cells."""
+    best = None
+    for cols in range(1, n + 1):
+        rows = math.ceil(n / cols)
+        if cols * TILE_W > CANVAS_W or rows * TILE_H > CANVAS_H:
+            continue
+        key = (abs(cols * TILE_W / (rows * TILE_H) - CANVAS_W / CANVAS_H), cols * rows - n)
+        if best is None or key < best[0]:
+            best = (key, cols, rows)
+    return best[1], best[2]
+
+
 def compose(tiles, out_mp4, frames_dir, fps):
-    """tiles: list of (caption, [frame files]). Writes out_mp4 (H.264) with the tiles side by side in a grid."""
+    """tiles: list of (caption, [frame files]). Writes out_mp4 (H.264, 16:9) with the tiles in a grid, centred on the canvas."""
     n = len(tiles)
-    cols = min(COLS_MAX, n)
-    rows = math.ceil(n / cols)
+    cols, rows = layout(n)
+    x0, y0 = (CANVAS_W - cols * TILE_W) // 2, (CANVAS_H - rows * TILE_H) // 2
     font = ImageFont.truetype(FONT, 22)
     frames_dir.mkdir(parents=True, exist_ok=True)
     total = fps * SECS
     for i in range(total):
-        canvas = Image.new("RGB", (cols * TILE_W, rows * TILE_H), (0, 0, 0))
+        canvas = Image.new("RGB", (CANVAS_W, CANVAS_H), (0, 0, 0))
         for k, (caption, files) in enumerate(tiles):
             j = min(len(files) - 1, int(i * len(files) / total))
-            x, y = (k % cols) * TILE_W, (k // cols) * TILE_H
+            x, y = x0 + (k % cols) * TILE_W, y0 + (k // cols) * TILE_H
             canvas.paste(Image.open(files[j]).convert("RGB"), (x, y))
             d = ImageDraw.Draw(canvas)
             d.rectangle((x, y + TILE_H - 36, x + TILE_W - 1, y + TILE_H - 1), fill=(0, 0, 0))
