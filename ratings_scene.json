@@ -127,5 +127,13 @@
     "boat": 5,
     "overall": 5,
     "note": "the island is almost white (blown out), palms pale; dark navy water with waves; the boat is under the island and hard to see"
+  },
+  "20261103-175115_DeepSeek-V4.1-Flash-1017-UD-IQ3_XXS-maya-SCENE": {
+    "water": 3,
+    "island": 5,
+    "light": 3,
+    "boat": 4,
+    "overall": 4,
+    "note": "sand-coloured wavy plane instead of water, black sky with no horizon, dim lighting; green island with palms and a small boat (visible in the other shots); reads as a desert island at night"
   }
 }

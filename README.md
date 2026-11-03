@@ -374,6 +374,7 @@ All on the RTX 5090 + 192 GB RAM, one run each. Table: [RESULTS_TABLE_SCENE.md](
 | DeepSeek-V4.1-Flash UD-Q2_K_XL · Maya | high, 60 min | 96% | **5** | 52.9 min | 75.1k (65.6k) | the island is almost white (blown out), palms pale; dark navy water; the boat is hard to see |
 | GLM-5.3-Flash GSQ-RCO 3.5-bit · Maya | high | 96% | **5** | 27.8 min | 40.0k (32.8k) | beautiful deep-blue waves; the island is a black silhouette |
 | Qwen3.8-Flash-Next NVFP4 GPTQ · Strata | medium | 100% | **4** | **1.2 min** | 8.4k (1.6k) | a flat sand cone, blocky water, a barely visible boat |
+| DeepSeek-V4.1-Flash UD-IQ3_XXS · Maya | high, 60 min | 83% | **4** | 55.2 min | 56.5k (46.7k) | sand-coloured wavy plane instead of water, black sky with no horizon, dim lighting; green island with palms and a small boat |
 | DeepSeek-V4.1-Flash Maya-S · Maya (1st run) | high | 87% | **3** | 28.2 min | 43.4k (32.8k) | no ocean: the water shader does not compile (`vec2.z`) |
 
 - **The score alone does not separate the good scenes,** so each run also has a by-eye rating, 1–10 for water, island, light and boat ([ratings_scene.json](ratings_scene.json), rated from the gallery screenshots; edit it if you see it differently). Two checks were added after the first runs (`water_visible`, `island_lit`) and the saved answers were graded again: the scene without water fell from 90% to 87%, the two GLM scenes with a black island to 96%.
@@ -421,6 +422,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 | Model / effort | Watch: checks | Watch: by eye | Rocket: checks | Rocket: by eye | Watch time (min) | Rocket time (min) | tok/s |
 |---|---|---|---|---|---|---|---|
+| DeepSeek-V4.1-Flash UD-IQ3_XXS (Maya) / high (second run) | 100% | 7 | 95% | 6.5 | 74.7 | 71.6 | 18.4 |
 | DeepSeek-V4.1-Flash Maya-S / high (second run) | 100% | 6 | 100% | 6.5 | 61.7 | 61.5 | 22.6 |
 | DeepSeek-V4.1-Flash Maya-S / high | 95% | 6 | 94% | 6.5 | 57.7 | 53.6 | 23.2 |
 | DeepSeek-V4.1-Flash Maya-S / max | 100% | 5 | 94% | 6 | 58.9 | 61.8 | 22.7 |
@@ -440,7 +442,7 @@ The checks were tested with a reference solution ([reference/s1_ocean_island.ts]
 
 - DeepSeek-V4.1-Flash gets the mechanism and the physics almost fully right, but needs about an hour per task at 22–23 tok/s. Its pictures are the only ones with a recognisable launch pad (lattice tower, masts, rocket, plume) and watch finishes (perlage, Geneva stripes, blued parts). Maya-S high (second run) is the best: every check passes on both tasks.
 - Qwen NVFP4 answers in minutes. At xhigh its watch passes every check, but its rocket does not compile. At low and medium its launch is a white screen: both add UnrealBloomPass with a low threshold and a high strength on top of the HDR Sky addon, which blows the whole frame out (without the bloom the same code shows the tower, the rocket and the sky), and the watch skips the gear data.
-- UD-IQ3_XXS in Maya (the fifth DeepSeek quant) has the highest by-eye watch so far (6.5): all 22 checks pass, a gilded movement with clear bridges. Its rocket has white launch frames and a flame glow above 100 km with stripe artefacts; the speed and plume checks fail.
+- UD-IQ3_XXS in Maya (the fifth DeepSeek quant) has the highest by-eye watch so far (7 in its second run): all 22 checks pass, a gilded movement with labelled parts and a readable train. Its second-run rocket keeps the pad, tower and plume readable from liftoff to 4 s and shows a dark sky with stars above 100 km (6.5; 18 of 19 checks, the failing one is the dark-sky check). The first run had white launch frames and passed 68% of the rocket checks.
 - The IQ2_XXS run has a watch that does not compile and never starts, and no answer for the rocket. The EXL2 high run's rocket page fails on start and stays blank.
 - The first runs (Qwen low, medium and xhigh, DeepSeek Maya-S high and max) were made before the playback speed and the chase camera were added, so their scores leave out those three checks. The newer runs have all 19.
 - The gallery shows one run per model version (model, quant, backend): the best by eye for each test, ties broken by the automatic score. All runs, the by-eye notes and the per-task scores: [RESULTS_TABLE_ENGINEERING.md](RESULTS_TABLE_ENGINEERING.md).

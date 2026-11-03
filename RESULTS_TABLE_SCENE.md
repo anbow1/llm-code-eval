@@ -100,6 +100,7 @@ How the picture looks, 1-10 per part (from [ratings_scene.json](ratings_scene.js
 | 26.10 13:58 | GLM-5.3-Flash | GSQ-RCO 3.5-bit | Maya | high | 96% | **5** | 8 | 3 | 4 | 5 | the best-looking deep-blue waves, but the island is a black silhouette (backlit, no fill light) |
 | 03.11 01:21 | DeepSeek-V4.1-Flash | UD-Q2_K_XL | Maya | high, 60 min | 96% | **5** | 6 | 5 | 4 | 5 | the island is almost white (blown out), palms pale; dark navy water with waves; the boat is under the island and hard to see |
 | 26.10 12:55 | Qwen3.8-Flash-Next | NVFP4 GPTQ | Strata | medium | 100% | **4** | 4 | 3 | 5 | 3 | a flat sand cone with tiny palms; dark blocky water; the boat is a thin sail on an almost invisible hull |
+| 03.11 17:51 | DeepSeek-V4.1-Flash | UD-IQ3_XXS | Maya | high, 60 min | 83% | **4** | 3 | 5 | 3 | 4 | sand-coloured wavy plane instead of water, black sky with no horizon, dim lighting; green island with palms and a small boat (visible in the other shots); reads as a desert island at night |
 | 26.10 11:37 | DeepSeek-V4.1-Flash | Maya-S | Maya | high | 87% | **3** | 0 | 7 | 6 | 6 | no ocean on screen: the water shader does not compile; the island itself is good (sand ring, rocks, palms) |
 
 - **Avg tok/s (from time)** = all generated tokens ÷ total generation time of all tasks (including prompt processing and waiting for the first token). This is the real working speed.
