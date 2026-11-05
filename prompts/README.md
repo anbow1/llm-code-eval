@@ -4,6 +4,6 @@ The large graphics tasks as plain prompts, to run in another API, chat or agent 
 
 | Task | Suite | Prompt | System / user (plain text) |
 |---|---|---|---|
-| s1_ocean_island | scene | [s1_ocean_island.md](s1_ocean_island.md) | [system](s1_ocean_island.system.txt), [user](s1_ocean_island.user.txt) |
-| e1_watch_unitas | engineering | [e1_watch_unitas.md](e1_watch_unitas.md) | [system](e1_watch_unitas.system.txt), [user](e1_watch_unitas.user.txt) |
-| e2_rocket_launch | engineering | [e2_rocket_launch.md](e2_rocket_launch.md) | [system](e2_rocket_launch.system.txt), [user](e2_rocket_launch.user.txt) |
+| s1_ocean_island | scene | [s1_ocean_island.md](s1_ocean_island.md) | [system](s1_ocean_island.system.txt), [user](s1_ocean_island.user.txt), [agent user](s1_ocean_island.agent.user.txt) |
+| e1_watch_unitas | engineering | [e1_watch_unitas.md](e1_watch_unitas.md) | [system](e1_watch_unitas.system.txt), [user](e1_watch_unitas.user.txt), [agent user](e1_watch_unitas.agent.user.txt) |
+| e2_rocket_launch | engineering | [e2_rocket_launch.md](e2_rocket_launch.md) | [system](e2_rocket_launch.system.txt), [user](e2_rocket_launch.user.txt), [agent user](e2_rocket_launch.agent.user.txt) |

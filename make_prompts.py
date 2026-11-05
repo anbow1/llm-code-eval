@@ -72,6 +72,9 @@ tokens to the tables.
 """
 
 
+AGENT_LINE = "Write the file to main.ts instead of replying with a code block."
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     index = ["# Prompts for comparisons", "",
@@ -84,7 +87,11 @@ def main():
         (OUT / f"{tid}.md").write_text(page(suite, task, system), encoding="utf-8")
         (OUT / f"{tid}.system.txt").write_text(system.strip() + "\n", encoding="utf-8")
         (OUT / f"{tid}.user.txt").write_text(task["prompt"].strip() + "\n", encoding="utf-8")
-        index.append(f"| {tid} | {suite} | [{tid}.md]({tid}.md) | [system]({tid}.system.txt), [user]({tid}.user.txt) |")
+        # the same user prompt for an agent harness: the last line makes it write the file instead of a code block
+        (OUT / f"{tid}.agent.user.txt").write_text(
+            task["prompt"].strip() + "\n\n" + AGENT_LINE + "\n", encoding="utf-8")
+        index.append(f"| {tid} | {suite} | [{tid}.md]({tid}.md) | [system]({tid}.system.txt), [user]({tid}.user.txt), "
+                     f"[agent user]({tid}.agent.user.txt) |")
     (OUT / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     print("wrote", OUT)
 
