@@ -1,0 +1,33 @@
+Jak wygenerować filmy (wyspa, zegarek, rakieta) na PC z GPU
+===========================================================
+
+Jednorazowo (PowerShell, w katalogu repozytorium):
+
+    pip install pillow playwright
+    python -m playwright install chromium
+    winget install Gyan.FFmpeg        (potem zamknij i otwórz PowerShell, żeby ffmpeg był w PATH)
+
+Render wszystkich trzech testów (wyspa, zegarek, rakieta):
+
+    git pull
+    python make_videos.py
+
+Tylko zegarek i rakieta:
+
+    python make_videos.py --test watch --test rocket
+
+Tylko wyspa:
+
+    python make_videos.py --test island
+
+Wyniki trafiają do videos\ (1920x1080, 16:9, po 10 s):
+
+    island_all.mp4, island_deepseek.mp4   (30 klatek/s)
+    watch_all.mp4,  watch_deepseek.mp4    (20 klatek/s)
+    rocket_all.mp4, rocket_deepseek.mp4   (20 klatek/s)
+
+Uwagi:
+- Skrypt sam używa pełnego Chromium z GPU (RTX 5090), gdy nie ustawiono CHROMIUM_PATH.
+- Klatki z poprzednich prób są w video_work\ i nie idą do git. Skrypt renderuje tylko brakujące kafelki, a potem składa filmy.
+- Jeśli chcesz wymusić ponowne wyrenderowanie, usuń katalog video_work\ (lub podkatalog testu) i uruchom komendę jeszcze raz.
+- Przed git pull zrób kopię swoich plików z videos\, jeśli nie chcesz ich nadpisać plikami z repozytorium.
