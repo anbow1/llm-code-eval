@@ -135,5 +135,21 @@
     "boat": 4,
     "overall": 4,
     "note": "sand-coloured wavy plane instead of water, black sky with no horizon, dim lighting; green island with palms and a small boat (visible in the other shots); reads as a desert island at night"
+  },
+  "20261104-203509_DeepSeek-V4.1-Flash-1017-exl3-2.68bpw-turboderp-maya-SCENE": {
+    "water": 8,
+    "island": 7,
+    "light": 7,
+    "boat": 6,
+    "overall": 7.5,
+    "note": "teal water with wave ridges and sun glints, green island with palms and a rock peak, a clear sailboat"
+  },
+  "20261105-095144_DeepSeek-V4.1-Flash-1017-exl3-2.9bpw-LibertAIDAI-maya-SCENE": {
+    "water": 7,
+    "island": 6,
+    "light": 6.5,
+    "boat": 6,
+    "overall": 6.5,
+    "note": "blue water with wave ridges, dotted foam rings around the island, green island with palms, a small sailboat"
   }
 }
