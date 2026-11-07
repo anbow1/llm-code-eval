@@ -1,0 +1,13 @@
+{
+  "name": "unitas-6497-1-render",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline 1080p H.264 MP4 renderer for index.html (UNITAS 6497-1)",
+  "type": "module",
+  "scripts": {
+    "render": "node render_video.mjs --seconds 10"
+  },
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}
