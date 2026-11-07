@@ -19,20 +19,22 @@ Interaktywny model mechanizmu zegarka UNITAS 6497-1 w three.js (`index.html`) or
 
 Otwórz `index.html` w przeglądarce z obsługą WebGL (Chrome, Edge, Firefox, Safari). Obracaj zegarek myszą, klikaj części, a w panelu po prawej zmieniaj ustawienia.
 
-## 2. Nagrywanie w przeglądarce (MP4, 1080p, H.264)
+## 2. Nagrywanie w przeglądarce (MP4, 1080p, H.264, w czasie rzeczywistym)
 
 1. Otwórz `index.html` w **Chrome** lub **Edge** (nagrywanie korzysta z WebCodecs i kodowania H.264; w Firefoksie i Safari może nie działać — wtedy użyj loadera offline).
 2. W panelu po prawej rozwiń **Video Recording · MP4 H.264**.
 3. Ustaw:
-   - **Length (s)** — długość filmu w sekundach (1–120),
+   - **Max length (s)** — maksymalna długość nagrania (1–120 s), domyślnie 60,
    - **Frame rate** — 30 lub 60 kl./s,
    - **Bitrate (Mbps)** — jakość; domyślnie 16 Mb/s.
-4. Kliknij **● Record 1080p MP4**. Etykieta przycisku pokazuje postęp. Po zakończeniu plik `unitas-6497-1_1920x1080_<fps>fps.mp4` pobiera się automatycznie.
+4. Kliknij **● Start recording (real time)**, obejrzyj animację i kliknij **■ Stop**. Przycisk pokazuje czas nagrania. Po zatrzymaniu plik `unitas-6497-1_1920x1080_<sekundy>s.mp4` pobiera się automatycznie.
 
 Uwagi:
-- Film nie zawiera dźwięku (dźwięk spustu jest wyciszony podczas nagrywania).
-- Podczas nagrywania płótno ma proporcje 16:9, więc w oknie przeglądarki może pojawić się czarny pas.
-- Czas nagrywania zależy od karty graficznej. Klatki są liczone w stałym kroku czasu, więc długość filmu jest dokładna niezależnie od szybkości komputera.
+- Długość filmu odpowiada czasowi nagrania na zegarze: 10 s nagrania to 10 s filmu.
+- Film zawiera tylko obraz 3D (bez panelu i etykiet) i nie ma dźwięku.
+- Płótno jest nagrywane w 16:9, więc w oknie przeglądarki może pojawić się czarny pas.
+- Gdy komputer nie nadąża (poniżej ok. 20 kl./s), ruch zegarka zwalnia względem zegara, a klatki, których koder nie nadąża, są pomijane. Długość filmu nadal jest prawidłowa.
+- Dłuższe nagranie wymaga większego **Max length**.
 
 ## 3. Loader offline (`render_video.mjs`)
 
@@ -100,9 +102,10 @@ Film ma dokładnie `--seconds × --fps` klatek, kodek H.264 (High, poziom 4.2), 
 | Timeout przy czekaniu na `__UNITAS_READY__` | Sprawdź połączenie z internetem (unpkg.com) i to, czy strona otwiera się w przeglądarce. |
 | `WebCodecs unavailable` (w przeglądarce) | Użyj Chrome lub Edge. |
 | `H.264 1080p not supported here` (w przeglądarce) | Użyj loadera offline. |
-| Nagrywanie trwa bardzo długo | Normalne przy renderowaniu programowym bez karty graficznej. Zmniejsz długość albo FPS. |
+| Film ma mniej klatek niż oczekiwano | Słaby komputer: koder pomija klatki, ale długość pozostaje prawidłowa. Zmniejsz FPS albo użyj loadera offline. |
 
 ## Jak to działa
 
-- Strona udostępnia hooki `window.__UNITAS_CAPTURE__` (`begin`, `frame`, `end`) oraz `window.__UNITAS_REC__` (ustawienia nagrania). Loader i nagrywanie w przeglądarce sterują tą samą funkcją `renderFrame(dt)`.
-- Każda klatka przesuwa symulację o dokładnie `1/fps` sekundy, a nie o czas rzeczywisty. Dzięki temu długość filmu nie zależy od wydajności komputera.
+- Nagrywanie w przeglądarce działa w czasie rzeczywistym: każda klatka dostaje znacznik czasu z zegara, więc długość filmu jest równa czasowi nagrania.
+- Loader offline przesuwa symulację o dokładnie `1/fps` sekundy na klatkę, więc długość jest ustawiona z góry i nie zależy od wydajności komputera.
+- Strona udostępnia hooki `window.__UNITAS_CAPTURE__` (`begin`, `frame`, `end`) używane przez loader oraz `window.__UNITAS_REC__` (ustawienia nagrania).

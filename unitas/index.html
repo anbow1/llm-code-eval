@@ -2871,7 +2871,7 @@ renderer.domElement.addEventListener('pointerup', e => {
    RESIZE
    ============================================================ */
 function onResize() {
-  if (recording) return;                        // the recorder owns the canvas size
+  if (captureSize) return;                      // the recorder owns the canvas size
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -2953,6 +2953,7 @@ renderer.setAnimationLoop(() => {
   if (recording) return;                       // the recorder drives frames itself
   const rawDt = clock.getDelta();
   renderFrame(Math.min(rawDt, 0.05), rawDt);
+  liveTick(performance.now());                // real-time film frames, if recording
 
   if (firstFrame) {
     firstFrame = false;
@@ -2972,40 +2973,55 @@ for (const rec of parts) {
 
 /* ============================================================
    VIDEO RECORDING — 1920×1080 · H.264 (AVC High) · MP4
-   Frames are stepped by exactly 1/fps of simulated time, not by
-   wall-clock time, so the length is exact on any machine.
+   Live mode (the button): records in real time. Every captured
+   frame is timestamped with the wall clock, so the film is as long
+   as the time you watched. If the encoder falls behind, frames are
+   skipped; the timing stays correct. Maximum length: "Max length".
+   Offline mode (render_video.mjs, window.__UNITAS_CAPTURE__): steps
+   frames at exactly 1/fps, so the length is fixed in advance.
    Encoder: WebCodecs VideoEncoder + mp4-muxer (Chrome/Edge 94+,
-   Safari 16.4+). Audio is not recorded (muted during capture).
+   Safari 16.4+). The film is the 3D canvas only (no panels), no audio.
    ============================================================ */
 const REC_W = 1920, REC_H = 1080;
-const REC = { seconds: 10, fps: 60, bitrateMbps: 16 };
+const REC = { seconds: 60, fps: 60, bitrateMbps: 16 };   // seconds = maximum length
 window.__UNITAS_REC__ = REC;
 
+let captureSize = false;   // canvas is held at 1920×1080 while a film is recorded
 let savedAudio = true;
 
-function beginCapture(w, h) {
+function applyCaptureSize(on) {
+  captureSize = on;
+  if (on) {
+    renderer.setPixelRatio(1);
+    renderer.setSize(REC_W, REC_H, false);   // false: keep the on-screen CSS size
+    composer.setPixelRatio(1);
+    composer.setSize(REC_W, REC_H);
+    camera.aspect = REC_W / REC_H;
+    camera.updateProjectionMatrix();
+  } else {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    onResize();                              // restores window size and camera aspect
+  }
+}
+
+/* offline mode, used by render_video.mjs */
+function beginCapture() {
   recording = true;
   savedAudio = CFG.audio;
-  CFG.audio = false;                           // no clicks while fast-forwarding
-  renderer.setPixelRatio(1);
-  renderer.setSize(w, h, false);               // false: keep the on-screen CSS size
-  composer.setPixelRatio(1);
-  composer.setSize(w, h);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
+  CFG.audio = false;                         // no clicks while fast-forwarding
+  applyCaptureSize(true);
 }
 
 function endCapture() {
   recording = false;
   CFG.audio = savedAudio;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-  onResize();                                  // restores window size and camera aspect
+  applyCaptureSize(false);
 }
 
-async function pickAvcConfig(fps, bitrate) {
+async function pickAvcConfig(fps, bitrate, latencyMode) {
   for (const codec of ['avc1.64002A', 'avc1.640028']) {   // High 4.2 / High 4.0
-    const config = { codec, width: REC_W, height: REC_H, bitrate, framerate: fps, avc: { format: 'avc' } };
+    const config = { codec, width: REC_W, height: REC_H, bitrate, framerate: fps, latencyMode, avc: { format: 'avc' } };
     try {
       const { supported, config: ok } = await VideoEncoder.isConfigSupported(config);
       if (supported) return ok;
@@ -3024,80 +3040,120 @@ function downloadBlob(blob, name) {
 }
 
 const recFolder = gui.addFolder('Video Recording · MP4 H.264');
-recFolder.add(REC, 'seconds', 1, 120, 1).name('Length (s)');
+recFolder.add(REC, 'seconds', 1, 120, 1).name('Max length (s)');
 recFolder.add(REC, 'fps', [30, 60]).name('Frame rate');
 recFolder.add(REC, 'bitrateMbps', 4, 40, 1).name('Bitrate (Mbps)');
-const REC_LABEL = '● Record 1080p MP4';
-const recCtrl = recFolder.add({ record: () => recordMP4() }, 'record').name(REC_LABEL);
+const REC_LABEL = '● Start recording (real time)';
+const recCtrl = recFolder.add({ toggle: () => onRecordButton() }, 'toggle').name(REC_LABEL);
 
-async function recordMP4() {
-  if (recording) return;
-  const label = t => recCtrl.name(t);
+const live = {
+  active: false, starting: false, stopRequested: false,
+  encoder: null, muxer: null, target: null, error: null, timer: 0,
+  t0: 0, last: -Infinity, lastTs: 0, count: 0, interval: 0,
+};
+
+function onRecordButton() {
+  if (live.active) live.stopRequested = true;   // the film ends on the next frame
+  else startLiveRecording();
+}
+
+async function startLiveRecording() {
+  if (live.active || live.starting || recording) return;
   if (!window.VideoEncoder || !window.VideoFrame) {
-    label('✕ WebCodecs unavailable — use Chrome or Edge');
+    recCtrl.name('✕ WebCodecs unavailable — use Chrome or Edge');
     return;
   }
-
-  const fps = REC.fps;
-  const totalFrames = Math.round(REC.seconds * fps);
-  label('Preparing…');
-  const { Muxer, ArrayBufferTarget } = await import('mp4-muxer');
-  const config = await pickAvcConfig(fps, REC.bitrateMbps * 1e6);
-  if (!config) {
-    label('✕ H.264 1080p not supported here');
-    return;
-  }
-
-  const target = new ArrayBufferTarget();
-  const muxer = new Muxer({
-    target,
-    video: { codec: 'avc', width: REC_W, height: REC_H, frameRate: fps },
-    fastStart: 'in-memory',
-  });
-
-  let encodeError = null;
-  const encoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-    error: e => { encodeError = e; },
-  });
-  encoder.configure(config);
-
-  const frameUs = 1e6 / fps;
-  const dt = 1 / fps;
-  recCtrl.disable();
-  beginCapture(REC_W, REC_H);
+  live.starting = true;
   try {
-    for (let i = 0; i < totalFrames; i++) {
-      renderFrame(dt, dt);
-      const frame = new VideoFrame(renderer.domElement, {
-        timestamp: Math.round(i * frameUs),
-        duration: Math.round(frameUs),
-      });
-      encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 });
-      frame.close();
-      if (encodeError) throw encodeError;
-      while (encoder.encodeQueueSize > 8 && !encodeError) {
-        await new Promise(r => setTimeout(r, 2));
-      }
-      if (i % 10 === 0) {
-        label(`Recording ${Math.round((i / totalFrames) * 100)}%`);
-        await new Promise(r => setTimeout(r, 0));
-      }
+    const fps = REC.fps;
+    recCtrl.name('Preparing…');
+    const { Muxer, ArrayBufferTarget } = await import('mp4-muxer');
+    const config = await pickAvcConfig(fps, REC.bitrateMbps * 1e6, 'realtime');
+    if (!config) {
+      recCtrl.name('✕ H.264 1080p not supported here');
+      return;
     }
-    if (encodeError) throw encodeError;
-    await encoder.flush();
-    muxer.finalize();
-    downloadBlob(new Blob([target.buffer], { type: 'video/mp4' }),
-      `unitas-6497-1_${REC_W}x${REC_H}_${fps}fps.mp4`);
-    label(`✓ Saved ${REC.seconds} s MP4`);
+
+    live.target = new ArrayBufferTarget();
+    live.muxer = new Muxer({
+      target: live.target,
+      video: { codec: 'avc', width: REC_W, height: REC_H, frameRate: fps },
+      fastStart: 'in-memory',
+      firstTimestampBehavior: 'offset',   // real-time frames do not start at exactly 0
+    });
+    live.error = null;
+    live.encoder = new VideoEncoder({
+      output: (chunk, meta) => live.muxer.addVideoChunk(chunk, meta),
+      error: e => { live.error = e; },
+    });
+    live.encoder.configure(config);
+
+    live.interval = 1000 / fps;
+    live.count = 0;
+    live.last = -Infinity;
+    live.lastTs = 0;
+    live.stopRequested = false;
+    live.t0 = performance.now();
+    applyCaptureSize(true);
+    live.active = true;
+    recCtrl.name('■ Stop · 0.0 s');
+    live.timer = setInterval(() => {
+      if (!live.stopRequested) recCtrl.name(`■ Stop · ${((performance.now() - live.t0) / 1000).toFixed(1)} s`);
+    }, 250);
   } catch (err) {
     console.error('[recording]', err);
-    label('✕ Recording failed — see console');
+    recCtrl.name('✕ Could not start — see console');
+    if (live.encoder && live.encoder.state !== 'closed') live.encoder.close();
   } finally {
-    if (encoder.state !== 'closed') encoder.close();
-    endCapture();
-    recCtrl.enable();
-    setTimeout(() => label(REC_LABEL), 5000);
+    live.starting = false;
+  }
+}
+
+/* called once per animation frame, right after the frame is rendered */
+function liveTick(now) {
+  if (!live.active) return;
+  if (live.error) { finishLive(); return; }
+  const done = live.stopRequested || now - live.t0 >= REC.seconds * 1000;
+  if (!done) {
+    const due = now - live.last >= live.interval - 1;
+    if (!due || live.encoder.encodeQueueSize > 4) return;   // encoder busy: skip this frame
+  }
+  if (now - live.last >= 1) encodeLiveFrame(now);
+  if (done) finishLive();
+}
+
+function encodeLiveFrame(now) {
+  const ts = Math.round((now - live.t0) * 1000);            // microseconds since start
+  const frame = new VideoFrame(renderer.domElement, {
+    timestamp: ts,
+    duration: Math.round(live.interval * 1000),
+  });
+  live.encoder.encode(frame, { keyFrame: live.count % (REC.fps * 2) === 0 });
+  frame.close();
+  live.last = now;
+  live.lastTs = ts;
+  live.count++;
+}
+
+async function finishLive() {
+  if (!live.active) return;
+  live.active = false;
+  clearInterval(live.timer);
+  const seconds = (live.lastTs + live.interval * 1000) / 1e6;
+  try {
+    if (live.error) throw live.error;
+    await live.encoder.flush();
+    live.muxer.finalize();
+    downloadBlob(new Blob([live.target.buffer], { type: 'video/mp4' }),
+      `unitas-6497-1_1920x1080_${seconds.toFixed(1)}s.mp4`);
+    recCtrl.name(`✓ Saved ${seconds.toFixed(1)} s MP4`);
+  } catch (err) {
+    console.error('[recording]', err);
+    recCtrl.name('✕ Recording failed — see console');
+  } finally {
+    if (live.encoder && live.encoder.state !== 'closed') live.encoder.close();
+    applyCaptureSize(false);
+    setTimeout(() => recCtrl.name(REC_LABEL), 6000);
   }
 }
 
