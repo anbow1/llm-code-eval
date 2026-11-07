@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nagrywarka MP4 · 1080p · H.264</title>
+<style>
+  :root{
+    --bg:#070a0f; --panel:#10151d; --stroke:rgba(216,182,114,.22);
+    --text:#e9eef6; --muted:#8d9aab; --gold:#d8b672; --red:#e33a55; --ok:#59e0a0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100%}
+  body{padding:16px}
+  main{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(--stroke);
+    border-radius:12px;padding:20px 22px;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  h1{margin:0 0 6px;font-size:20px;letter-spacing:.04em;color:var(--gold)}
+  p{margin:0 0 12px;line-height:1.55;font-size:14px}
+  .muted{color:var(--muted);font-size:13px}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 10px}
+  button{font:inherit;font-size:14px;padding:10px 16px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--stroke);background:#1b222c;color:var(--text)}
+  button:hover:not(:disabled){border-color:var(--gold)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.primary{background:#2a1216;border-color:rgba(227,58,85,.5)}
+  .opts{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin:12px 0 4px;font-size:13px;color:var(--muted)}
+  .opts label{display:flex;align-items:center;gap:6px}
+  select,input[type=number]{font:inherit;font-size:13px;background:#0b1016;color:var(--text);
+    border:1px solid var(--stroke);border-radius:6px;padding:5px 8px;width:auto}
+  input[type=number]{width:84px}
+  video{display:block;width:100%;max-height:360px;margin:14px 0 6px;border-radius:8px;background:#000;
+    border:1px solid rgba(105,226,255,.16)}
+  #status{font-size:14px;margin:10px 0 4px;min-height:1.4em}
+  #timer{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--gold);min-height:1.2em}
+  details{margin-top:16px;font-size:13px;color:var(--muted)}
+  details summary{cursor:pointer;color:var(--text)}
+  details ol{padding-left:20px;line-height:1.6}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#bfe9ff}
+  @media (max-width:520px){ body{padding:10px} main{padding:16px} }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "mp4-muxer": "https://unpkg.com/mp4-muxer@5.2.2/build/mp4-muxer.mjs"
+  }
+}
+</script>
+</head>
+<body>
+<main>
+  <h1>Nagrywarka MP4 · 1080p · H.264</h1>
+  <p class="muted">Nagrywa w czasie rzeczywistym dowolną kartę lub okno przeglądarki, także z innym HTML. Długość filmu równa się czasowi nagrania. Działa w Chrome i Edge.</p>
+
+  <div class="btns">
+    <button id="pick">1 · Wybierz kartę lub okno</button>
+    <button id="rec" class="primary" disabled>● Nagrywaj</button>
+  </div>
+
+  <div class="opts">
+    <label>Klatki/s
+      <select id="fps"><option value="60" selected>60</option><option value="30">30</option></select>
+    </label>
+    <label>Bitrate (Mb/s)
+      <input id="mbps" type="number" min="4" max="40" step="1" value="16" />
+    </label>
+    <label>
+      <input id="audio" type="checkbox" checked /> Dźwięk karty
+    </label>
+  </div>
+
+  <video id="preview" muted playsinline></video>
+  <p id="status" role="status">Krok 1: wybierz kartę lub okno z oglądaną stroną.</p>
+  <p id="timer"></p>
+
+  <details>
+    <summary>Jak to działa i co zaznaczyć</summary>
+    <ol>
+      <li>Kliknij <b>Wybierz kartę lub okno</b>. W oknie przeglądarki wybierz kartę z oglądaną stroną (zakładka, nie cały ekran, jeśli chcesz tylko stronę).</li>
+      <li>Jeśli chcesz dźwięku, zaznacz <b>Udostępnij dźwięk karty</b> w oknie wyboru. Pole <i>Dźwięk karty</i> musi być zaznaczone przed wyborem.</li>
+      <li>Kliknij <b>● Nagrywaj</b>, a potem <b>■ Zatrzymaj</b>. Plik MP4 pobierze się sam.</li>
+      <li>Nagranie kończy się też, gdy zatrzymasz udostępnianie w pasku przeglądarki.</li>
+    </ol>
+    <p>Film to dokładnie to, co widać w udostępnionym oknie, skalowane do 1920×1080 z zachowaniem proporcji. Klatki, których koder nie nadąża, są pomijane, a czas filmu pozostaje prawidłowy.</p>
+  </details>
+</main>
+
+<script type="module">
+/* ============================================================
+   Recorder core: window.UnitasRecorder
+   start(videoTrack, audioTrack?, {fps, mbps})  → begins recording
+   stop()                                        → Promise<result>
+   save(result)                                  → downloads the MP4
+   Pipeline: MediaStreamTrackProcessor → canvas 1920×1080 (letterbox)
+   → VideoEncoder (H.264 High 4.2) + AudioEncoder (AAC) → mp4-muxer.
+   ============================================================ */
+const W = 1920, H = 1080;
+const $ = id => document.getElementById(id);
+const ui = {
+  pick: $('pick'), rec: $('rec'), fps: $('fps'), mbps: $('mbps'), audio: $('audio'),
+  preview: $('preview'), status: $('status'), timer: $('timer'),
+};
+
+const SUPPORTED = 'VideoEncoder' in window && 'AudioEncoder' in window &&
+  'VideoFrame' in window && 'AudioData' in window && 'MediaStreamTrackProcessor' in window;
+
+let session = null;     // the running recording (one at a time)
+let busy = false;       // guards start/stop against double clicks
+let source = null;      // { stream, video, audio } from getDisplayMedia
+
+async function pickVideoConfig(fps, bitrate) {
+  for (const codec of ['avc1.64002A', 'avc1.640028']) {   // High 4.2 / High 4.0
+    const config = { codec, width: W, height: H, bitrate, framerate: fps, latencyMode: 'realtime', avc: { format: 'avc' } };
+    try {
+      const r = await VideoEncoder.isConfigSupported(config);
+      if (r.supported) return r.config;
+    } catch (_) { /* try the next profile */ }
+  }
+  return null;
+}
+
+async function pickAudioConfig(sampleRate, numberOfChannels) {
+  // AAC first (the MP4 standard); Opus in MP4 when the browser has no AAC encoder
+  for (const [codec, muxCodec] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
+    const rate = sampleRate;                     // use the stream's own rate (e.g. 44.1 kHz)
+    const config = { codec, sampleRate: rate, numberOfChannels, bitrate: 128000 };
+    try {
+      const r = await AudioEncoder.isConfigSupported(config);
+      if (r.supported) return { config: r.config, muxCodec, sampleRate: rate, numberOfChannels };
+    } catch (_) { /* try the next codec */ }
+  }
+  return null;
+}
+
+function fail(s, e) {
+  if (!s.error) { s.error = e; console.error('[recorder]', e); }
+  s.active = false;
+}
+
+async function pumpVideo(s) {
+  const frameUs = 1e6 / s.fps;
+  try {
+    while (s.active) {
+      const r = await s.vreader.read();
+      if (r.done) break;
+      const frame = r.value;
+      try {
+        if (frame.timestamp - s.lastTs < frameUs * 0.9) { s.dropped++; continue; }  // above target fps
+        if (s.venc.encodeQueueSize > 4) { s.dropped++; continue; }                  // encoder busy
+        const k = Math.min(W / frame.displayWidth, H / frame.displayHeight);
+        const dw = Math.round(frame.displayWidth * k), dh = Math.round(frame.displayHeight * k);
+        s.ctx.fillStyle = '#000';
+        s.ctx.fillRect(0, 0, W, H);
+        s.ctx.drawImage(frame, Math.round((W - dw) / 2), Math.round((H - dh) / 2), dw, dh);
+        const out = new VideoFrame(s.canvas, { timestamp: frame.timestamp, duration: Math.round(frameUs) });
+        s.venc.encode(out, { keyFrame: s.frames % (s.fps * 2) === 0 });
+        out.close();
+        s.firstTs ??= frame.timestamp;
+        s.lastTs = frame.timestamp;
+        s.lastWall = performance.now();
+        s.frames++;
+      } finally {
+        frame.close();
+      }
+    }
+  } catch (e) {
+    fail(s, e);
+  }
+}
+
+async function pumpAudio(s, first) {
+  try {
+    await s.videoReady;
+    let data = first;
+    while (data || s.active) {
+      if (!data) {
+        const r = await s.areader.read();
+        if (r.done) break;
+        data = r.value;
+      }
+      // keep blocks captured after the first video frame; audio is not dropped mid-recording
+      const keep = s.active && s.firstTs !== null && data.timestamp >= s.firstTs;
+      try {
+        if (keep) s.aenc.encode(data);
+      } finally {
+        data.close();
+      }
+      data = null;
+    }
+  } catch (e) {
+    fail(s, e);
+  }
+}
+
+async function startRecording(videoTrack, audioTrack = null, { fps = 60, mbps = 16 } = {}) {
+  if (!SUPPORTED) throw new Error('ta przeglądarka nie ma WebCodecs / MediaStreamTrackProcessor (użyj Chrome lub Edge)');
+  if (session || busy) throw new Error('nagranie już trwa');
+  if (!videoTrack) throw new Error('brak ścieżki wideo');
+  busy = true;
+  try {
+    const vCfg = await pickVideoConfig(fps, mbps * 1e6);
+    if (!vCfg) throw new Error('kodowanie H.264 1080p nie jest dostępne w tej przeglądarce');
+
+    // take the real audio format from the first block the track delivers (settings can differ)
+    let areader = null, aPick = null, firstAudio = null;
+    if (audioTrack) {
+      areader = new MediaStreamTrackProcessor({ track: audioTrack }).readable.getReader();
+      const got = await Promise.race([areader.read(), new Promise(res => setTimeout(() => res(null), 2000))]);
+      if (got && !got.done) {
+        firstAudio = got.value;
+        aPick = await pickAudioConfig(firstAudio.sampleRate, Math.min(2, firstAudio.numberOfChannels));
+      }
+      if (!aPick) {
+        firstAudio?.close();
+        firstAudio = null;
+        await areader.cancel().catch(() => {});
+        areader = null;
+      }
+    }
+
+    const { Muxer, ArrayBufferTarget } = await import('mp4-muxer');
+    const target = new ArrayBufferTarget();
+    const muxerOpts = {
+      target,
+      video: { codec: 'avc', width: W, height: H, frameRate: fps },
+      fastStart: 'in-memory',
+      firstTimestampBehavior: 'cross-track-offset',   // video and audio start together at 0
+    };
+    if (aPick) muxerOpts.audio = { codec: aPick.muxCodec, numberOfChannels: aPick.numberOfChannels, sampleRate: aPick.sampleRate };
+    const muxer = new Muxer(muxerOpts);
+
+    const s = {
+      fps, mbps, muxer, target, active: true, error: null,
+      frames: 0, dropped: 0, t0: performance.now(), firstTs: null, lastTs: -Infinity, lastWall: 0,
+      canvas: Object.assign(document.createElement('canvas'), { width: W, height: H }),
+    };
+    // audio must reach the muxer after the first video chunk, or the cross-track offset is wrong
+    s.videoReady = new Promise(res => { s.resolveVideoReady = res; });
+    s.ctx = s.canvas.getContext('2d', { alpha: false });
+
+    s.venc = new VideoEncoder({
+      output: (chunk, meta) => { muxer.addVideoChunk(chunk, meta); s.resolveVideoReady(); },
+      error: e => fail(s, e),
+    });
+    s.venc.configure(vCfg);
+
+    if (aPick) {
+      s.aenc = new AudioEncoder({
+        output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+        error: e => fail(s, e),
+      });
+      s.aenc.configure(aPick.config);
+      s.areader = areader;
+    }
+    s.vreader = new MediaStreamTrackProcessor({ track: videoTrack }).readable.getReader();
+
+    session = s;
+    s.videoDone = pumpVideo(s);
+    s.audioDone = s.aenc ? pumpAudio(s, firstAudio) : Promise.resolve();
+    return s;
+  } finally {
+    busy = false;
+  }
+}
+
+async function stopRecording() {
+  const s = session;
+  if (!s || busy) return null;
+  busy = true;
+  s.active = false;
+  s.resolveVideoReady();
+  try {
+    // cancelling the readers ends the pump loops; wait for them before flushing
+    await s.vreader.cancel().catch(() => {});
+    if (s.areader) await s.areader.cancel().catch(() => {});
+    await Promise.all([s.videoDone, s.audioDone]);
+
+    if (s.error) throw s.error;
+    // hold the last picture until the stop moment, so the video lasts as long as the audio.
+    // track timestamps are not on the page clock, so add the wall time since the last frame
+    const endTs = s.lastTs + Math.round((performance.now() - s.lastWall) * 1000);
+    if (s.firstTs !== null && endTs - s.lastTs > 1000) {
+      const hold = new VideoFrame(s.canvas, { timestamp: endTs, duration: Math.round(1e6 / s.fps) });
+      s.venc.encode(hold, { keyFrame: false });
+      hold.close();
+      s.lastTs = endTs;
+      s.frames++;
+    }
+    await s.venc.flush();
+    if (s.aenc) await s.aenc.flush();
+    s.muxer.finalize();
+    const seconds = s.firstTs === null ? 0 : (s.lastTs - s.firstTs) / 1e6 + 1 / s.fps;
+    return {
+      blob: new Blob([s.target.buffer], { type: 'video/mp4' }),
+      seconds, frames: s.frames, dropped: s.dropped, audio: !!s.aenc,
+    };
+  } finally {
+    for (const enc of [s.venc, s.aenc]) if (enc && enc.state !== 'closed') enc.close();
+    session = null;
+    busy = false;
+  }
+}
+
+function saveResult(result, name) {
+  if (!result) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const file = name || `nagranie_${stamp}_${result.seconds.toFixed(1)}s.mp4`;
+  const url = URL.createObjectURL(result.blob);
+  const a = Object.assign(document.createElement('a'), { href: url, download: file });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
+}
+
+/* public API: used by the buttons below and available in the console / tests */
+window.UnitasRecorder = {
+  start: startRecording,
+  stop: stopRecording,
+  save: saveResult,
+  isRecording: () => !!session,
+};
+
+/* ---------- UI ---------- */
+function setStatus(text) { ui.status.textContent = text; }
+
+if (!SUPPORTED || !navigator.mediaDevices?.getDisplayMedia) {
+  ui.pick.disabled = true;
+  setStatus('Ta przeglądarka nie obsługuje nagrywania (potrzebne: Chrome lub Edge z WebCodecs).');
+}
+
+ui.pick.addEventListener('click', async () => {
+  if (session) return;
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: { ideal: 60 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: ui.audio.checked,
+    });
+    source?.stream.getTracks().forEach(t => t.stop());
+    const video = stream.getVideoTracks()[0];
+    const audio = stream.getAudioTracks()[0] || null;
+    source = { stream, video, audio };
+    ui.preview.srcObject = stream;
+    ui.preview.play().catch(() => {});
+    video.addEventListener('ended', onSourceEnded);
+    ui.rec.disabled = false;
+    setStatus(`Źródło: ${video.label || 'karta / okno'} ${audio ? '· z dźwiękiem' : '· bez dźwięku'}. Kliknij „Nagrywaj".`);
+  } catch (e) {
+    setStatus('Nie udostępniono karty ani okna: ' + e.message);
+  }
+});
+
+ui.rec.addEventListener('click', async () => {
+  if (session) { await finishRecording(); return; }
+  if (!source) return;
+  try {
+    await startRecording(source.video, source.audio, { fps: +ui.fps.value, mbps: +ui.mbps.value });
+    ui.rec.textContent = '■ Zatrzymaj';
+    ui.pick.disabled = true;
+    setStatus('Nagrywanie w czasie rzeczywistym…');
+  } catch (e) {
+    setStatus('Nie udało się zacząć nagrywania: ' + e.message);
+  }
+});
+
+async function finishRecording() {
+  ui.rec.disabled = true;
+  setStatus('Zapisywanie pliku MP4…');
+  try {
+    const result = await stopRecording();
+    if (result) {
+      saveResult(result);
+      setStatus(`Zapisano ${result.seconds.toFixed(1)} s · klatki ${result.frames} · pominięte ${result.dropped}${result.audio ? '' : ' · bez dźwięku'}.`);
+    }
+  } catch (e) {
+    setStatus('Błąd zapisu: ' + e.message);
+  } finally {
+    ui.rec.textContent = '● Nagrywaj';
+    ui.rec.disabled = !source;
+    ui.pick.disabled = false;
+    ui.timer.textContent = '';
+  }
+}
+
+function onSourceEnded() {
+  if (session) finishRecording();
+  source = null;
+  ui.rec.disabled = true;
+  setStatus('Udostępnianie zakończone. Wybierz kartę lub okno ponownie.');
+}
+
+setInterval(() => {
+  if (!session) return;
+  const sec = (performance.now() - session.t0) / 1000;
+  ui.timer.textContent = `● ${sec.toFixed(1)} s · klatki ${session.frames} · pominięte ${session.dropped}`;
+}, 500);
+</script>
+</body>
+</html>
